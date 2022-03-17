@@ -1,6 +1,21 @@
+"""
+This is a script for testing the module demodigi, by running a
+simulated study with 8000 participants and three manipulations, two of
+which give a slight improvement and one of which does nothing. There
+are three background variables that affect the initial digital
+competence, the effect of the learning module, or both. Two of them are
+known, and one is unknown.
+
+Setting the variable print_results to true gives a verbose description
+of the results of the study. Setting the variable plot_results to true
+causes it to attempt to make plots in a folder named DD_plots, which
+has to be in the same directory as the script is run in.
+"""
+
 import demodigi as dd
 
 print_results = True
+plot_results = True
 
 known_background_1 = dd.background("hates computers", dd.standard_transformations["subtractive normal deterioration"], dd.standard_transformations["subtractive normal deterioration"], 0.2)
 known_background_2 = dd.background("kazoo band outside office", dd.standard_transformations["no effect"], dd.standard_transformations["subtractive normal deterioration"], 0.1)
@@ -31,6 +46,8 @@ if print_results:
 trial_study.run_study()
 if print_results:
    trial_study.summarise_results()
+   
+if plot_results:
    trial_study.plot_folder = 'DD_plots'
    trial_study.plot_results()
    trial_study.plot_participants()
