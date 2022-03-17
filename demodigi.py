@@ -170,7 +170,6 @@ def _shop_docstring(docstring):
    full_string += row + " " + word
    return full_string[1:]
 
-
 def _trim_for_filename(string):
    """
    Removes parts of a string that would not be suitable for a filename
@@ -228,8 +227,11 @@ def _ordinalise_many(ndarrays):
       cut += length
    return ordinal
    
-   
 def logB(alpha, beta):
+   """
+   The logarithm of the normalisation factor when doing Bayesian fitting
+   of binomial functions.
+   """
    return sp.loggamma(alpha) + sp.loggamma(beta) - sp.loggamma(alpha + beta)
 
 
@@ -591,7 +593,7 @@ class participants:
    
    def describe(self):
       """
-      Give a summary of the most important facts about the participants
+      Gives a summary of the most important facts about the participants
       """
    
       print("There {} {} participant{}".format(_is_are(self.n), self.n, _plural_ending(self.n)))
