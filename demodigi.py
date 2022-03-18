@@ -364,8 +364,35 @@ class manipulation:
       self.name_for_file = _trim_for_filename(self.name)
       self.transformation = transformation
       return
-      
+
 class background:
+   """
+   This represents something that can be expected to affect the results of
+   the participants in the study, but which cannot be directly controlled
+   by the experimenters. For example, it is possible that the results can
+   be affected by whether the participants are native speakers of the
+   language that the course is given in.
+   
+   Attributes
+   ----------
+   name : str
+   \tDescription of the background
+   name_for_file : str
+   \tRendition of the name suitable for use in a file name
+   """
+   def __init__(self, name):
+      """
+      Parameters
+      ----------
+      name : str
+      \tDescribed under attributes
+      """
+      self.name = name
+      self.name_for_file = _trim_for_filename(self.name)
+      return
+      
+
+class simulated_background(background):
    """
    This represents something that can be expected to affect the results of
    the participants in the study, but which cannot be directly controlled
@@ -407,8 +434,7 @@ class background:
       fraction : float
       \tDescribed under attributes
       """
-      self.name = name
-      self.name_for_file = _trim_for_filename(self.name)
+      background.__init__(self, name)
       self.pre_transformation = pre_transformation
       self.post_transformation = post_transformation
       self.fraction = fraction

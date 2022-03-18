@@ -14,24 +14,27 @@ has to be in the same directory as the script is run in.
 
 import demodigi as dd
 
+# Prints verbose output describing the simulated study
 print_results = True
+# Makes plots describing the simulated study
 plot_results = True
+
 
 # We introduce two known backgrounds, one which affects both initial
 # skill and the effectiveness of the intervention, and one which affects
 # only the effectiveness of the intervention.
 
-known_background_1 = dd.background("hates computers", dd.standard_transformations["subtractive normal deterioration"], dd.standard_transformations["subtractive normal deterioration"], 0.2)
-known_background_2 = dd.background("kazoo band outside office", dd.standard_transformations["no effect"], dd.standard_transformations["subtractive normal deterioration"], 0.1)
+known_background_1 = dd.simulated_background("hates computers", dd.standard_transformations["subtractive normal deterioration"], dd.standard_transformations["subtractive normal deterioration"], 0.2)
+known_background_2 = dd.simulated_background("kazoo band outside office", dd.standard_transformations["no effect"], dd.standard_transformations["subtractive normal deterioration"], 0.1)
 known_backgrounds = [known_background_1, known_background_2]
 
 
 # We introduce one unknown background, which affects both initial skill
 # and the effectiveness of the intervention.
 
-
-unknown_background_1 = dd.background("secretly a ghost", dd.standard_transformations["subtractive normal deterioration"], dd.standard_transformations["subtractive normal deterioration"], 0.1)
+unknown_background_1 = dd.simulated_background("secretly a ghost", dd.standard_transformations["subtractive normal deterioration"], dd.standard_transformations["subtractive normal deterioration"], 0.1)
 unknown_backgrounds = [unknown_background_1]
+
 
 # We define a test group of 8000 participants, who are assumed to have
 # skills following a normal distribution. (Note that this is not
