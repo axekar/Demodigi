@@ -346,11 +346,37 @@ class manipulation:
    \tDescription of the manipulation
    name_for_file : str
    \tRendition of the name suitable for use in a file name
+   """
+
+   def __init__(self, name):
+      """
+      Parameters
+      ----------
+      name : str
+      \tDescribed under attributes
+      """
+      self.name = name
+      self.name_for_file = _trim_for_filename(self.name)
+      return
+      
+class simulated_manipulation:
+   """
+   See base class manipulation for definition.
+   
+   This is used when simulating a study. It differs from the base class in
+   that the user must specify how the manipulation affects the learning
+   outcomes.
+   
+   Attributes
+   ----------
+   name : str
+   \tDescription of the manipulation
+   name_for_file : str
+   \tRendition of the name suitable for use in a file name
    transformation : function float -> float
    \tSome mapping R->R representing how digital competence is affected by
    \tthis manipulation
    """
-
    def __init__(self, name, transformation):
       """
       Parameters
@@ -360,8 +386,7 @@ class manipulation:
       transformation : function float -> float
       \tDescribed under attributes
       """
-      self.name = name
-      self.name_for_file = _trim_for_filename(self.name)
+      manipulation.__init__(self, name)
       self.transformation = transformation
       return
 
@@ -391,11 +416,12 @@ class background:
       self.name_for_file = _trim_for_filename(self.name)
       return
       
-
 class simulated_background(background):
    """
-   This is used when simulating a study. It differs from the base class
-   in that the user must specify how the background affects the learning
+   See base class background for definition.
+   
+   This is used when simulating a study. It differs from the base class in
+   that the user must specify how the background affects the learning
    outcomes - and possibly also the initial skills - of the participants.
    
    Some backgrounds are assumed to be known and some are assumed to be

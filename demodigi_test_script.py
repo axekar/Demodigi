@@ -55,9 +55,9 @@ default = dd.standard_transformations["additive normal improvement (big)"]
 # Define three manipulations, two of which has a slight effect and one
 # of which does nothing.
 
-manipulation_1 = dd.manipulation("funny hats", dd.standard_transformations["additive normal improvement"])
-manipulation_2 = dd.manipulation("prayer and incense", dd.standard_transformations["additive normal improvement"])
-manipulation_3 = dd.manipulation("all text in comic sans", dd.standard_transformations["no effect"])
+manipulation_1 = dd.simulated_manipulation("funny hats", dd.standard_transformations["additive normal improvement"])
+manipulation_2 = dd.simulated_manipulation("prayer and incense", dd.standard_transformations["additive normal improvement"])
+manipulation_3 = dd.simulated_manipulation("all text in comic sans", dd.standard_transformations["no effect"])
 manipulations = [manipulation_1, manipulation_2, manipulation_3]
 
 
