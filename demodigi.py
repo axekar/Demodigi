@@ -41,8 +41,6 @@ import scipy.stats as st
 import os
 import matplotlib.pyplot as plt
 import numbers as nb
-#import emcee
-#import corner
 
 ### Useful tools
 
@@ -599,7 +597,7 @@ class participants:
       Gives a summary of the most important facts about the participants
       """
       print("Description of the participants:\n")
-      print("There {} {} participant{}\n".format(_is_are(self.n), self.n, _plural_ending(self.n)))
+      print("There {} {} participant{}".format(_is_are(self.n), self.n, _plural_ending(self.n)))
       for wording, background_dict in [("known", self.known_backgrounds), ("unknown", self.unknown_backgrounds)]:
          n_backgrounds = len(background_dict)
          print("\nThere {} {} background{} {} to the experimenters".format(_is_are(n_backgrounds), n_backgrounds, _plural_ending(n_backgrounds), wording))
@@ -963,7 +961,7 @@ class study:
       self.boundary_tests_run = True
       return boundary_tests
       
-   ### Functions specific to median tests
+   ### Functions specific to the Bayesian median tests
       
    def _logL_median(self, Qki, nki, n_good):
       with np.errstate(divide = 'ignore'):
@@ -990,7 +988,12 @@ class study:
       
    def _median_test_total(self, participants):
       """
-      Runs median tests for the entire module. This checks that the 
+      Runs median tests for the entire module. This tests whether the skills
+      before or after taking the module are higher than the median skill for
+      both before and after taking the module.
+      
+      Note that this compares participants against a group that includes
+      themselves at another point in time.
       """
       median_tests = {}
       median_tests['after module'] = self._median_tests(participants.digicomp_pre_ordinal, participants.digicomp_post_ordinal)
@@ -1000,9 +1003,9 @@ class study:
       
    def _median_test_background_or_manipulation(self, flags, participants):
       """
-      This tests how likely it seems to be that a participant in either the control
-      or treatment group does better than the median for the control and treatment
-      groups together.
+      This tests how likely it seems to be that a participant in either the
+      control or treatment group does better than the median for the control
+      and treatment groups together.
       """
       
       treatment_group_pre = participants.digicomp_pre_ordinal[flags]
@@ -1011,7 +1014,7 @@ class study:
       control_group_post = participants.digicomp_post_ordinal[np.invert(flags)]
       
       median_tests = {}
-      for text, control, treat in [('Before module', control_group_pre, treatment_group_pre), ('after module', control_group_post, treatment_group_post)]:
+      for text, control, treat in [('before module', control_group_pre, treatment_group_pre), ('after module', control_group_post, treatment_group_post)]:
          median_tests[text] = self._median_tests(control, treat)
          self._fill_dictionary_with_qk_and_dk(median_tests[text], 0.1) # Fix magic number
       return median_tests
@@ -1058,8 +1061,8 @@ class study:
    
    def summarise_results(self):
       """
-      Summarise the findings that the experimentalists have at the end of
-      the study.
+      Summarise the findings that the experimentalists have at the end of the
+      study.
       """
       def print_poor_to_high(group_name, group_data, base_indent):
          print("{}In {}, out of {} members with poor skills {} acquire good skills".format(_indent(base_indent), group_name, group_data['members with initially poor skills'], group_data['members moving from poor to good skills']))
@@ -1131,6 +1134,7 @@ class study:
       """
       Plot group membership of all participants.
       """
+      
       def plot_flags(flags, name):
          side = int(np.ceil(np.sqrt(self.participants.n)))
          i = np.arange(self.participants.n)
@@ -1174,6 +1178,20 @@ class study:
 
 
    def plot_results(self):
+      """
+      Plot the results of the study. This includes.
+      
+      - The estimated quality of the teaching module with and without each
+      manipulation
+      
+      - The logarithm of the above. This can be interesting since the
+      distributions often drop off exponentially, meaning that normally only
+      a sharp peak is visible.
+      
+      - The estimated difference between the versions of the teaching module
+      with and without each manipulation
+      """
+      
       def plot_quality(test_name, test_data):
          plt.clf()
          plt.tight_layout()
@@ -1223,6 +1241,7 @@ class study:
       increasing in digital competence as they do so. Then simulate the
       experimenters studying the results.
       """
+      
       self._apply_manipulations()
       self._do_sanity_checks()
       self._do_tests()
