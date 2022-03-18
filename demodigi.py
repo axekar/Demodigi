@@ -36,10 +36,10 @@ alvin.gavel@gmail.com
 
 import numpy as np
 import numpy.random as rd
+import scipy.special as sp
 import scipy.stats as st
 import os
 import matplotlib.pyplot as plt
-import scipy.special as sp
 import numbers as nb
 #import emcee
 #import corner
@@ -88,12 +88,12 @@ def read_nested_dict(dictionary):
    
       print("Dictionaries:")
       if dict_level != dictionary:
-         print("   0: (Go up one level)")
+         print("{}0: (Go up one level)".format(_indent(1)))
       if n['Dictionary'] > 0:
          dict_keys, dicts = zip(*sorted(zip(keys['Dictionary'], values['Dictionary'])))
          for i in range(n['Dictionary']):
-            print("   {}: {}".format(i+1, keys['Dictionary'][i]))
-      print("   q: (Leave nested dict)")
+            print("{}{}: {}".format(_indent(1), i+1, keys['Dictionary'][i]))
+      print("{}q: (Leave nested dict)".format(_indent(1)))
          
       for sorting_type_name in sorting_type_nondict_order:
          if n[sorting_type_name] > 0:
@@ -101,18 +101,18 @@ def read_nested_dict(dictionary):
             sorted_keys, sorted_values = zip(*sorted(zip(keys[sorting_type_name], values[sorting_type_name])))
             for i in range(n[sorting_type_name]):
                if sorting_type_name == 'Numpy ndarray':
-                  print("   {}".format(sorted_keys[i]))
-                  print("       Type: {}".format(sorted_values[i].dtype))
-                  print("       Size: {}".format(sorted_values[i].size))
+                  print("{}{}".format(_indent(1), sorted_keys[i]))
+                  print("{}Type: {}".format(_indent(2), sorted_values[i].dtype))
+                  print("{}Size: {}".format(_indent(2), sorted_values[i].size))
                elif sorting_type_name == 'Collections not dict or ndarray':
-                  print("   {}".format(sorted_keys[i]))
-                  print("      Size: {}".format(len(sorted_values[i])))
+                  print("{}{}".format(_indent(1), sorted_keys[i]))
+                  print("{}Size: {}".format(_indent(2), len(sorted_values[i])))
                elif sorting_type_name in ['Numerical', 'String']:
-                  print("   {}".format(sorted_keys[i]))
-                  print("      Value: {}".format(sorted_values[i]))
+                  print("{}{}".format(_indent(1), sorted_keys[i]))
+                  print("{}Value: {}".format(_indent(2), sorted_values[i]))
                else:
-                  print("   {}".format(sorted_keys[i]))
-                  print("       Type: {}".format(type(sorted_values[i])))
+                  print("{}{}".format(_indent(1), sorted_keys[i]))
+                  print("{}Type: {}".format(_indent(2), type(sorted_values[i])))
       choice = input("Type in choice:\n")
       print("\n")
       return keys["Dictionary"], choice
@@ -190,6 +190,9 @@ def _plural_ending(n):
    
 def _initial_capital(string):
    return string[0].upper() + string[1:]
+
+def _indent(n):
+   return n * '   '
 
 ### Misc. mathematical stuff
 
@@ -595,26 +598,26 @@ class participants:
       """
       Gives a summary of the most important facts about the participants
       """
-   
-      print("There {} {} participant{}".format(_is_are(self.n), self.n, _plural_ending(self.n)))
+      print("Description of the participants:\n")
+      print("There {} {} participant{}\n".format(_is_are(self.n), self.n, _plural_ending(self.n)))
       for wording, background_dict in [("known", self.known_backgrounds), ("unknown", self.unknown_backgrounds)]:
          n_backgrounds = len(background_dict)
-         print("There {} {} background{} {} to the experimenters".format(_is_are(n_backgrounds), n_backgrounds, _plural_ending(n_backgrounds), wording))
+         print("\nThere {} {} background{} {} to the experimenters".format(_is_are(n_backgrounds), n_backgrounds, _plural_ending(n_backgrounds), wording))
          for background in background_dict:
             n_affected = np.sum(self.background_flags[background.name])
-            print("\tBackground: {}".format(background.name))
-            print("\t\tAffects {} participant{}".format(n_affected, _plural_ending(n_affected)))
-            print("\t\tWhich makes up {:.2f} of total".format(n_affected / self.n))
+            print("{}Background: {}".format(_indent(1), background.name))
+            print("{}Affects {} participant{}".format(_indent(2), n_affected, _plural_ending(n_affected)))
+            print("{}Which makes up {:.2f} of total".format(_indent(2), n_affected / self.n))
       
       if len(self.known_backgrounds) > 0:
-         print("The known backgrounds require splitting the group into the following subgroups")
+         print("\nThe known backgrounds require splitting the group into the following subgroups")
          for subgroup_name, subgroup_members in self.subgroups.items():
             n_members = len(subgroup_members)
-            print("\t'{}'".format(subgroup_name))
-            print("\t\tHas {} member{}".format(n_members, _plural_ending(n_members)))
-            print("\t\tOut of these, some may be affected by unknown backgrounds:")
+            print("{}'{}'".format(_indent(1), subgroup_name))
+            print("{}Has {} member{}".format(_indent(2), n_members, _plural_ending(n_members)))
+            print("{}Out of these, some may be affected by unknown backgrounds:".format(_indent(2)))
             for background in self.unknown_backgrounds:
-               print("\t\t\t{}: {}".format(background.name, sum(self.background_flags[background.name][subgroup_members])))
+               print("{}{}: {}".format(_indent(3), background.name, sum(self.background_flags[background.name][subgroup_members])))
          print("\n")
       return
 
@@ -748,34 +751,36 @@ class study:
       are assumed to be known prior to the study being carried out.
       """
    
+      print("Description of the study itself:\n")
       print("There {} {} participant{}".format(_is_are(self.participants.n), self.participants.n, _plural_ending(self.participants.n)))
       print("We are testing {} manipulation{}:".format(self.n_manipulations, _plural_ending(self.n_manipulations)))
       for manipulation in self.manipulations:
-         print("\t{}".format(manipulation.name))
+         print("{}{}".format(_indent(1), manipulation.name))
          
       n_backgrounds = len(self.participants.known_backgrounds)
       if n_backgrounds > 0:
-         print("There {} {} known background{}:".format(_is_are(n_backgrounds), n_backgrounds, _plural_ending(n_backgrounds)))
+         print("\nThere {} {} known background{}:".format(_is_are(n_backgrounds), n_backgrounds, _plural_ending(n_backgrounds)))
          for background in self.participants.known_backgrounds:
-            print("\t{}".format(background.name))
-         print("Hence, the participants are split into {} subgroups".format(len(self.participants.subgroups)))
+            print("{}{}".format(_indent(1), background.name))
+         print("Hence, the participants are split into {} subgroups\n".format(len(self.participants.subgroups)))
 
       n_unknown_backgrounds = len(self.participants.unknown_backgrounds)
       if n_unknown_backgrounds > 0:
          print("There {} {} unknown background{}:".format(_is_are(n_unknown_backgrounds), n_unknown_backgrounds, _plural_ending(n_unknown_backgrounds)))
          for background in self.participants.unknown_backgrounds:
-            print("\t{}".format(background.name))
-         print("This may affect the study")
+            print("{}{}".format(_indent(1), background.name))
+         print("This may affect the study\n")
             
+      print("Group membership:")
       for subgroup_name, subgroup_members in self.participants.subgroups.items():
          n_members = len(subgroup_members)
-         print("\tGroup '{}' has {} member{}".format(subgroup_name, n_members, _plural_ending(n_members)))
+         print("{}Group '{}' has {} member{}".format(_indent(1), subgroup_name, n_members, _plural_ending(n_members)))
          # Maybe move this?
          subgroup_members = set(subgroup_members)
          for manipulation_group_name, manipulation_group_members in self.manipulation_groups.items():
             manipulation_members = set(manipulation_group_members)
             subgroup_manipulation = subgroup_members.intersection(manipulation_members)
-            print("\t\tManipulation group '{}' has {} members".format(manipulation_group_name, len(subgroup_manipulation)))
+            print("{}Manipulation group '{}' has {} members".format(_indent(2), manipulation_group_name, len(subgroup_manipulation)))
       print("\n")
       
    def _apply_manipulations(self):
@@ -905,7 +910,8 @@ class study:
       have high digital competence after the course module. This requires
       definition of bounds for low and high quality when creating the study.
       """
-      log_qki = nlh * np.log(Qki) + (nl - nlh) * np.log(1 - Qki) - logB(nlh + 1, nl - nlh + 1)
+      with np.errstate(divide = 'ignore'):
+         log_qki = nlh * np.log(Qki) + (nl - nlh) * np.log(1 - Qki) - logB(nlh + 1, nl - nlh + 1)
       return log_qki
       
    def _boundary_tests(self, pre, post):
@@ -960,7 +966,8 @@ class study:
    ### Functions specific to median tests
       
    def _logL_median(self, Qki, nki, n_good):
-      log_qki = n_good * np.log(Qki) + (nki - n_good) * np.log(1 - Qki) - logB(n_good + 1, nki - n_good + 1)
+      with np.errstate(divide = 'ignore'):
+         log_qki = n_good * np.log(Qki) + (nki - n_good) * np.log(1 - Qki) - logB(n_good + 1, nki - n_good + 1)
       return log_qki
       
    def _median_tests(self, control, treat):
@@ -1027,7 +1034,8 @@ class study:
       self.measured_results['quick tests']['total']['pre-course median'] = np.median(self.participants.digicomp_pre_ordinal)
       self.measured_results['quick tests']['total']['post-course median'] = np.median(self.participants.digicomp_post_ordinal)
       n_improved = np.sum(self.participants.digicomp_post_ordinal > self.participants.digicomp_pre_ordinal)
-      pvalue = st.binom_test(n_improved, self.participants.n)
+      with np.errstate(divide = 'ignore'):
+         pvalue = st.binom_test(n_improved, self.participants.n)
       self.measured_results['quick tests']['total']['sign test p-value'] = pvalue
 
       self.measured_results['median tests'] = {}
@@ -1053,65 +1061,69 @@ class study:
       Summarise the findings that the experimentalists have at the end of
       the study.
       """
-      def print_poor_to_high(group_name, group_data):
-         print("\tIn {}, out of {} members with poor skills {} acquire good skills".format(group_name, group_data['members with initially poor skills'], group_data['members moving from poor to good skills']))
-         print("\t\tQuality estimated to be: {:.2f}".format(group_data['Median of qki']))
-         print("\t\tOne sigma bounds at: {:.2f} - {:.2f}".format(group_data['Percentiles of qki'][15.87], group_data['Percentiles of qki'][84.13]))
-         print("\t\tTwo sigma bounds at: {:.2f} - {:.2f}".format(group_data['Percentiles of qki'][2.28], group_data['Percentiles of qki'][97.72]))
+      def print_poor_to_high(group_name, group_data, base_indent):
+         print("{}In {}, out of {} members with poor skills {} acquire good skills".format(_indent(base_indent), group_name, group_data['members with initially poor skills'], group_data['members moving from poor to good skills']))
+         print("{}Quality estimated to be: {:.2f}".format(_indent(base_indent + 1), group_data['Median of qki']))
+         print("{}One sigma bounds at: {:.2f} - {:.2f}".format(_indent(base_indent + 1), group_data['Percentiles of qki'][15.87], group_data['Percentiles of qki'][84.13]))
+         print("{}Two sigma bounds at: {:.2f} - {:.2f}".format(_indent(base_indent + 1), group_data['Percentiles of qki'][2.28], group_data['Percentiles of qki'][97.72]))
          return
          
-      def print_above_median(group_name, group_data):
-         print("\tIn {}, out of {} members {} end up above median".format(group_name, group_data['total members'], group_data['members above median']))
-         print("\t\tQuality estimated to be: {:.2f}".format(group_data['Median of qki']))
-         print("\t\tOne sigma bounds at: {:.2f} - {:.2f}".format(group_data['Percentiles of qki'][15.87], group_data['Percentiles of qki'][84.13]))
-         print("\t\tTwo sigma bounds at: {:.2f} - {:.2f}".format(group_data['Percentiles of qki'][2.28], group_data['Percentiles of qki'][97.72]))
+      def print_above_median(group_name, group_data, base_indent):
+         print("{}In {}, out of {} members {} end up above median".format(_indent(base_indent), group_name, group_data['total members'], group_data['members above median']))
+         print("{}Quality estimated to be: {:.2f}".format(_indent(base_indent + 1), group_data['Median of qki']))
+         print("{}One sigma bounds at: {:.2f} - {:.2f}".format(_indent(base_indent + 1), group_data['Percentiles of qki'][15.87], group_data['Percentiles of qki'][84.13]))
+         print("{}Two sigma bounds at: {:.2f} - {:.2f}".format(_indent(base_indent + 1), group_data['Percentiles of qki'][2.28], group_data['Percentiles of qki'][97.72]))
          return
       
-      def dk_permutations(dk_dict):
+      def print_dk_permutations(dk_dict, base_indent):
          for descriptor in ['Probability that treatment group does better than control group', 'Probability that treatment group does worse than control group','Probability that treatment group does much better than control group','Probability that treatment group does much worse than control group','Probability that treatment group does about as well as control group']:
-            print("\t\t{}: {:.2f}".format(descriptor, dk_dict[descriptor]))
+            print("{}{}: {:.2f}".format(_indent(base_indent), descriptor, dk_dict[descriptor]))
          return
       
-      def print_total_median(dk_dict):
-         print("\tAfter taking the course module, {} out of {} members are above the total median".format(dk_dict['treatment group']['total members'], dk_dict['treatment group']['members above median']))
-         print("\t\t'Quality difference' before and after module estimated to be: {:.2f}".format(dk_dict['Median of dk']))
-         print("\t\tOne sigma bounds at: {:.2f} - {:.2f}".format(dk_dict['Percentiles of dk'][15.87], dk_dict['Percentiles of dk'][84.13]))
-         print("\t\tTwo sigma bounds at: {:.2f} - {:.2f}".format(dk_dict['Percentiles of dk'][2.28], dk_dict['Percentiles of dk'][97.72]))
-         dk_permutations(dk_dict)
+      def print_total_median(dk_dict, base_indent):
+         print("{}After taking the course module, {} out of {} members are above the total median".format(_indent(base_indent), dk_dict['treatment group']['members above median'], dk_dict['treatment group']['total members']))
+         print("{}'Quality difference' before and after module estimated to be: {:.2f}".format(_indent(base_indent), dk_dict['Median of dk']))
+         print("{}One sigma bounds at: {:.2f} - {:.2f}".format(_indent(base_indent), dk_dict['Percentiles of dk'][15.87], dk_dict['Percentiles of dk'][84.13]))
+         print("{}Two sigma bounds at: {:.2f} - {:.2f}".format(_indent(base_indent), dk_dict['Percentiles of dk'][2.28], dk_dict['Percentiles of dk'][97.72]))
+         print_dk_permutations(dk_dict, base_indent)
          return
       
-      def print_quality_difference(dk_dict):
-         print("\tComparing control group and test group")
-         print("\t\tQuality difference estimated to be: {:.2f}".format(dk_dict['Median of dk']))
-         print("\t\tOne sigma bounds at: {:.2f} - {:.2f}".format(dk_dict['Percentiles of dk'][15.87], dk_dict['Percentiles of dk'][84.13]))
-         print("\t\tTwo sigma bounds at: {:.2f} - {:.2f}".format(dk_dict['Percentiles of dk'][2.28], dk_dict['Percentiles of dk'][97.72]))
-         dk_permutations(dk_dict)
+      def print_quality_difference(dk_dict, base_indent):
+         print("{}Comparing control group and test group".format(_indent(base_indent)))
+         print("{}Quality difference estimated to be: {:.2f}".format(_indent(base_indent + 1), dk_dict['Median of dk']))
+         print("{}One sigma bounds at: {:.2f} - {:.2f}".format(_indent(base_indent + 1), dk_dict['Percentiles of dk'][15.87], dk_dict['Percentiles of dk'][84.13]))
+         print("{}Two sigma bounds at: {:.2f} - {:.2f}".format(_indent(base_indent + 1), dk_dict['Percentiles of dk'][2.28], dk_dict['Percentiles of dk'][97.72]))
+         print_dk_permutations(dk_dict, base_indent + 1)
          return
          
       tot = self.measured_results['quick tests']['total']
-      print("Median prior to course: {:.2f}".format(tot['pre-course median']))
-      print("Median after course: {:.2f}".format(tot['post-course median']))
-      print("p-value of sign test: {:.2}".format(tot['sign test p-value']))
-      print_total_median(self.measured_results['median tests']['total']['after module'])
+      print("Description of results of study:\n")
+      print("Results for course module as a whole:")
+      print("{}Results of standard frequentist tests:".format(_indent(1)))
+      print("{}p-value of sign test: {:.2}".format(_indent(2), tot['sign test p-value']))
+      print("{}Results of bayesian median tests:".format(_indent(1)))
+      print_total_median(self.measured_results['median tests']['total']['after module'], 2)
       if self.boundary_tests_run:
-         print_poor_to_high('total', self.measured_results['boundary tests']['total'])   
+         print("{}Results of boundary tests:".format(_indent(1)))
+         print_poor_to_high('total', self.measured_results['boundary tests']['total'], 1)
       
       for variation, description in [(self.manipulations, 'manipulation'), (self.participants.known_backgrounds, 'background')]:
          for choice in variation:
             results = self.measured_results['quick tests'][choice.name]
-            print("For {} {}:".format(description, choice.name))
-            print("\tControl group median:   {:.2f}".format(results['control group median']))   
-            print("\tTreatment group median: {:.2f}".format(results['treatment group median']))
-            print("\tp-value of median test: {:.2}".format(results['median test p-value']))
-            print("\tp-value of Mann-Whitney U rank test: {:.2}".format(results['Mann-Whitney U rank test p-value']))
+            print("\nResults for {} {}:".format(description, choice.name))
+            print("{}Results of standard frequentist tests:".format(_indent(1)))
+            print("{}p-value of median test: {:.2}".format(_indent(2),results['median test p-value']))
+            print("{}p-value of Mann-Whitney U rank test: {:.2}".format(_indent(2),results['Mann-Whitney U rank test p-value']))
+            print("{}Results of bayesian median tests:".format(_indent(1)))
             for group in ['control group', 'treatment group']: 
-               print_above_median(group, self.measured_results['median tests'][choice.name]['after module'][group])            
-            print_quality_difference(self.measured_results['median tests'][choice.name]['after module'])         
+               print_above_median(group, self.measured_results['median tests'][choice.name]['after module'][group], 2)            
+            print_quality_difference(self.measured_results['median tests'][choice.name]['after module'], 2)         
             if self.boundary_tests_run:
+               print("{}Results of boundary tests:".format(_indent(1)))
                bound =  self.measured_results['boundary tests'][choice.name]
                for group in ['control group', 'treatment group']:
-                  print_poor_to_high(group, bound[group])
-               print_quality_difference(bound)
+                  print_poor_to_high(group, bound[group], 2)
+               print_quality_difference(bound, 2)
       return
   
 
