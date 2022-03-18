@@ -735,7 +735,7 @@ class simulated_participants(participants):
             print("{}Out of these, some may be affected by unknown backgrounds:".format(_indent(2)))
             for background in self.unknown_backgrounds:
                print("{}{}: {}".format(_indent(3), background.name, sum(self.background_flags[background.name][subgroup_members])))
-         print("\n")
+      print("\n")
       return
 
 class study:
