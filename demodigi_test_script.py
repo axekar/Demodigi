@@ -41,7 +41,7 @@ unknown_backgrounds = [unknown_background_1]
 # visible to the simulated experimentalists. They only have access to
 # ordinal data).
 
-testgroup = dd.participants(8000, dd.standard_distributions["normal"], known_backgrounds = known_backgrounds, unknown_backgrounds = unknown_backgrounds)
+testgroup = dd.simulated_participants(8000, dd.standard_distributions["normal"], known_backgrounds = known_backgrounds, unknown_backgrounds = unknown_backgrounds)
 if print_results:
    testgroup.describe()
 

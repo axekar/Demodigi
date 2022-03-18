@@ -329,6 +329,9 @@ standard_transformations = {"additive scatter":additive_scatter,
 
 class manipulation:
    """
+   This class should generally not be used on its own. Instead, one of the
+   inherited classes should be used.
+   
    This represents some change we make to the course, which we try out on
    a subset of the participants. This means that the participants will be
    divided into a control group and a test group, which will be as close
@@ -392,6 +395,9 @@ class simulated_manipulation:
 
 class background:
    """
+   This class should generally not be used on its own. Instead, one of the
+   inherited classes should be used.
+   
    This represents something that can be expected to affect the results of
    the participants in the study, but which cannot be directly controlled
    by the experimenters. For example, it is possible that the results can
@@ -526,14 +532,108 @@ class skill_boundaries:
       self.minimum_quality_difference = minimum_quality_difference
       return
 
+# This will probably be rewritten a lot once we have an actual participants class
 class participants:
    """
+   This class should generally not be used on its own. Instead, one of the
+   inherited classes should be used.
+   
    This represents the people participating in the study, each of whom is
    taking some version of the module intended to improve their digital
    competence.
   
    If there are known background variables the participants are divided
    into smaller groups where all members are affected in the same way.
+   
+   Attributes
+   ----------
+   n : int
+   \tThe number of participants in the study
+   known_backgrounds : list of background
+   \tBackgrounds that affect some subset of participants, and which are
+   \tassumed to be known to the experimenters
+   background_flags : dict of bool ndarrays
+   \tDictionary containing arrays stating which participants are
+   \taffected by which backgrounds
+   subgroups : dict of int ndarrays
+   \tDictionary containing the indices of the participants in each
+   \tsubgroup
+   digicomp_pre : float ndarray
+   \tThe digital competence of the participants before taking the module
+   digicomp_post : float ndarray
+   \tThe digital competence of the participants after taking the module.
+   \tThis is initially set to nan, and should be set to definite values by
+   \tthe class study.
+   digicomp_delta : float ndarray
+   \tThe change in digital competence of the participants as a result of
+   \ttaking the module.
+   """
+   def __init__(self, n, known_backgrounds):
+      """
+      Parameters
+      ----------
+      n : int
+      \tDescribed under attributes
+      
+      Optional parameters
+      -------------------
+      known_backgrounds : list of background
+      \tDescribed under attributes
+      """
+      
+      self.n = n
+      self.known_backgrounds = known_backgrounds
+      
+      # These must be set in some way by the inheriting classes
+      self.all_backgrounds = []
+      self.background_flags = {}
+         
+      # These must all be set in some way be the inheriting classes
+      self.digicomp_pre = np.zeros(n) * np.nan
+      self.digicomp_post = np.zeros(n) * np.nan
+      self.digicomp_delta = np.zeros(n) * np.nan
+      
+      self.digicomp_pre_ordinal = np.zeros(n) * np.nan
+      self.digicomp_post_ordinal = np.zeros(n) * np.nan
+      # By definition, there is no digicomp_delta_ordinal
+      return
+      
+   def _define_subgroups(self):
+      """
+      Divide the participants into subgroups where the members are subject
+      to the same known backgrounds
+      """
+      
+      subgroups = {}
+      subgroup_names = set([])
+      for i in range(self.n):
+         participant_flags = []
+         for background in self.known_backgrounds:
+            if self.background_flags[background.name][i]:
+               participant_flags.append(background.name)
+         subgroup_name = ", ".join(participant_flags)
+         if subgroup_name == "":
+            subgroup_name = "no background"
+         
+         if not (subgroup_name in subgroup_names):
+            subgroups[subgroup_name] = []
+            subgroup_names.add(subgroup_name)
+         subgroups[subgroup_name].append(i)
+      for subgroup_name in subgroup_names:
+         subgroups[subgroup_name] = np.asarray(subgroups[subgroup_name])
+      return subgroups
+   
+
+class simulated_participants(participants):
+   """
+   See base class participants for definition.
+   
+   This is used when simulating a study. It differs from the base class in
+   that the user must specify:
+   
+    - The initial distribution over digital competence
+   
+    - The unknown backgrounds
   
    Attributes
    ----------
@@ -584,9 +684,9 @@ class participants:
       unknown_backgrounds : list of background
       \tDescribed under attributes
       """
-      self.n = n
+      participants.__init__(self, n, known_backgrounds)
+      
       self.initial_distribution = initial_distribution
-      self.known_backgrounds = known_backgrounds
       self.unknown_backgrounds = unknown_backgrounds
       self.all_backgrounds = self.known_backgrounds + self.unknown_backgrounds
       
@@ -594,15 +694,9 @@ class participants:
       for background in self.all_backgrounds:
          self.background_flags[background.name] = rd.random(self.n) < background.fraction
          
-      self.subgroups = self._define_subgroups()
-         
+      self.subgroups = self._define_subgroups()         
       self.digicomp_pre = self._calculate_digicomp_pre()
-      self.digicomp_post = np.zeros(n) * np.nan
-      self.digicomp_delta = np.zeros(n) * np.nan
-      
-      self.digicomp_pre_ordinal = np.zeros(n) * np.nan
-      self.digicomp_post_ordinal = np.zeros(n) * np.nan
-      # By definition, there is no digicomp_delta_ordinal
+
       return
    
    def _calculate_digicomp_pre(self):
@@ -616,31 +710,6 @@ class participants:
       for background in self.all_backgrounds:
           digicomp_pre[self.background_flags[background.name]] = background.pre_transformation(digicomp_pre[self.background_flags[background.name]])
       return digicomp_pre
-   
-   def _define_subgroups(self):
-      """
-      Divide the participants into subgroups where the members are subject
-      to the same known backgrounds
-      """
-      
-      subgroups = {}
-      subgroup_names = set([])
-      for i in range(self.n):
-         participant_flags = []
-         for background in self.known_backgrounds:
-            if self.background_flags[background.name][i]:
-               participant_flags.append(background.name)
-         subgroup_name = ", ".join(participant_flags)
-         if subgroup_name == "":
-            subgroup_name = "no background"
-         
-         if not (subgroup_name in subgroup_names):
-            subgroups[subgroup_name] = []
-            subgroup_names.add(subgroup_name)
-         subgroups[subgroup_name].append(i)
-      for subgroup_name in subgroup_names:
-         subgroups[subgroup_name] = np.asarray(subgroups[subgroup_name])
-      return subgroups
    
    def describe(self):
       """
