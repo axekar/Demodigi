@@ -394,15 +394,13 @@ class background:
 
 class simulated_background(background):
    """
-   This represents something that can be expected to affect the results of
-   the participants in the study, but which cannot be directly controlled
-   by the experimenters. For example, it is possible that the results can
-   be affected by whether the participants are native speakers of the
-   language that the course is given in.
+   This is used when simulating a study. It differs from the base class
+   in that the user must specify how the background affects the learning
+   outcomes - and possibly also the initial skills - of the participants.
    
-   When simulating a study, some backgrounds are assumed to be known and
-   some are assumed to be unknown. One goal of these simulations is to get
-   an idea of how much background variables interfere with our results.
+   Some backgrounds are assumed to be known and some are assumed to be
+   unknown. One goal of these simulations is to get an idea of how much
+   background variables may interfere with our results.
 
    Attributes
    ----------
