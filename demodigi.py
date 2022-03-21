@@ -331,9 +331,6 @@ standard_transformations = {"additive scatter":additive_scatter,
 
 class manipulation(ABC):
    """
-   This class should generally not be used on its own. Instead, one of the
-   inherited classes should be used.
-   
    This represents some change we make to the course, which we try out on
    a subset of the participants. This means that the participants will be
    divided into a control group and a test group, which will be as close
@@ -408,24 +405,15 @@ class real_manipulation(manipulation):
       manipulation.__init__(self, name)
       return
 
-class background:
+class background(ABC):
    """
-   This class should generally not be used on its own. Instead, one of the
-   inherited classes should be used.
-   
    This represents something that can be expected to affect the results of
    the participants in the study, but which cannot be directly controlled
    by the experimenters. For example, it is possible that the results can
    be affected by whether the participants are native speakers of the
    language that the course is given in.
-   
-   Attributes
-   ----------
-   name : str
-   \tDescription of the background
-   name_for_file : str
-   \tRendition of the name suitable for use in a file name
    """
+   @abstractmethod
    def __init__(self, name):
       """
       Parameters
@@ -441,9 +429,9 @@ class simulated_background(background):
    """
    See base class background for definition.
    
-   This is used when simulating a study. It differs from the base class in
-   that the user must specify how the background affects the learning
-   outcomes - and possibly also the initial skills - of the participants.
+   This is used when simulating a study. It requires the user to define
+   transformations that describe how the background affects both the
+   initial digital competence and the effect of the teaching module.
    
    Some backgrounds are assumed to be known and some are assumed to be
    unknown. One goal of these simulations is to get an idea of how much
@@ -483,6 +471,32 @@ class simulated_background(background):
       self.pre_transformation = pre_transformation
       self.post_transformation = post_transformation
       self.fraction = fraction
+      return
+      
+      
+
+class real_background(background):
+   """
+   See base class background for definition.
+   
+   This is used for real studies.
+
+   Attributes
+   ----------
+   name : str
+   \tDescription of the background
+   name_for_file : str
+   \tRendition of the name suitable for use in a file name
+   """
+   
+   def __init__(self, name):
+      """
+      Parameters
+      ----------
+      name : str
+      \tDescribed under attributes
+      """
+      background.__init__(self, name)
       return
       
 class skill_boundaries:
@@ -547,12 +561,9 @@ class skill_boundaries:
       self.minimum_quality_difference = minimum_quality_difference
       return
 
-# This will probably be rewritten a lot once we have an actual participants class
-class participants:
+
+class participants(ABC):
    """
-   This class should generally not be used on its own. Instead, one of the
-   inherited classes should be used.
-   
    This represents the people participating in the study, each of whom is
    taking some version of the module intended to improve their digital
    competence.
@@ -643,8 +654,7 @@ class simulated_participants(participants):
    """
    See base class participants for definition.
    
-   This is used when simulating a study. It differs from the base class in
-   that the user must specify:
+   This is used when simulating a study. It requires the user to specify:
    
     - The initial distribution over digital competence
    
@@ -751,64 +761,15 @@ class simulated_participants(participants):
       print("\n")
       return
 
-class study:
+class study(ABC):
    """
    This represents a test run of a course module, in which data about the
    participants' digital competence is collected before and after taking
    the module.
-   
-   Attributes
-   ----------
-   name : string
-   \tName of the study. Used for filenames when plotting.
-   participants : participants
-   \tThe people taking the course
-   default_effect : function float->float
-   \tThe effect that the default version of the course has on the digital
-   \tskills of the participants
-   manipulations : list of manipulations
-   \tThe manipulations that are tried out on the participants
-   n_manipulations : int
-   \tThe number of manipulations that are carried out
-   manipulation_flags : dict of bool ndarrays
-   \tDictionary containing arrays stating which participants are affected
-   \tby which manipulations
-   all_flags : dict of bool ndarrays
-   \tDictionary containing both the manipulation flags and the boundary
-   \tflags of the participants
-   manipulation_groups : dict of int ndarrays
-   \tDictionary containing the indices of the participants that are
-   \taffected by each manipulation
-   bounds : skill_boundaries
-   \tBoundaries defining poor and good digital skill, as defined by this
-   \tstudy
-   boundary_tests_run : bool
-   \tWhether the tests implied by the bounds have been run
    """
-   
-   def __init__(self, name, participants, default_effect, manipulations, bounds = None, combined_manipulations = []):
-      """
-      Parameters
-      ----------
-      name : string
-      \tDescribed under attributes
-      participants : participants
-      \tDescribed under attributes
-      default_effect : function float->float
-      \tDescribed under attributes
-      manipulations : list of manipulation
-      \tDescribed under attributes
-   
-      Optional parameters
-      -------------------
-      bounds : skill_boundaries
-      \tDescribed under attributes
-      combined_manipulations :
-      \tTo be implemented
-      """
+   def __init__(self, name, participants, manipulations, bounds):
       self.name = name
       self.participants = participants
-      self.default_effect = default_effect
       self.manipulations = manipulations
       self.bounds = bounds
       self.boundary_tests_run = False
@@ -817,7 +778,6 @@ class study:
       self.manipulation_flags = self._set_manipulation_flags()
       self.all_flags = {**self.manipulation_flags, **self.participants.background_flags}
       
-      # Define manipulation groups
       self.manipulation_groups = self._define_manipulation_groups()
       
       self.sanity_checks = {}
@@ -833,25 +793,6 @@ class study:
       self._Dk_range = np.linspace(-1.0, 1.0, num=self._dk_samples)
       return
       
-   def _set_manipulation_flags(self):
-      n_manipulations = len(self.manipulations)
-
-      manipulation_flags = {}
-      for i in range(n_manipulations):
-         flags = np.zeros(self.participants.n, dtype = np.bool)
-         manipulation = self.manipulations[i]
-
-         for subgroup_name, subgroup_indices in self.participants.subgroups.items():
-
-            n_blocks = 2**(i+1)
-            block_exact_breakpoints = np.linspace(0, len(subgroup_indices), 2**(i+1) + 1)
-            block_breakpoints = np.rint(block_exact_breakpoints).astype(int)
-         
-            for start, stop in zip(block_breakpoints[0:-2:2], block_breakpoints[1:-1:2]):
-               flags[subgroup_indices[start:stop]] = True
-            manipulation_flags[manipulation.name] = flags
-      return manipulation_flags
-
    def _define_manipulation_groups(self):
 
       # Maybe combine this function with define_subgroups in class participants?
@@ -875,94 +816,6 @@ class study:
          manipulation_groups[manipulation_group_name] = np.asarray(manipulation_groups[manipulation_group_name])
       return manipulation_groups
 
-   def describe(self):
-      """
-      Gives a summary of the most important facts about the study, which
-      are assumed to be known prior to the study being carried out.
-      """
-   
-      print("Description of the study itself:\n")
-      print("There {} {} participant{}".format(_is_are(self.participants.n), self.participants.n, _plural_ending(self.participants.n)))
-      print("We are testing {} manipulation{}:".format(self.n_manipulations, _plural_ending(self.n_manipulations)))
-      for manipulation in self.manipulations:
-         print("{}{}".format(_indent(1), manipulation.name))
-         
-      n_backgrounds = len(self.participants.known_backgrounds)
-      if n_backgrounds > 0:
-         print("\nThere {} {} known background{}:".format(_is_are(n_backgrounds), n_backgrounds, _plural_ending(n_backgrounds)))
-         for background in self.participants.known_backgrounds:
-            print("{}{}".format(_indent(1), background.name))
-         print("Hence, the participants are split into {} subgroups\n".format(len(self.participants.subgroups)))
-
-      n_unknown_backgrounds = len(self.participants.unknown_backgrounds)
-      if n_unknown_backgrounds > 0:
-         print("There {} {} unknown background{}:".format(_is_are(n_unknown_backgrounds), n_unknown_backgrounds, _plural_ending(n_unknown_backgrounds)))
-         for background in self.participants.unknown_backgrounds:
-            print("{}{}".format(_indent(1), background.name))
-         print("This may affect the study\n")
-            
-      print("Group membership:")
-      for subgroup_name, subgroup_members in self.participants.subgroups.items():
-         n_members = len(subgroup_members)
-         print("{}Group '{}' has {} member{}".format(_indent(1), subgroup_name, n_members, _plural_ending(n_members)))
-         # Maybe move this?
-         subgroup_members = set(subgroup_members)
-         for manipulation_group_name, manipulation_group_members in self.manipulation_groups.items():
-            manipulation_members = set(manipulation_group_members)
-            subgroup_manipulation = subgroup_members.intersection(manipulation_members)
-            print("{}Manipulation group '{}' has {} members".format(_indent(2), manipulation_group_name, len(subgroup_manipulation)))
-      print("\n")
-      
-   def _apply_manipulations(self):
-      self.participants.digicomp_post = self.participants.digicomp_pre + self.default_effect(self.participants.digicomp_pre)
-      
-      for manipulation in self.manipulations:
-         self.participants.digicomp_post[self.manipulation_flags[manipulation.name]] = manipulation.transformation(self.participants.digicomp_post[self.manipulation_flags[manipulation.name]])
-        
-      for background in self.participants.all_backgrounds:
-         self.participants.digicomp_post[self.participants.background_flags[background.name]] = background.post_transformation(self.participants.digicomp_post[self.participants.background_flags[background.name]])
-         
-      self.participants.digicomp_delta = self.participants.digicomp_post - self.participants.digicomp_pre
-
-      data_to_ordinalise = [self.participants.digicomp_pre, self.participants.digicomp_post]
-      if self.bounds != None:
-         data_to_ordinalise += [np.asarray([self.bounds.poor]), np.asarray([self.bounds.good])]
-      ordinal_data = _ordinalise_many(data_to_ordinalise)
-      self.participants.digicomp_pre_ordinal = ordinal_data[0]
-      self.participants.digicomp_post_ordinal = ordinal_data[1]
-      if self.bounds != None:
-         self.bounds.poor_ordinal = ordinal_data[2]
-         self.bounds.good_ordinal = ordinal_data[3]
-      return
-   
-   def _do_sanity_checks(self):
-      """
-      These tests make use of information that is assumed to be hidden from
-      the experimenters. Hence, they should only be used to test the internal
-      consistency of a model study.
-      """
-      self.sanity_checks["average differences"] = {}
-      for manipulation in self.manipulations:
-         average_result_with_manipulation = np.mean(self.participants.digicomp_post[self.manipulation_flags[manipulation.name]])
-         average_result_without_manipulation = np.mean(self.participants.digicomp_post[np.invert(self.manipulation_flags[manipulation.name])])
-         self.sanity_checks["average differences"][manipulation.name] = average_result_with_manipulation - average_result_without_manipulation
-      return
-   
-   def _compare_flagged(self, flags, results):
-      treatment_group = results[flags]
-      control_group = results[np.invert(flags)]
-      
-      statistics = {}
-      statistics['treatment group median'] = np.median(treatment_group)
-      statistics['control group median'] = np.median(control_group)
-      s, p, m, table = st.median_test(treatment_group, control_group)
-      statistics['median test test statistic'] = s
-      statistics['median test p-value'] = p
-      statistic, pvalue = st.mannwhitneyu(treatment_group, control_group)
-      statistics['Mann-Whitney U rank test test statistic'] = statistic
-      statistics['Mann-Whitney U rank test p-value'] = pvalue
-      return statistics
-   
    ### Functions shared between boundary and median tests
    
    def _make_percentiles(self, variable_range, distribution):
@@ -1366,6 +1219,171 @@ class study:
             if self.boundary_tests_run:
                plot_quality('btest', self.measured_results['boundary tests'][choice.name])
       return
+
+
+class simulated_study(study):
+   """
+   This represents a simulated test run of the course module.
+   
+   Attributes
+   ----------
+   name : string
+   \tName of the study. Used for filenames when plotting.
+   participants : participants
+   \tThe people taking the course
+   default_effect : function float->float
+   \tThe effect that the default version of the course has on the digital
+   \tskills of the participants
+   manipulations : list of manipulations
+   \tThe manipulations that are tried out on the participants
+   n_manipulations : int
+   \tThe number of manipulations that are carried out
+   manipulation_flags : dict of bool ndarrays
+   \tDictionary containing arrays stating which participants are affected
+   \tby which manipulations
+   all_flags : dict of bool ndarrays
+   \tDictionary containing both the manipulation flags and the boundary
+   \tflags of the participants
+   manipulation_groups : dict of int ndarrays
+   \tDictionary containing the indices of the participants that are
+   \taffected by each manipulation
+   bounds : skill_boundaries
+   \tBoundaries defining poor and good digital skill, as defined by this
+   \tstudy
+   boundary_tests_run : bool
+   \tWhether the tests implied by the bounds have been run
+   """
+   
+   def __init__(self, name, participants, manipulations, default_effect, bounds = None):
+      """
+      Parameters
+      ----------
+      name : string
+      \tDescribed under attributes
+      participants : participants
+      \tDescribed under attributes
+      manipulations : list of manipulation
+      \tDescribed under attributes
+      default_effect : function float->float
+      \tDescribed under attributes
+         
+      Optional parameters
+      -------------------
+      bounds : skill_boundaries
+      \tDescribed under attributes
+      """
+      study.__init__(self, name, participants, manipulations, bounds)
+      self.default_effect = default_effect
+      self.manipulation_groups = study._define_manipulation_groups(self)
+      return
+
+   def _set_manipulation_flags(self):
+      n_manipulations = len(self.manipulations)
+
+      manipulation_flags = {}
+      for i in range(n_manipulations):
+         flags = np.zeros(self.participants.n, dtype = np.bool)
+         manipulation = self.manipulations[i]
+
+         for subgroup_name, subgroup_indices in self.participants.subgroups.items():
+
+            n_blocks = 2**(i+1)
+            block_exact_breakpoints = np.linspace(0, len(subgroup_indices), 2**(i+1) + 1)
+            block_breakpoints = np.rint(block_exact_breakpoints).astype(int)
+         
+            for start, stop in zip(block_breakpoints[0:-2:2], block_breakpoints[1:-1:2]):
+               flags[subgroup_indices[start:stop]] = True
+            manipulation_flags[manipulation.name] = flags
+      return manipulation_flags
+
+   def describe(self):
+      """
+      Gives a summary of the most important facts about the study, which
+      are assumed to be known prior to the study being carried out.
+      """
+   
+      print("Description of the study itself:\n")
+      print("There {} {} participant{}".format(_is_are(self.participants.n), self.participants.n, _plural_ending(self.participants.n)))
+      print("We are testing {} manipulation{}:".format(self.n_manipulations, _plural_ending(self.n_manipulations)))
+      for manipulation in self.manipulations:
+         print("{}{}".format(_indent(1), manipulation.name))
+         
+      n_backgrounds = len(self.participants.known_backgrounds)
+      if n_backgrounds > 0:
+         print("\nThere {} {} known background{}:".format(_is_are(n_backgrounds), n_backgrounds, _plural_ending(n_backgrounds)))
+         for background in self.participants.known_backgrounds:
+            print("{}{}".format(_indent(1), background.name))
+         print("Hence, the participants are split into {} subgroups\n".format(len(self.participants.subgroups)))
+
+      n_unknown_backgrounds = len(self.participants.unknown_backgrounds)
+      if n_unknown_backgrounds > 0:
+         print("There {} {} unknown background{}:".format(_is_are(n_unknown_backgrounds), n_unknown_backgrounds, _plural_ending(n_unknown_backgrounds)))
+         for background in self.participants.unknown_backgrounds:
+            print("{}{}".format(_indent(1), background.name))
+         print("This may affect the study\n")
+            
+      print("Group membership:")
+      for subgroup_name, subgroup_members in self.participants.subgroups.items():
+         n_members = len(subgroup_members)
+         print("{}Group '{}' has {} member{}".format(_indent(1), subgroup_name, n_members, _plural_ending(n_members)))
+         # Maybe move this?
+         subgroup_members = set(subgroup_members)
+         for manipulation_group_name, manipulation_group_members in self.manipulation_groups.items():
+            manipulation_members = set(manipulation_group_members)
+            subgroup_manipulation = subgroup_members.intersection(manipulation_members)
+            print("{}Manipulation group '{}' has {} members".format(_indent(2), manipulation_group_name, len(subgroup_manipulation)))
+      print("\n")
+      
+   def _apply_manipulations(self):
+      self.participants.digicomp_post = self.participants.digicomp_pre + self.default_effect(self.participants.digicomp_pre)
+      
+      for manipulation in self.manipulations:
+         self.participants.digicomp_post[self.manipulation_flags[manipulation.name]] = manipulation.transformation(self.participants.digicomp_post[self.manipulation_flags[manipulation.name]])
+        
+      for background in self.participants.all_backgrounds:
+         self.participants.digicomp_post[self.participants.background_flags[background.name]] = background.post_transformation(self.participants.digicomp_post[self.participants.background_flags[background.name]])
+         
+      self.participants.digicomp_delta = self.participants.digicomp_post - self.participants.digicomp_pre
+
+      data_to_ordinalise = [self.participants.digicomp_pre, self.participants.digicomp_post]
+      if self.bounds != None:
+         data_to_ordinalise += [np.asarray([self.bounds.poor]), np.asarray([self.bounds.good])]
+      ordinal_data = _ordinalise_many(data_to_ordinalise)
+      self.participants.digicomp_pre_ordinal = ordinal_data[0]
+      self.participants.digicomp_post_ordinal = ordinal_data[1]
+      if self.bounds != None:
+         self.bounds.poor_ordinal = ordinal_data[2]
+         self.bounds.good_ordinal = ordinal_data[3]
+      return
+   
+   def _do_sanity_checks(self):
+      """
+      These tests make use of information that is assumed to be hidden from
+      the experimenters. Hence, they should only be used to test the internal
+      consistency of a model study.
+      """
+      self.sanity_checks["average differences"] = {}
+      for manipulation in self.manipulations:
+         average_result_with_manipulation = np.mean(self.participants.digicomp_post[self.manipulation_flags[manipulation.name]])
+         average_result_without_manipulation = np.mean(self.participants.digicomp_post[np.invert(self.manipulation_flags[manipulation.name])])
+         self.sanity_checks["average differences"][manipulation.name] = average_result_with_manipulation - average_result_without_manipulation
+      return
+   
+   def _compare_flagged(self, flags, results):
+      treatment_group = results[flags]
+      control_group = results[np.invert(flags)]
+      
+      statistics = {}
+      statistics['treatment group median'] = np.median(treatment_group)
+      statistics['control group median'] = np.median(control_group)
+      s, p, m, table = st.median_test(treatment_group, control_group)
+      statistics['median test test statistic'] = s
+      statistics['median test p-value'] = p
+      statistic, pvalue = st.mannwhitneyu(treatment_group, control_group)
+      statistics['Mann-Whitney U rank test test statistic'] = statistic
+      statistics['Mann-Whitney U rank test p-value'] = pvalue
+      return statistics
+   
       
    def run_study(self):
       """

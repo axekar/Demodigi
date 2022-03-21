@@ -71,7 +71,7 @@ bounds = dd.skill_boundaries(25, 50, minimum_quality_difference = 0.1)
 
 # Everything is put together into a study, which is then run and the
 # desired output is displayed
-trial_study = dd.study('test', testgroup, default, manipulations, bounds = bounds)
+trial_study = dd.simulated_study('test', testgroup, manipulations, default, bounds = bounds)
 if print_results:
    trial_study.describe()
 trial_study.run_study()
