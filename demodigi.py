@@ -33,14 +33,16 @@ Written by Alvin Gavel,
 
 alvin.gavel@gmail.com
 """
+import os
+from abc import ABC, abstractmethod
 
 import numpy as np
 import numpy.random as rd
 import scipy.special as sp
 import scipy.stats as st
-import os
 import matplotlib.pyplot as plt
 import numbers as nb
+
 
 ### Useful tools
 
@@ -327,7 +329,7 @@ standard_transformations = {"additive scatter":additive_scatter,
 
 ### Classes
 
-class manipulation:
+class manipulation(ABC):
    """
    This class should generally not be used on its own. Instead, one of the
    inherited classes should be used.
@@ -342,33 +344,21 @@ class manipulation:
    As a rule all manipulations are binary. That is, they are either done
    or not done, but there are no manipulations that we try out to varying
    degrees.
-
-   Attributes
-   ----------
-   name : str
-   \tDescription of the manipulation
-   name_for_file : str
-   \tRendition of the name suitable for use in a file name
    """
 
+   @abstractmethod
    def __init__(self, name):
-      """
-      Parameters
-      ----------
-      name : str
-      \tDescribed under attributes
-      """
       self.name = name
       self.name_for_file = _trim_for_filename(self.name)
       return
       
-class simulated_manipulation:
+class simulated_manipulation(manipulation):
    """
    See base class manipulation for definition.
    
-   This is used when simulating a study. It differs from the base class in
-   that the user must specify how the manipulation affects the learning
-   outcomes.
+   This is used when simulating a study. It requires the user to specify a
+   transformation that describes how the digital competence of the
+   participants is affected by the manipulation.
    
    Attributes
    ----------
@@ -391,6 +381,31 @@ class simulated_manipulation:
       """
       manipulation.__init__(self, name)
       self.transformation = transformation
+      return
+
+class real_manipulation(manipulation):
+   """
+   See base class manipulation for definition.
+   
+   This is used when performing a real study.
+      
+   Attributes
+   ----------
+   name : str
+   \tDescription of the manipulation
+   name_for_file : str
+   \tRendition of the name suitable for use in a file name
+   transformation : function float -> float
+   """
+   
+   def __init__(self, name):
+      """
+      Parameters
+      ----------
+      name : str
+      \tDescribed under attributes
+      """
+      manipulation.__init__(self, name)
       return
 
 class background:
@@ -696,7 +711,6 @@ class simulated_participants(participants):
          
       self.subgroups = self._define_subgroups()         
       self.digicomp_pre = self._calculate_digicomp_pre()
-
       return
    
    def _calculate_digicomp_pre(self):
@@ -705,7 +719,6 @@ class simulated_participants(participants):
       using the initial distribution and adding the relevant background
       effects
       """
-   
       digicomp_pre = self.initial_distribution(self.n)
       for background in self.all_backgrounds:
           digicomp_pre[self.background_flags[background.name]] = background.pre_transformation(digicomp_pre[self.background_flags[background.name]])
