@@ -194,7 +194,33 @@ def _initial_capital(string):
 def _indent(n):
    return n * '   '
 
-### Misc. mathematical stuff
+### Misc. stuff
+
+def _define_subgroups(n, backgrounds_or_manipulations, background_or_manipulation_flags):
+   """
+   Take a list of manipulations or backgrounds, together with a list of
+   boolean flags stating which participants are affected, and create
+   arrays with the indices of those that are affected by the manipulation
+   or background in question.
+   """
+   groups = {}
+   group_names = set([])
+   for i in range(n):
+      flags = []
+      for background_or_manipulation in backgrounds_or_manipulations:
+          if background_or_manipulation_flags[background_or_manipulation.name][i]:
+             flags.append(background_or_manipulation.name)
+      group_name = ", ".join(flags)
+      if group_name == "":
+         group_name = "none"
+      if not (group_name in group_names):
+         groups[group_name] = []
+         group_names.add(group_name)
+      groups[group_name].append(i)
+   for group_name in group_names:
+      groups[group_name] = np.asarray(groups[group_name])
+   return groups
+
 
 def _ordinalise(ndarray):
    """
@@ -367,6 +393,7 @@ class simulated_manipulation(manipulation):
    \tSome mapping R->R representing how digital competence is affected by
    \tthis manipulation
    """
+   
    def __init__(self, name, transformation):
       """
       Parameters
@@ -606,7 +633,6 @@ class participants(ABC):
       known_backgrounds : list of background
       \tDescribed under attributes
       """
-      
       self.n = n
       self.known_backgrounds = known_backgrounds
       
@@ -623,31 +649,6 @@ class participants(ABC):
       self.digicomp_post_ordinal = np.zeros(n) * np.nan
       # By definition, there is no digicomp_delta_ordinal
       return
-      
-   def _define_subgroups(self):
-      """
-      Divide the participants into subgroups where the members are subject
-      to the same known backgrounds
-      """
-      
-      subgroups = {}
-      subgroup_names = set([])
-      for i in range(self.n):
-         participant_flags = []
-         for background in self.known_backgrounds:
-            if self.background_flags[background.name][i]:
-               participant_flags.append(background.name)
-         subgroup_name = ", ".join(participant_flags)
-         if subgroup_name == "":
-            subgroup_name = "no background"
-         
-         if not (subgroup_name in subgroup_names):
-            subgroups[subgroup_name] = []
-            subgroup_names.add(subgroup_name)
-         subgroups[subgroup_name].append(i)
-      for subgroup_name in subgroup_names:
-         subgroups[subgroup_name] = np.asarray(subgroups[subgroup_name])
-      return subgroups
    
 
 class simulated_participants(participants):
@@ -719,7 +720,9 @@ class simulated_participants(participants):
       for background in self.all_backgrounds:
          self.background_flags[background.name] = rd.random(self.n) < background.fraction
          
-      self.subgroups = self._define_subgroups()         
+      #Divide the participants into subgroups where the members are subject
+      #to the same known backgrounds
+      self.subgroups = _define_subgroups(self.n, self.known_backgrounds, self.background_flags)
       self.digicomp_pre = self._calculate_digicomp_pre()
       return
    
@@ -775,10 +778,11 @@ class study(ABC):
       self.boundary_tests_run = False
       
       self.n_manipulations = len(self.manipulations)
+      # This may be changed
       self.manipulation_flags = self._set_manipulation_flags()
       self.all_flags = {**self.manipulation_flags, **self.participants.background_flags}
       
-      self.manipulation_groups = self._define_manipulation_groups()
+      self.manipulation_groups = _define_subgroups(self.participants.n, self.manipulations, self.manipulation_flags)
       
       self.sanity_checks = {}
       self.measured_results = {}
@@ -792,29 +796,23 @@ class study(ABC):
       self._dk_samples = 2 * self._qk_samples - 1
       self._Dk_range = np.linspace(-1.0, 1.0, num=self._dk_samples)
       return
-      
-   def _define_manipulation_groups(self):
 
-      # Maybe combine this function with define_subgroups in class participants?
+   ### Functions using standard frequentist tests
+
+   def _compare_flagged(self, flags, results):
+      treatment_group = results[flags]
+      control_group = results[np.invert(flags)]
       
-      manipulation_groups = {}
-      manipulation_group_names = set([])
-      for i in range(self.participants.n):
-         participant_flags = []
-         for manipulation in self.manipulations:
-            if self.manipulation_flags[manipulation.name][i]:
-               participant_flags.append(manipulation.name)
-         manipulation_group_name = ", ".join(participant_flags)
-         if manipulation_group_name == "":
-            manipulation_group_name = "no manipulation"
-         
-         if not (manipulation_group_name in manipulation_group_names):
-            manipulation_groups[manipulation_group_name] = []
-            manipulation_group_names.add(manipulation_group_name)
-         manipulation_groups[manipulation_group_name].append(i)
-      for manipulation_group_name in manipulation_group_names:
-         manipulation_groups[manipulation_group_name] = np.asarray(manipulation_groups[manipulation_group_name])
-      return manipulation_groups
+      statistics = {}
+      statistics['treatment group median'] = np.median(treatment_group)
+      statistics['control group median'] = np.median(control_group)
+      s, p, m, table = st.median_test(treatment_group, control_group)
+      statistics['median test test statistic'] = s
+      statistics['median test p-value'] = p
+      statistic, pvalue = st.mannwhitneyu(treatment_group, control_group)
+      statistics['Mann-Whitney U rank test test statistic'] = statistic
+      statistics['Mann-Whitney U rank test p-value'] = pvalue
+      return statistics
 
    ### Functions shared between boundary and median tests
    
@@ -992,7 +990,6 @@ class study(ABC):
       control or treatment group does better than the median for the control
       and treatment groups together.
       """
-      
       treatment_group_pre = participants.digicomp_pre_ordinal[flags]
       control_group_pre = participants.digicomp_pre_ordinal[np.invert(flags)]
       treatment_group_post = participants.digicomp_post_ordinal[flags]
@@ -1119,7 +1116,6 @@ class study(ABC):
       """
       Plot group membership of all participants.
       """
-      
       def plot_flags(flags, name):
          side = int(np.ceil(np.sqrt(self.participants.n)))
          i = np.arange(self.participants.n)
@@ -1176,7 +1172,6 @@ class study(ABC):
       - The estimated difference between the versions of the teaching module
       with and without each manipulation
       """
-      
       def plot_quality(test_name, test_data):
          plt.clf()
          plt.tight_layout()
@@ -1274,7 +1269,7 @@ class simulated_study(study):
       """
       study.__init__(self, name, participants, manipulations, bounds)
       self.default_effect = default_effect
-      self.manipulation_groups = study._define_manipulation_groups(self)
+      self.manipulation_groups = _define_subgroups(self.participants.n, self.manipulations, self.manipulation_flags)
       return
 
    def _set_manipulation_flags(self):
@@ -1301,7 +1296,6 @@ class simulated_study(study):
       Gives a summary of the most important facts about the study, which
       are assumed to be known prior to the study being carried out.
       """
-   
       print("Description of the study itself:\n")
       print("There {} {} participant{}".format(_is_are(self.participants.n), self.participants.n, _plural_ending(self.participants.n)))
       print("We are testing {} manipulation{}:".format(self.n_manipulations, _plural_ending(self.n_manipulations)))
@@ -1369,29 +1363,13 @@ class simulated_study(study):
          self.sanity_checks["average differences"][manipulation.name] = average_result_with_manipulation - average_result_without_manipulation
       return
    
-   def _compare_flagged(self, flags, results):
-      treatment_group = results[flags]
-      control_group = results[np.invert(flags)]
-      
-      statistics = {}
-      statistics['treatment group median'] = np.median(treatment_group)
-      statistics['control group median'] = np.median(control_group)
-      s, p, m, table = st.median_test(treatment_group, control_group)
-      statistics['median test test statistic'] = s
-      statistics['median test p-value'] = p
-      statistic, pvalue = st.mannwhitneyu(treatment_group, control_group)
-      statistics['Mann-Whitney U rank test test statistic'] = statistic
-      statistics['Mann-Whitney U rank test p-value'] = pvalue
-      return statistics
    
-      
    def run_study(self):
       """
       Simulate the participants taking their various versions of the course,
       increasing in digital competence as they do so. Then simulate the
       experimenters studying the results.
       """
-      
       self._apply_manipulations()
       self._do_sanity_checks()
       self._do_tests()
