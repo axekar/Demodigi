@@ -6,18 +6,27 @@ are three background variables that affect the initial digital
 competence, the effect of the learning module, or both. Two of them are
 known, and one is unknown.
 
-Setting the variable print_results to true gives a verbose description
-of the results of the study. Setting the variable plot_results to true
-causes it to attempt to make plots in a folder named DD_plots, which
-has to be in the same directory as the script is run in.
+Setting print_results to true gives a verbose description of the
+results of the study.
+
+Setting save_results to true causes it to save csv files with
+information about the study.
+
+Setting plot_results to true causes it to attempt to make plots in a
+folder named DD_plots, which has to be in the same directory as the
+script is run in.
 """
 
 import demodigi as dd
 
 # Prints verbose output describing the simulated study
 print_results = True
+
 # Makes plots describing the simulated study
 plot_results = True
+
+# Output three files containing flags and results for the participants
+save_results = True
 
 
 # We introduce two known backgrounds, one which affects both initial
@@ -36,14 +45,26 @@ unknown_background_1 = dd.simulated_background("secretly a ghost", dd.standard_t
 unknown_backgrounds = [unknown_background_1]
 
 
+# Define the bounds for what we consider to be good and poor digital
+# competence. The study will then, among other things, test how many
+# participants who are moved from poor to good competence. (This means
+# that it does not simply look at how many are pushed from just below
+# to just above the threshold for poor competence.
+
+bounds = dd.skill_boundaries(25, 50, minimum_quality_difference = 0.1)
+
+
 # We define a test group of 8000 participants, who are assumed to have
 # skills following a normal distribution. (Note that this is not
 # visible to the simulated experimentalists. They only have access to
 # ordinal data).
 
-testgroup = dd.simulated_participants(8000, dd.standard_distributions["normal"], known_backgrounds = known_backgrounds, unknown_backgrounds = unknown_backgrounds)
+testgroup = dd.simulated_participants(8000, dd.standard_distributions["normal"], known_backgrounds = known_backgrounds, unknown_backgrounds = unknown_backgrounds, bounds = bounds)
 if print_results:
    testgroup.describe()
+if save_results:
+   testgroup.save_ids('simulated_participants.csv')
+   testgroup.save_backgrounds('simulated_backgrounds.csv')
 
 
 # Define the effect that the teaching module has, in the absence of any
@@ -61,23 +82,25 @@ manipulation_3 = dd.simulated_manipulation("all text in comic sans", dd.standard
 manipulations = [manipulation_1, manipulation_2, manipulation_3]
 
 
-# Define the bounds for what we consider to be good and poor digital
-# competence. The study will then, among other things, test how many
-# participants who are moved from poor to good competence. (This means
-# that it does not simply look at how many are pushed from just below
-# to just above the threshold for poor competence.
-bounds = dd.skill_boundaries(25, 50, minimum_quality_difference = 0.1)
 
 
 # Everything is put together into a study, which is then run and the
 # desired output is displayed
-trial_study = dd.simulated_study('test', testgroup, manipulations, default, bounds = bounds)
+
+trial_study = dd.study('test', testgroup)
+trial_study.set_manipulations(manipulations)
 if print_results:
    trial_study.describe()
-trial_study.run_study()
+if save_results:
+   trial_study.save_manipulations('simulated_manipulations.csv')
+   
+trial_study.simulate_study(default)
+trial_study.do_tests()
 if print_results:
    trial_study.summarise_results()
 if plot_results:
    trial_study.plot_folder = 'DD_plots'
    trial_study.plot_results()
    trial_study.plot_participants()
+if save_results:
+   trial_study.participants.save_digicomp('simulated_results.csv')
