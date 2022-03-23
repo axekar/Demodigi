@@ -9,12 +9,16 @@ known, and one is unknown.
 Setting print_results to true gives a verbose description of the
 results of the study.
 
-Setting save_results to true causes it to save csv files with
-information about the study.
-
 Setting plot_results to true causes it to attempt to make plots in a
 folder named DD_plots, which has to be in the same directory as the
 script is run in.
+
+Setting save_results to true causes it to save csv files with
+information about the study.
+
+setting load_results to true causes it to attempt to load the results
+that were saved by save_results. This is mostly to allow quickly
+testing that the loading and saving works.
 """
 
 import demodigi as dd
@@ -28,6 +32,8 @@ plot_results = True
 # Output three files containing flags and results for the participants
 save_results = True
 
+# Test that loading the results works
+load_results = True
 
 # We introduce two known backgrounds, one which affects both initial
 # skill and the effectiveness of the intervention, and one which affects
@@ -73,15 +79,13 @@ if save_results:
 default = dd.standard_transformations["additive normal improvement (big)"]
 
 
-# Define three manipulations, two of which has a slight effect and one
+# Define three manipulations, two of which have a slight effect and one
 # of which does nothing.
 
 manipulation_1 = dd.simulated_manipulation("funny hats", dd.standard_transformations["additive normal improvement"])
 manipulation_2 = dd.simulated_manipulation("prayer and incense", dd.standard_transformations["additive normal improvement"])
 manipulation_3 = dd.simulated_manipulation("all text in comic sans", dd.standard_transformations["no effect"])
 manipulations = [manipulation_1, manipulation_2, manipulation_3]
-
-
 
 
 # Everything is put together into a study, which is then run and the
@@ -104,3 +108,12 @@ if plot_results:
    trial_study.plot_participants()
 if save_results:
    trial_study.participants.save_digicomp('simulated_results.csv')
+   
+if load_results:
+   print('Loading saved data...')
+   loaded_participants = dd.real_participants('simulated_participants.csv', 'simulated_backgrounds.csv', 'simulated_results.csv', bounds = bounds)
+   loaded_study = dd.study('test of loading', loaded_participants)
+   loaded_study.load_manipulations('simulated_manipulations.csv')
+   loaded_study.do_tests()
+   if print_results:
+      loaded_study.summarise_results()
