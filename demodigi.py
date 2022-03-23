@@ -217,7 +217,6 @@ def _define_subgroups(n, backgrounds_or_manipulations, background_or_manipulatio
       groups[group_name] = np.asarray(groups[group_name])
    return groups
 
-
 def _ordinalise(ndarray):
    """
    Takes an ndarray and makes the data ordinal. That is to say, the
@@ -259,6 +258,29 @@ def logB(alpha, beta):
    """
    return sp.loggamma(alpha) + sp.loggamma(beta) - sp.loggamma(alpha + beta)
 
+class IDMismatchError(Exception):
+   """
+   Raised when reading data from a file and finding that the IDs in the
+   file do not match the ones expected.
+   """
+   pass
+
+def _match_ids(reference_ids, ids, data):
+   if not (len(reference_ids) == len(ids) == len(data)):
+      raise IDMismatchError
+   if len(reference_ids) != len(set(reference_ids)):
+      raise IDMismatchError
+   if len(ids) != len(set(ids)):
+      raise IDMismatchError
+
+   sorted_data = ids[:]
+   for ID, datum in zip(ids, data):
+      try:
+         sorted_data[reference_ids.index(ID)] = datum
+      except ValueError:
+         raise IDMismatchError
+   return sorted_data
+      
 
 ### Statistical distributions
 
@@ -528,7 +550,7 @@ class skill_boundaries:
    aries can be identical, but do not need to be.
    
    A skill_boundaries object should be given to a participants object,
-   where the    boundaries will be placed on the same ordinal scale as the
+   where the boundaries will be placed on the same ordinal scale as the
    participants' skills before and after the module. This is then used to
    calculate a quality for each different version of the modules, defined
    as the probability that a person starting with poor skills will have
@@ -603,6 +625,7 @@ class participants(ABC):
       self.n = np.nan
       self.known_backgrounds = []
       self.unknown_backgrounds = []
+      self.n_backgrounds = np.nan
       
       self.ids = []
       self.backgrounds = []
@@ -705,32 +728,35 @@ class participants(ABC):
          return
 
       ids = []
-      self.known_backgrounds = []
-      self.background_flags = {}
+      known_backgrounds = []
+      background_flags = {}
       for background_line in lines[start_backgrounds+1: start_participants]:
          words = background_line.split(': ')
          background_name = words[1]
-         self.known_backgrounds.append(real_background(background_name))
-         self.background_flags[background_name] = []
+         known_backgrounds.append(real_background(background_name))
+         background_flags[background_name] = []
       for participant_line in lines[start_participants+1:]:
          words = participant_line.split(',')
          ids.append(words[0])
-         for i in range(len(self.known_backgrounds)):
+         for i in range(len(known_backgrounds)):
             word = words[i+1].strip()
             # Note that this reads anything other than 'True' as a false
-            self.background_flags[self.known_backgrounds[i].name].append(word == 'True')
+            background_flags[known_backgrounds[i].name].append(word == 'True')
             
-      for background in self.known_backgrounds:
-         self.background_flags[background.name] = np.asarray(self.background_flags[background.name], dtype = np.bool)
-            
+      for background in known_backgrounds:
+         try:
+            background_flags[background.name] = np.asarray(_match_ids(self.ids, ids, background_flags[background.name]), dtype = np.bool)
+         except IDMismatchError:
+            print("Cannot read data from file!")
+            print("IDs in file do not match IDs of participants in study")
+            return
+
+      self.known_backgrounds = known_backgrounds
+      # We assume that this is only done in the absence of unknown backgrounds
+      self.unknown_backgrounds = []
       self.backgrounds = self.known_backgrounds + self.unknown_backgrounds
-      if self.ids == []:
-         self.ids = ids
-         self.n = len(self.ids)
-      elif self.ids != ids:
-         print('IDs in file do not seem to match prior IDs!')
-      else:
-         pass
+      self.background_flags = background_flags
+      self.n_backgrounds = len(known_backgrounds)
       return
       
    def load_digicomp(self, path):
@@ -748,22 +774,24 @@ class participants(ABC):
          print("File does not match expected format")
          return
       ids = []
-      self.digicomp_pre = []
-      self.digicomp_post = []
+      digicomp_pre = []
+      digicomp_post = []
       for participant_line in lines[start_participants+1:]:
          words = participant_line.split(',')
          ids.append(words[0])
-         self.digicomp_pre.append(float(words[1]))
-         self.digicomp_post.append(float(words[2]))
-      if self.ids == []:
-         self.ids = ids
-         self.n = len(self.ids)
-      elif self.ids != ids:
-         print('IDs in file do not seem to match prior IDs!')
-      else:
-         pass
-      self.digicomp_pre = np.asarray(self.digicomp_pre)
-      self.digicomp_post = np.asarray(self.digicomp_post)
+         digicomp_pre.append(float(words[1]))
+         digicomp_post.append(float(words[2]))
+         
+      try:
+         digicomp_pre = np.asarray(_match_ids(self.ids, ids, digicomp_pre), dtype = np.float64)
+         digicomp_post = np.asarray(_match_ids(self.ids, ids, digicomp_post), dtype = np.float64)
+      except IDMismatchError:
+         print("Cannot read data from file!")
+         print("IDs in file do not match IDs of participants in study")
+         return
+         
+      self.digicomp_pre = digicomp_pre
+      self.digicomp_post = digicomp_post
       
       data_to_ordinalise = [self.digicomp_pre, self.digicomp_post]
       if self.bounds != None:
@@ -842,7 +870,8 @@ class simulated_participants(participants):
       self.known_backgrounds = known_backgrounds
       self.unknown_backgrounds = unknown_backgrounds
       self.backgrounds = self.known_backgrounds + self.unknown_backgrounds
-      
+      self.n_backgrounds = len(self.backgrounds)
+
       self.background_flags = {}
       for background in self.backgrounds:
          self.background_flags[background.name] = rd.random(self.n) < background.fraction
@@ -1088,26 +1117,32 @@ class study:
          return
 
       ids = []
-      self.manipulations = []
-      self.manipulation_flags = {}
+      manipulations = []
+      manipulation_flags = {}
       for manipulation_line in lines[start_manipulations+1: start_participants]:
          words = manipulation_line.split(': ')
          manipulation_name = words[1]
-         self.manipulations.append(real_manipulation(manipulation_name))
-         self.manipulation_flags[manipulation_name] = []
+         manipulations.append(real_manipulation(manipulation_name))
+         manipulation_flags[manipulation_name] = []
       for participant_line in lines[start_participants+1:]:
          words = participant_line.split(',')
          ids.append(words[0])
-         for i in range(len(self.manipulations)):
+         for i in range(len(manipulations)):
             word = words[i+1].strip()
             # Note that this reads anything other than 'True' as a false
-            self.manipulation_flags[self.manipulations[i].name].append(word == 'True')
-            
-      self.n_manipulations = len(self.manipulations)
-      for manipulation in self.manipulations:
-         self.manipulation_flags[manipulation.name] = np.asarray(self.manipulation_flags[manipulation.name], dtype = np.bool)
-      if self.participants.ids != ids:
-         print('IDs in file do not seem to match prior IDs!')
+            manipulation_flags[manipulations[i].name].append(word == 'True')
+                        
+      for manipulation in manipulations:
+         try:
+            manipulation_flags[manipulation.name] = np.asarray(_match_ids(self.participants.ids, ids, manipulation_flags[manipulation.name]), dtype = np.bool)
+         except IDMismatchError:
+            print("Cannot read data from file!")
+            print("IDs in file do not match IDs of participants in study")
+            return
+
+      self.manipulations = manipulations
+      self.manipulation_flags = manipulation_flags
+      self.n_manipulations = len(manipulations)
       return
       
 
