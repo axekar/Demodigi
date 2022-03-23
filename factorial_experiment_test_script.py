@@ -108,7 +108,10 @@ if plot_results:
    trial_study.plot_participants()
 if save_results:
    trial_study.participants.save_digicomp('simulated_results.csv')
-   
+
+
+# The data that was just saved is loaded again.
+
 if load_results:
    print('Loading saved data...')
    loaded_participants = dd.real_participants('simulated_participants.csv', 'simulated_backgrounds.csv', 'simulated_results.csv', bounds = bounds)

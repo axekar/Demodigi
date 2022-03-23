@@ -35,16 +35,16 @@ alvin.gavel@gmail.com
 import os
 import csv
 from abc import ABC, abstractmethod
+import numbers as nb
 
 import numpy as np
 import numpy.random as rd
 import scipy.special as sp
 import scipy.stats as st
 import matplotlib.pyplot as plt
-import numbers as nb
 
 
-### Useful tools
+### Tools for inspecting data
 
 def read_nested_dict(dictionary):
    """
@@ -793,16 +793,17 @@ class participants(ABC):
       self.digicomp_pre = digicomp_pre
       self.digicomp_post = digicomp_post
       
+      # Fix ordinal data
       data_to_ordinalise = [self.digicomp_pre, self.digicomp_post]
       if self.bounds != None:
          data_to_ordinalise += [np.asarray([self.bounds.poor]), np.asarray([self.bounds.good])]
       ordinal_data = _ordinalise_many(data_to_ordinalise)
       self.digicomp_pre_ordinal = ordinal_data[0]
       self.digicomp_post_ordinal = ordinal_data[1]
-      
       if self.bounds != None:
          self.bounds.poor_ordinal = ordinal_data[2]
          self.bounds.good_ordinal = ordinal_data[3]
+         
       self.digicomp_set = True
       return
 
