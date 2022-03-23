@@ -7,20 +7,19 @@ defined at https://ec.europa.eu/jrc/en/digcomp - of people working at
 Arbetsförmedlingen, and by extension also job seekers. This shall be
 done by learning modules at KTH using OLI-Torus.
 
-The module is primarily intended as a proof-of-concept. That is, the
-main purpose is to simulate data, and then perform the analyses that we
-would do on real-world data on that simulated data. However, it should
-also be able to take real-world data, once such is available.
+This module can be used to analyse either real or simulated data. The
+latter is intended as a proof-of-concept, to ensure that the planned
+analysis makes sense before we have seen real data.
 
-One of the assumptions in this model is that digital competence can in
-principle be represented as a real number, but that the experimenters
+One of the assumptions in the simulation is that digital competence can
+in principle be represented as a real number, but that the experimenters
 do not have access to that number. That is, behind the scenes we model
 digital competence on an interval scale, but the simulated experiment-
 ers have to analyse it using an ordinal scale.
 
 The study is assumed to use a factorial design, so that the experiment-
 ers first identify some background variables - here referred to as 
-'backgrounds '- that are likely to affect the results - such as age or
+'backgrounds' - that are likely to affect the results - such as age or
 motivation - and split the participants into several smaller groups
 within which all members are affected the same. They then try out a
 certain number of changes in the course - here referred to as
@@ -54,9 +53,9 @@ def read_nested_dict(dictionary):
    
    Given a dict, you will be shown the keys and some information about
    the corresponding values. For most data types only the type itself is
-   printed out. Numeric values are printed out. Strings are printed out
-   but shortened if too long. For lists, tuples and sets the length is
-   shown.
+   printed out. Individual numeric values are printed out. Strings are
+   printed out but shortened if too long. For lists, tuples and sets the
+   length is shown. For numpy arrays the size and dtype is shown.
    
    Any dicts inside the dict can in turn be entered, permitting you to
    descend through the levels of a tree of dicts and ascend again.
@@ -149,28 +148,6 @@ def read_nested_dict(dictionary):
 
 ### Internal functions for handling text
 
-def _shop_docstring(docstring):
-   """
-   Takes a string of documentation and inserts line breaks ensuring each
-   line is max 72 characters wide.
-   """
-   line_maxlen = 72
-   full_string = ""
-   row = ""
-   word = ""
-   for character in docstring:
-      if character == " ":
-         if len(row) + len(word) + 1 >= line_maxlen:
-            full_string += row + "\n"
-            row = word
-         else:
-            row += " " + word
-         word = ""
-      else:
-         word += character
-   full_string += row + " " + word
-   return full_string[1:]
-
 def _trim_for_filename(string):
    """
    Removes parts of a string that would not be suitable for a filename
@@ -245,7 +222,7 @@ def _ordinalise(ndarray):
    """
    Takes an ndarray and makes the data ordinal. That is to say, the
    elements will be turned into integers denoting the lowest, second
-   lowest etcetera.
+   lowest, etcetera.
    """
    n = len(ndarray)
    ordinal = np.zeros(n, dtype=np.int64)
@@ -277,8 +254,8 @@ def _ordinalise_many(ndarrays):
    
 def logB(alpha, beta):
    """
-   The logarithm of the normalisation factor when doing Bayesian fitting
-   of binomial functions.
+   The logarithm of the normalisation factor that appears when doing
+   Bayesian fitting of binomial functions.
    """
    return sp.loggamma(alpha) + sp.loggamma(beta) - sp.loggamma(alpha + beta)
 
@@ -293,7 +270,7 @@ def logB(alpha, beta):
 def _normal_dist(n):
    """
    Returns n samples from a normal distribution with mean 25 and standard
-   deviation 10
+   deviation 10.
    """
    return rd.normal(loc=25., scale=10, size=n)
    
@@ -387,7 +364,6 @@ class manipulation(ABC):
    or not done, but there are no manipulations that we try out to varying
    degrees.
    """
-
    @abstractmethod
    def __init__(self, name):
       self.name = name
@@ -551,12 +527,12 @@ class skill_boundaries:
    skills and those above the higher boundary have good skills. The bound-
    aries can be identical, but do not need to be.
    
-   A skill_boundaries object should be given to a study object, where the
-   boundaries will be placed on the same ordinal scale as the participants'
-   skills before and after the module. This is then used to calculate a
-   quality for each different version of the modules, defined as the
-   probability that a person starting with poor skills will have good
-   skills after taking the course module.
+   A skill_boundaries object should be given to a participants object,
+   where the    boundaries will be placed on the same ordinal scale as the
+   participants' skills before and after the module. This is then used to
+   calculate a quality for each different version of the modules, defined
+   as the probability that a person starting with poor skills will have
+   good skills after taking the course module.
    
    Optionally, it is possible to also supply a minimal difference in
    quality which we consider to be practically significant.
@@ -571,10 +547,12 @@ class skill_boundaries:
    \tdigital competence
    poor_ordinal : int
    \tThe level for low digital competence, placed on an ordinal scale
-   \ttogether with the skills of a group of participants
+   \ttogether with the skills of a group of participants. This is
+   \tinitially set to nan.
    good_ordinal : int
    \tThe level for high digital competence, placed on an ordinal scale
-   \ttogether with the skills of a group of participants
+   \ttogether with the skills of a group of participants. This is
+   \tinitially set to nan.
    minimum_quality_difference : float
    \tThe difference in quality which we consider to be practically signif-
    \ticant. This defaults to zero, meaning that any different is taken to
@@ -654,6 +632,11 @@ class participants(ABC):
       return
 
    def save_backgrounds(self, path):
+      """
+      Save a file naming the backgrounds affecting the participants and
+      listing boolean flags describing which participant is affected by which
+      background
+      """
       f = open(path, 'w')
       f.write("# File generated by demodigi.py\n")
       f.write("Known backgrounds:\n")
@@ -669,6 +652,10 @@ class participants(ABC):
       return
       
    def save_digicomp(self, path):
+      """
+      Save a file listing the digital competence before and after the course
+      module, for each participant
+      """
       if not self.digicomp_set:
          print('There is no digital competence to save!')
          return
@@ -702,6 +689,10 @@ class participants(ABC):
       return
 
    def load_backgrounds(self, path):
+      """
+      Read a file with backgrounds and the boolean flags describing which
+      participants are affected.
+      """
       f = open(path, 'r')
       lines = f.readlines()
       f.close()
@@ -743,6 +734,10 @@ class participants(ABC):
       return
       
    def load_digicomp(self, path):
+      """
+      Read a file describing the digital competence before and after taking
+      the course module.
+      """
       f = open(path, 'r')
       lines = f.readlines()
       f.close()
@@ -789,9 +784,9 @@ class simulated_participants(participants):
    
    This is used when simulating a study. It requires the user to specify:
    
-    - The initial distribution over digital competence
+    - Initial distribution over digital competence
    
-    - The unknown backgrounds
+    - Unknown backgrounds, if any, affecting the participants
   
    Attributes
    ----------
@@ -800,13 +795,13 @@ class simulated_participants(participants):
    initial_distribution : function int->float ndarray
    \tThe statistical distribution that describes the digital competence of
    \tthe participants prior to taking the course
-   known_backgrounds : list of background
+   known_backgrounds : list of simulated_background
    \tBackgrounds that affect some subset of participants, and which are
    \tassumed to be known to the experimenters
-   unknown_backgrounds : list of background
+   unknown_backgrounds : list of simulated_background
    \tBackgrounds that affect some subset of participants, and which are
    \tnot known to the experimenters
-   backgrounds : list of background
+   backgrounds : list of simulated_background
    \tList containing both the known and unknown backgrounds
    background_flags : dict of bool ndarrays
    \tDictionary containing arrays stating which participants are
@@ -818,8 +813,9 @@ class simulated_participants(participants):
    \tThe digital competence of the participants before taking the module
    digicomp_post : float ndarray
    \tThe digital competence of the participants after taking the module.
-   \tThis is initially set to nan, and should be set to definite values by
-   \tthe class study.
+   \tThis is initially set to nan, and can be calculated by supplying some
+   \tdefault effect of the module, and optionally a list of manipulations.
+   \tTypically, this is done by a study object.
    digicomp_set : bool
    \tWhether anything has set digicomp_pre and digicomp_post
    """
@@ -926,9 +922,28 @@ class real_participants(participants):
    """
    See base class participants for definition.
    
-   This needs to read a csv-file of participant data, which is assumed to
-   follow the format:
-   participant_ID, background_1, background_2, ...
+   This needs to read three files of participant IDs, backgrounds and
+   digital competence.
+   
+   Attributes
+   ----------
+   n : int
+   \tThe number of participants in the study
+   known_backgrounds : list of real_background
+   backgrounds : list of real_background
+   \tList containing both the known and unknown backgrounds
+   background_flags : dict of bool ndarrays
+   \tDictionary containing arrays stating which participants are
+   \taffected by which backgrounds
+   subgroups : dict of int ndarrays
+   \tDictionary containing the indices of the participants in each
+   \tsubgroup
+   digicomp_pre : float ndarray
+   \tThe digital competence of the participants before taking the module
+   digicomp_post : float ndarray
+   \tThe digital competence of the participants after taking the module
+   digicomp_set : bool
+   \tWhether anything has set digicomp_pre and digicomp_post
    """
    def __init__(self, id_path, background_path, digicomp_path, bounds = None):
       participants.__init__(self, bounds)
@@ -953,10 +968,7 @@ class study:
    \tName of the study. Used for filenames when plotting.
    participants : participants
    \tThe people taking the course
-   default_effect : function float->float
-   \tThe effect that the default version of the course has on the digital
-   \tskills of the participants
-   manipulations : list of manipulations
+   manipulations : list of real_manipulation or simulated_manipulation
    \tThe manipulations that are tried out on the participants
    n_manipulations : int
    \tThe number of manipulations that are carried out
@@ -980,8 +992,6 @@ class study:
       \tDescribed under attributes
       participants : participants
       \tDescribed under attributes
-      default_effect : function float->float
-      \tDescribed under attributes
       """
       self.name = name
       self.participants = participants
@@ -996,11 +1006,14 @@ class study:
       self.all_flags = {}
       self.manipulation_groups = {}
       
-      # [EXPLANATORY TEXT GOES HERE]
+      # The results of a statistical analysis of the participants' digital
+      # competence before and after taking the course module
       self.measured_results = {}
       
       self.plot_folder = None
       
+      # Used when calculating and comparing the qualities for different
+      # versions of the course
       self._qk_samples = self.participants.n * 10
       self._qk_sample_width = 1 / self._qk_samples
       self._Qki_range = np.linspace(0.0, 1.0, num=self._qk_samples)
