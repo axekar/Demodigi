@@ -21,7 +21,7 @@ that were saved by save_results. This is mostly to allow quickly
 testing that the loading and saving works.
 """
 
-import demodigi as dd
+import factorial_experiment as dd
 
 # Prints verbose output describing the simulated study
 print_results = True
