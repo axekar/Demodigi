@@ -30,7 +30,7 @@ manipulations.
 
 Written by Alvin Gavel,
 
-alvin.gavel@gmail.com
+https://github.com/Alvin-Gavel/Demodigi
 """
 import os
 import csv

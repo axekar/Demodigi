@@ -7,3 +7,5 @@ The current contents of the repository are:
 `factorial_experiment.py`: Python module for analysing the results of a factorial experiment that we plan to do as part of the study. It can also be used for simulating similar studies, to test that the analysis at least makes sense on paper.
 
 `factorial_experiment_test_script.py`: Script intended as a test of the module `factorial_experiment.py`, by implementing a simple simulated study. It can also be seen as a demo of how to use the module. To make that easier, it has verbose comments explaining what happens at every step along the way.
+
+`behavioural_experiment.py`: Python module for simulating a behavioural experiment that we plan to do as part of the study. With time, I will also add code for analysis the results of the actual experiment.
