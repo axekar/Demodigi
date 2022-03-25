@@ -7,6 +7,8 @@ defined at https://ec.europa.eu/jrc/en/digcomp - of people working at
 Arbetsförmedlingen, and by extension also job seekers. This shall be
 done by learning modules at KTH using OLI-Torus.
 
+--- About the module ---
+
 This module can be used to analyse either real or simulated data. The
 latter is intended as a proof-of-concept, to ensure that the planned
 analysis makes sense before we have seen real data.
@@ -1223,6 +1225,7 @@ class study:
       qkcont = dictionary['control group']['Probability mass per sampled quality']
       dk = np.convolve(qktreat, np.flip(qkcont))
       
+      # Note to self: Check normalisation of dk
       dictionary['Range of quality differences'] = self._Dk_range
       dictionary['Probabilities of quality differences'] = dk
       dictionary['Peak of dk'] = self._Dk_range[np.argmax(dk)]

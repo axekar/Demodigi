@@ -53,9 +53,18 @@ import matplotlib.pyplot as plt
 _p_steps = 101
 # Corresponding for the difference between two probabilities.
 _d_steps = 2 * _p_steps - 1
+_D_sample_width = 1/ _d_steps
 
+def _index_of_nearest(array, value):
+   """
+   Thanks to unutbu of Stackoverflow:
+   https://stackoverflow.com/questions/2566412/find-nearest-value-in-numpy-array
+   """
+   array = np.asarray(array)
+   idx = (np.abs(array - value)).argmin()
+   return idx
 
-### Assorted mathematical stuff
+### Statistical analysis
 
 def logB(alpha, beta):
    """
@@ -63,8 +72,6 @@ def logB(alpha, beta):
    Bayesian fitting of binomial functions.
    """
    return sp.loggamma(alpha) + sp.loggamma(beta) - sp.loggamma(alpha + beta)
-
-### Generic probability-distributions stuff
 
 def test_normalisation(p, sample_width):
    p_mass = p * sample_width
@@ -75,33 +82,30 @@ def test_normalisation(p, sample_width):
       print("Total probability mass: {}".format(total_mass))
    return
 
-
-### The actual experiment
-
-def single_trial(n, P):
+def binomial_trial(n, P):
    """
    Make a single iteration of the experiment, with n participants, for a
    given value of P.
    """
-   successes = np.sum(rd.random(n) < P)
-   return successes
+   return np.sum(rd.random(n) < P)
 
-def estimate_P(n, successes):
+def calculate_p(n, S):
    """
-   Given the results of a single trial, estimates the probabilility P of
-   success.
+   Given the results of a single trial, estimates what the probability
+   P of success actually was.
 
    Returns an array containing the probability distribution p over P.
    """
    p_sample_width = 1 / _p_steps
    P_range = np.linspace(0.0, 1.0, num=_p_steps)
    with np.errstate(divide = 'ignore'):
-      log_p = successes * np.log(P_range) + (n - successes) * np.log(1 - P_range) - logB(successes + 1, n - successes + 1)
+      log_p = S * np.log(P_range) + (n - S) * np.log(1 - P_range) - logB(S + 1, n - S + 1)
    p = np.exp(log_p)
-   test_normalisation(p, p_sample_width)
+
+   p /= np.trapz(p, dx=p_sample_width)
    return P_range, p
 
-def estimate_D(p_pre, p_post):
+def calculate_d(p_pre, p_post):
    """
    Given two distributions p_pre and p_post over success chances P_pre and
    P_post, calculates the probability distribution d over the difference D
@@ -109,44 +113,68 @@ def estimate_D(p_pre, p_post):
    """
    D_range = np.linspace(-1.0, 1.0, num=_d_steps)
    d = np.convolve(p_post, np.flip(p_pre))
+   d /= np.trapz(d, dx=_D_sample_width)
    return D_range, d
 
-def estimate_pdpos(D_range, d, practical_significance = 0.0):
+def estimate_pDpos(D_range, d):
    """
    Given a probability distribution d over the difference in quality D,
    calculate the probability that D is positive.
    """
-   return sum(d[_p_steps:]) / sum(d) # Kluge, fix tomorrow
+   zero_diff = _index_of_nearest(D_range, 0)
+   return np.trapz(d[zero_diff:], dx = _D_sample_width)
 
-def median_pdpos(n, P_pre, P_post, runs, practical_significance = 0.0):
-   """
-   Makes multiple iterations of the experiment, with n participants, for
-   a given value of p, each time estimating the probability that d is
-   positive.
-   """
-   estimates = []
-   for i in range(runs):
-      dummy, p_pre = estimate_P(n, single_trial(n, P_pre))
-      dummy, p_post = estimate_P(n, single_trial(n, P_post))
-      D_range, d = estimate_D(p_pre, p_post)
-      pdpos = estimate_pdpos(D_range, d, practical_significance)
-      estimates.append(pdpos)
-   return np.median(estimates)
+### The actual experiment
 
-def range_pdpos(n_min, n_max, P_pre, P_post, runs):
+class experiment_run:
    """
-   Calculates pdpos for a range of values of n
+   This represents a single run of the experiment
    """
-   medians = []
-   n = np.arange(n_min, n_max)
-   for i in n:
-      medians.append(median_pdpos(i, P_pre, P_post, runs))
-   return n, medians
+   def __init__(self, n_pre, n_post, P_pre, P_post):
+      self.n_pre = n_pre
+      self.n_post = n_post
+      self.P_pre = P_pre
+      self.P_post = P_post
+      self.D = self.P_post - self.P_pre
+      
+      self.S_pre = binomial_trial(self.n_pre, self.P_pre)
+      self.S_post = binomial_trial(self.n_post, self.P_post)
+      
+      self.P_range, self.p_pre = calculate_p(self.n_pre, self.S_pre)
+      dummy, self.p_post = calculate_p(self.n_post, self.S_post)
+      self.D_range, self.d = calculate_d(self.p_pre, self.p_post)
+      self.pDpos = estimate_pDpos(self.D_range, self.d)
+      return
+      
+   def _plot_with_dot(self, x_range, y_range, label, x_mark):
+      """
+      Plot the function f(x), with a dot located on the curve at some
+      specific value of x.
+      """
+      plt.plot(x_range, y_range, label = label)
+      y_mark = y_range[_index_of_nearest(x_range, x_mark)]
+      plt.scatter(x_mark, y_mark, s = 10)
+      return
+      
+   def plot_p(self):
+      plt.clf()
+      self._plot_with_dot(self.P_range, self.p_pre, 'pre', self.P_pre)
+      self._plot_with_dot(self.P_range, self.p_post, 'post', self.P_post)
+      plt.xlabel(r"$P$")
+      plt.ylabel(r"$p\left( P \right)$")
+      plt.legend()
+      plt.show()
+      return
+   
+   def plot_d(self):
+      plt.clf()
+      self._plot_with_dot(self.D_range, self.d, 'diff', 0.0)
+      plt.fill_between(self.D_range, self.d, where = self.D_range > 0, step="mid", alpha=0.4)
+      plt.title(r"$P\left( D > 0 \right) = {:.2f}$".format(self.pDpos))
+      plt.xlabel(r"$D$")
+      plt.ylabel(r"$d\left( D \right)$")
+      plt.show()
+      return
 
-def plot_pdpos(n, medians):
-   plt.clf()
-   plt.plot(n, medians)
-   plt.xlabel(r"$n$")
-   plt.ylabel(r"Median $P\left(D > 0 \right)$")
-   plt.show()
-   return
+
+
