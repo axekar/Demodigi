@@ -41,6 +41,8 @@ Written by Alvin Gavel
 https://github.com/Alvin-Gavel/Demodigi
 """
 
+import numbers as nb
+
 import numpy as np
 import scipy.special as sp
 import numpy.random as rd
@@ -98,8 +100,10 @@ def calculate_p(n, S):
    """
    p_sample_width = 1 / _p_steps
    P_range = np.linspace(0.0, 1.0, num=_p_steps)
+   
    with np.errstate(divide = 'ignore'):
       log_p = S * np.log(P_range) + (n - S) * np.log(1 - P_range) - logB(S + 1, n - S + 1)
+      
    p = np.exp(log_p)
 
    p /= np.trapz(p, dx=p_sample_width)
@@ -130,7 +134,7 @@ class experiment_run:
    """
    This represents a single run of the experiment
    """
-   def __init__(self, n_pre, n_post, P_pre, P_post):
+   def __init__(self, n_pre, n_post, P_pre, P_post, name = ''):
       self.n_pre = n_pre
       self.n_post = n_post
       self.P_pre = P_pre
@@ -144,6 +148,12 @@ class experiment_run:
       dummy, self.p_post = calculate_p(self.n_post, self.S_post)
       self.D_range, self.d = calculate_d(self.p_pre, self.p_post)
       self.pDpos = estimate_pDpos(self.D_range, self.d)
+      
+      if name == '':
+         self.name = '{}-{}_{}-{}'.format(self.n_pre, self.n_post, self.P_pre, self.P_post)
+      else:
+         self.name = name
+      self.plot_folder = ''
       return
       
    def _plot_with_dot(self, x_range, y_range, label, x_mark):
@@ -160,21 +170,92 @@ class experiment_run:
       plt.clf()
       self._plot_with_dot(self.P_range, self.p_pre, 'pre', self.P_pre)
       self._plot_with_dot(self.P_range, self.p_post, 'post', self.P_post)
+      plt.xlim(0, 1)
       plt.xlabel(r"$P$")
       plt.ylabel(r"$p\left( P \right)$")
+      plt.xticks(ticks=np.linspace(0, 1, 11, endpoint=True))
       plt.legend()
-      plt.show()
+      if self.plot_folder == '':
+         plt.show()
+      else:
+         plt.savefig('./{}/ill_{}_p.png'.format(self.plot_folder, self.name))
       return
    
    def plot_d(self):
       plt.clf()
       self._plot_with_dot(self.D_range, self.d, 'diff', 0.0)
       plt.fill_between(self.D_range, self.d, where = self.D_range > 0, step="mid", alpha=0.4)
+      plt.xlim(-1, 1)
       plt.title(r"$P\left( D > 0 \right) = {:.2f}$".format(self.pDpos))
       plt.xlabel(r"$D$")
       plt.ylabel(r"$d\left( D \right)$")
-      plt.show()
+      plt.xticks(ticks=np.linspace(-1, 1, 21, endpoint=True), rotation = 90)
+      if self.plot_folder == '':
+         plt.show()
+      else:
+         plt.savefig('./{}/ill_{}_d.png'.format(self.plot_folder, self.name))
       return
 
+class varying_n:
+   def __init__(self, n_min, n_max, P_pre, P_post, n_steps = 100, iterations = 100, name = ''):
+      self.n_min = n_min
+      self.n_max = n_max
+      self.n_steps = n_steps
 
+      self.iterations = iterations
+      
+      if isinstance(P_pre, nb.Number) and isinstance(P_post, nb.Number):
+         self.P_pre = [P_pre]
+         self.P_post = [P_post]
+         self.P_type = 'single P'
+         self.P_steps = 1
+      elif isinstance(P_pre, list) and isinstance(P_post, list):
+         if len(P_pre) == len(P_post):
+            self.P_pre = P_pre
+            self.P_post = P_post
+            self.P_type = 'multiple P'
+            self.P_steps = len(P_pre)
+         else:
+            print('P_pre has length {} but P_post has length {}'.format(len(P_pre), len(P_post)))
+            return
+      else:
+         print('Cannot use P_pre and P_post of types {} and {}'.format(type(P_pre), type(P_post)))
+         return
 
+      self.ns = np.linspace(self.n_min, self.n_max, num = self.n_steps, endpoint = True, dtype = np.int64)
+      self.median_pDpos = np.zeros((self.n_steps, self.P_steps), np.float64) * np.nan
+      
+      if name == '':
+         if self.P_type == 'single P':
+            self.name = '{}-{}_{}-{}'.format(self.n_min, self.n_max, P_pre, P_post)
+         elif self.P_type == 'multiple P':
+            self.name = '{}-{}_multi_P'.format(self.n_min, self.n_max)
+      else:
+         self.name = name
+      self.plot_folder = ''
+      return
+   
+   def run(self):
+      for i in range(self.n_steps):
+         n = self.ns[i]
+         for j in range(self.P_steps):
+            pDpos = []
+            for k in range(self.iterations):
+               run = experiment_run(n // 2, n // 2, self.P_pre[j], self.P_post[j])
+               pDpos.append(run.pDpos)
+            self.median_pDpos[i, j] = np.nanmedian(pDpos)
+      return
+      
+   def plot_pDpos(self):
+      plt.clf()
+      for m in range(self.P_steps):
+         plt.plot(self.ns, self.median_pDpos[:,m], label = r'$P_{{\mathrm{{pre}}}} = {}, P_{{\mathrm{{post}}}} = {}$'.format(self.P_pre[m], self.P_post[m]))
+      plt.xlabel(r"$n$")
+      plt.ylabel(r"$P\left( D > 0 \right)$")
+      plt.xlim(self.n_min, self.n_max)
+      plt.legend()
+      if self.plot_folder == '':
+         plt.show()
+      else:
+         plt.savefig('./{}/ill_{}_pDpos.png'.format(self.plot_folder, self.name))
+      return
