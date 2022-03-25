@@ -19,6 +19,8 @@ do not have access to that number. That is, behind the scenes we model
 digital competence on an interval scale, but the simulated experiment-
 ers have to analyse it using an ordinal scale.
 
+[Note, I will probably change this on Monday 28th]
+
 The study is assumed to use a factorial design, so that the experiment-
 ers first identify some background variables - here referred to as 
 'backgrounds' - that are likely to affect the results - such as age or
@@ -291,6 +293,10 @@ def _match_ids(reference_ids, ids, data):
 # normally found on a scale from 0 to 100, with some people being above
 # that and none being below.
 
+## NOTE: This stuff will probably go, as I will implement a model where
+## Digital competence is a number between 0 and 1, representing a chance
+## of correctly answering a learning module question
+
 def _normal_dist(n):
    """
    Returns n samples from a normal distribution with mean 25 and standard
@@ -543,6 +549,11 @@ class real_background(background):
       background.__init__(self, name)
       return
       
+
+## NOTE: The skill boundaries will probably be replaced by results boundaries,
+## reflecting the fact that the experimenters only have test results to go by,
+## they do not have direct access to the underlying skill.
+
 class skill_boundaries:
    """
    This is used in one possible test for evaluating the effectiveness of a
@@ -633,6 +644,8 @@ class participants(ABC):
       self.backgrounds = []
       self.background_flags = {}
          
+      ## NOTE: The ordinal digicomps will probably be replaced by results instead,
+      ## representing correct answers to learning module questions
       self.digicomp_pre = []
       self.digicomp_post = []
       
@@ -761,6 +774,8 @@ class participants(ABC):
       self.n_backgrounds = len(known_backgrounds)
       return
       
+   ## Note: This will probably be changed, as we only have access to results, not the underlying
+   ## competence
    def load_digicomp(self, path):
       """
       Read a file describing the digital competence before and after taking
@@ -987,6 +1002,7 @@ class real_participants(participants):
       self.subgroups = _define_subgroups(self.n, self.backgrounds, self.background_flags)
       return
       
+## Note: Most uses of digicomp will be replaced by results instead.
 
 class study:
    """
@@ -1225,7 +1241,6 @@ class study:
       qkcont = dictionary['control group']['Probability mass per sampled quality']
       dk = np.convolve(qktreat, np.flip(qkcont))
       
-      # Note to self: Check normalisation of dk
       dictionary['Range of quality differences'] = self._Dk_range
       dictionary['Probabilities of quality differences'] = dk
       dictionary['Peak of dk'] = self._Dk_range[np.argmax(dk)]
