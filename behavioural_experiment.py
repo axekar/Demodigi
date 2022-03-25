@@ -133,8 +133,69 @@ def estimate_pDpos(D_range, d):
 class experiment_run:
    """
    This represents a single run of the experiment
+   
+   Attributes
+   ----------
+   name : str
+   \tThe name of the experiment run
+   plot_folder : str
+   \tPath to a folder where plots should be run. If none is specified,
+   \tplots are shown immediately instead.
+   n_pre : int
+   \tThe number of participants who have not yet taken the learning module
+   n_post : int
+   \tThe number of participants who have taken the learning module
+   P_pre : float
+   \tThe probability that a participant who has not taken the learning
+   \tmodule will perform the desired behaviour
+   P_post : float
+   \tThe probability that a participant who has taken the learning module
+   \twill perform the desired behaviour
+   D : float
+   \tThe difference P_post - P_pre
+   S_pre : float
+   \tThe number of those participants who have not taken the learning
+   \twho still ended up performing the desired behaviour
+   S_post : float
+   \tThe number of those participants who have taken the learning module
+   \twho end up performing the desired behaviour
+   P_range : float ndarray
+   \tThe range of values of P for which the probability distribution p(P)
+   \tis calculated
+   p_pre : float ndarray
+   \tThe probability distribution p(P) for the participants who have not
+   \tyet taken the learning module
+   p_post : float ndarray
+   \tThe probability distribution p(P) for the participants who have taken
+   \tthe learning module
+   D_range : float ndarray
+   \tThe range of values of D for which the probability distribution d(D)
+   \tis calculated
+   d : float ndarray
+   \tThe probability distribution d(D)
+   pDpos : float
+   \tThe probability that D is positive, based on d(D)
    """
    def __init__(self, n_pre, n_post, P_pre, P_post, name = ''):
+      """
+      This represents a single run of the experiment
+   
+      Parameters
+      ----------
+      n_pre : int
+      \tDescribed under attributes
+      n_post : int
+      \tDescribed under attributes
+      P_pre : float
+      \tDescribed under attributes
+      P_post : float
+      \tDescribed under attributes
+      
+      Optional parameters
+      -------------------
+      name : str
+      \tDescribed under attributes
+      """
       self.n_pre = n_pre
       self.n_post = n_post
       self.P_pre = P_pre
@@ -167,6 +228,9 @@ class experiment_run:
       return
       
    def plot_p(self):
+      """
+      Plot the probability distributions p(P) for the two participant groups
+      """
       plt.clf()
       self._plot_with_dot(self.P_range, self.p_pre, 'pre', self.P_pre)
       self._plot_with_dot(self.P_range, self.p_post, 'post', self.P_post)
@@ -182,6 +246,9 @@ class experiment_run:
       return
    
    def plot_d(self):
+      """
+      Plot the probability distribution d(D) for the participants
+      """
       plt.clf()
       self._plot_with_dot(self.D_range, self.d, 'diff', 0.0)
       plt.fill_between(self.D_range, self.d, where = self.D_range > 0, step="mid", alpha=0.4)
