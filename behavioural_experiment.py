@@ -102,12 +102,11 @@ def calculate_p(n, S):
    P_range = np.linspace(0.0, 1.0, num=_p_steps)
    
    with np.errstate(divide = 'ignore'):
-      log_p = S * np.log(P_range) + (n - S) * np.log(1 - P_range) - logB(S + 1, n - S + 1)
+     log_p = S * np.log(P_range) + (n - S) * np.log(1 - P_range) - logB(S + 1, n - S + 1)
       
    p = np.exp(log_p)
-
-   p /= np.trapz(p, dx=p_sample_width)
-   return P_range, p
+   p_mass = p * p_sample_width
+   return P_range, p_mass
 
 def calculate_d(p_pre, p_post):
    """
@@ -116,9 +115,8 @@ def calculate_d(p_pre, p_post):
    between p_pre and p_post.
    """
    D_range = np.linspace(-1.0, 1.0, num=_d_steps)
-   d = np.convolve(p_post, np.flip(p_pre))
-   d /= np.trapz(d, dx=_D_sample_width)
-   return D_range, d
+   d_mass = np.convolve(p_post, np.flip(p_pre))
+   return D_range, d_mass
 
 def estimate_pDpos(D_range, d):
    """
@@ -126,7 +124,7 @@ def estimate_pDpos(D_range, d):
    calculate the probability that D is positive.
    """
    zero_diff = _index_of_nearest(D_range, 0)
-   return np.trapz(d[zero_diff:], dx = _D_sample_width)
+   return np.sum(d[zero_diff:])
 
 ### The actual experiment
 
