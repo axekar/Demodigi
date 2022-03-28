@@ -30,24 +30,24 @@ print_results = True
 plot_results = True
 
 # Output three files containing flags and results for the participants
-save_results = True
+save_results = False
 
 # Test that loading the results works
-load_results = True
+load_results = False
 
 # We introduce two known backgrounds, one which affects both initial
 # skill and the effectiveness of the intervention, and one which affects
 # only the effectiveness of the intervention.
 
-known_background_1 = dd.simulated_background("hates computers", dd.standard_transformations["subtractive normal deterioration"], dd.standard_transformations["subtractive normal deterioration"], 0.2)
-known_background_2 = dd.simulated_background("kazoo band outside office", dd.standard_transformations["no effect"], dd.standard_transformations["subtractive normal deterioration"], 0.1)
+known_background_1 = dd.simulated_background("hates computers", dd.standard_transformations["large deterioration"], dd.standard_transformations["slight deterioration"], 0.2)
+known_background_2 = dd.simulated_background("kazoo band outside office", dd.standard_transformations["no effect"], dd.standard_transformations["slight deterioration"], 0.1)
 known_backgrounds = [known_background_1, known_background_2]
 
 
 # We introduce one unknown background, which affects both initial skill
 # and the effectiveness of the intervention.
 
-unknown_background_1 = dd.simulated_background("secretly a ghost", dd.standard_transformations["subtractive normal deterioration"], dd.standard_transformations["subtractive normal deterioration"], 0.1)
+unknown_background_1 = dd.simulated_background("secretly a ghost", dd.standard_transformations["moderate deterioration"], dd.standard_transformations["slight deterioration"], 0.1)
 unknown_backgrounds = [unknown_background_1]
 
 
@@ -57,7 +57,7 @@ unknown_backgrounds = [unknown_background_1]
 # that it does not simply look at how many are pushed from just below
 # to just above the threshold for poor competence.
 
-bounds = dd.skill_boundaries(25, 50, minimum_quality_difference = 0.1)
+bounds = dd.boundaries(0.5, 0.75, minimum_quality_difference = 0.1)
 
 
 # We define a test group of 8000 participants, who are assumed to have
@@ -65,7 +65,7 @@ bounds = dd.skill_boundaries(25, 50, minimum_quality_difference = 0.1)
 # visible to the simulated experimentalists. They only have access to
 # ordinal data).
 
-testgroup = dd.simulated_participants(8000, dd.standard_distributions["normal"], known_backgrounds = known_backgrounds, unknown_backgrounds = unknown_backgrounds, bounds = bounds)
+testgroup = dd.simulated_participants(8000, 0.5, known_backgrounds = known_backgrounds, unknown_backgrounds = unknown_backgrounds, boundaries = bounds)
 if print_results:
    testgroup.describe()
 if save_results:
@@ -76,14 +76,14 @@ if save_results:
 # Define the effect that the teaching module has, in the absence of any
 # manipulations
 
-default = dd.standard_transformations["additive normal improvement (big)"]
+default = dd.standard_transformations["large improvement"]
 
 
 # Define three manipulations, two of which have a slight effect and one
 # of which does nothing.
 
-manipulation_1 = dd.simulated_manipulation("funny hats", dd.standard_transformations["additive normal improvement"])
-manipulation_2 = dd.simulated_manipulation("prayer and incense", dd.standard_transformations["additive normal improvement"])
+manipulation_1 = dd.simulated_manipulation("funny hats", dd.standard_transformations["slight improvement"])
+manipulation_2 = dd.simulated_manipulation("prayer and incense", dd.standard_transformations["slight improvement"])
 manipulation_3 = dd.simulated_manipulation("all text in comic sans", dd.standard_transformations["no effect"])
 manipulations = [manipulation_1, manipulation_2, manipulation_3]
 
@@ -91,7 +91,7 @@ manipulations = [manipulation_1, manipulation_2, manipulation_3]
 # Everything is put together into a study, which is then run and the
 # desired output is displayed
 
-trial_study = dd.study('test', testgroup)
+trial_study = dd.study('test', testgroup, 40)
 trial_study.set_manipulations(manipulations)
 if print_results:
    trial_study.describe()

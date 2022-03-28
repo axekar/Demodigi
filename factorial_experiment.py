@@ -13,13 +13,11 @@ This module can be used to analyse either real or simulated data. The
 latter is intended as a proof-of-concept, to ensure that the planned
 analysis makes sense before we have seen real data.
 
-One of the assumptions in the simulation is that digital competence can
-in principle be represented as a real number, but that the experimenters
-do not have access to that number. That is, behind the scenes we model
-digital competence on an interval scale, but the simulated experiment-
-ers have to analyse it using an ordinal scale.
-
-[Note, I will probably change this on Monday 28th]
+Behind the scenes we model the digital competence of a participant as a
+real number between 0 and 1, which gives the probability of giving the
+correct answer to a summative question in one of the learning modules.
+However, this number is not accessible to the experimentalists. All
+they see is the actual number of correct answers.
 
 The study is assumed to use a factorial design, so that the experiment-
 ers first identify some background variables - here referred to as 
@@ -297,72 +295,34 @@ def _match_ids(reference_ids, ids, data):
 ## Digital competence is a number between 0 and 1, representing a chance
 ## of correctly answering a learning module question
 
-def _normal_dist(n):
+def improvement(digicomp_pre, factor):
    """
-   Returns n samples from a normal distribution with mean 25 and standard
-   deviation 10.
+   Represents an improvement which decreases the risk of incorrectly
+   answering a summative question by factor
    """
-   return rd.normal(loc=25., scale=10, size=n)
+   return 1 - factor * (1 - digicomp_pre)
+
+def deterioration(digicomp_pre, factor):
+   return factor * digicomp_pre
+
+def large_improvement(digicomp_pre):
+   return improvement(digicomp_pre, 1/2)
+
+def moderate_improvement(digicomp_pre):
+   return improvement(digicomp_pre, 2/3)
+
+def slight_improvement(digicomp_pre):
+   return improvement(digicomp_pre, 4/5)
    
-standard_distributions = {"normal": _normal_dist}
+def large_deterioration(digicomp_pre):
+   return deterioration(digicomp_pre, 1/2)
 
-def additive_scatter(digicomp_pre):
-   """
-   This represents something that affects digital competence by a normal
-   variable centered around 0, with std 5. This could be a representation
-   of measurement error.
-   """
-   digicomp_post = digicomp_pre + rd.normal(loc=0, scale=5, size=len(digicomp_pre))
-   return digicomp_post
-
-def additive_normal_improvement(digicomp_pre):
-   """
-   This represents a manipulation or background that increases digital
-   competence by a normal variable centered around 10, with std 5.
-   """
-   digicomp_post = digicomp_pre + rd.normal(loc=10, scale=5, size=len(digicomp_pre))
-   return digicomp_post
-
-def additive_normal_improvement_big(digicomp_pre):
-   """
-   This represents a manipulation or background that increases digital
-   competence by a normal variable centered around 20, with std 5.
-   """
-   digicomp_post = digicomp_pre + rd.normal(loc=20, scale=5, size=len(digicomp_pre))
-   return digicomp_post
-
-def subtractive_normal_deterioration(digicomp_pre):
-   """
-   This represents a manipulation or background that decreases digital
-   competence by a normal variable centered around 10, with std 5.
-   """
-   digicomp_post = digicomp_pre - rd.normal(loc=10, scale=5, size=len(digicomp_pre))
-   return digicomp_post
-
-def additive_deterministic_improvement_big(digicomp_pre):
-   """
-   This represents a manipulation or background that always
-   increases digital competence by exactly 20.
-   """
-   digicomp_post = digicomp_pre + 20
-   return digicomp_post
-
-def additive_deterministic_improvement(digicomp_pre):
-   """
-   This represents a manipulation or background that always
-   increases digital competence by exactly 10.
-   """
-   digicomp_post = digicomp_pre + 10
-   return digicomp_post
-
-def subtractive_deterministic_deterioration(digicomp_pre):
-   """
-   This represents a manipulation or background that always
-   increases digital competence by exactly 10.
-   """
-   digicomp_post = digicomp_pre - 10
-   return digicomp_post
-
+def moderate_deterioration(digicomp_pre):
+   return deterioration(digicomp_pre, 2/3)
+   
+def slight_deterioration(digicomp_pre):
+   return deterioration(digicomp_pre, 4/5)
+   
 def zero_improvement(digicomp_pre):
    """
    This represents a manipulation or background that does nothing to
@@ -370,13 +330,12 @@ def zero_improvement(digicomp_pre):
    """
    return digicomp_pre[:]
 
-standard_transformations = {"additive scatter":additive_scatter,
-                            "additive normal improvement": additive_normal_improvement,
-                            "additive normal improvement (big)": additive_normal_improvement_big,
-                            "subtractive normal deterioration": subtractive_normal_deterioration,
-                            "additive deterministic improvement": additive_deterministic_improvement,
-                            "additive deterministic improvement (big)": additive_deterministic_improvement_big,
-                            "subtractive deterministic deterioration": subtractive_deterministic_deterioration,
+standard_transformations = {"large improvement":large_improvement,
+                            "moderate improvement":moderate_improvement,
+                            "slight improvement":slight_improvement,
+                            "large deterioration":large_deterioration,
+                            "moderate deterioration":moderate_deterioration,
+                            "slight deterioration":slight_deterioration,
                             "no effect": zero_improvement}
 
 ### Classes
@@ -550,24 +509,18 @@ class real_background(background):
       return
       
 
-## NOTE: The skill boundaries will probably be replaced by results boundaries,
-## reflecting the fact that the experimenters only have test results to go by,
-## they do not have direct access to the underlying skill.
-
-class skill_boundaries:
+class boundaries:
    """
    This is used in one possible test for evaluating the effectiveness of a
-   course module. We define two boundaries, such that participants with
-   digital competence below the lower boundary are considered to have poor
-   skills and those above the higher boundary have good skills. The bound-
-   aries can be identical, but do not need to be.
+   learning module. We define two boundaries, such that participants whose   
+   fraction of correct answers lie below the lower boundary are considered
+   to have poor skills and those above the higher boundary have good
+   skills. The boundaries can be identical, but this is probably not
+   optimal, since it will likely result in modules being evaluated by
+   their ability to push people from just below to just above passing.
    
-   A skill_boundaries object should be given to a participants object,
-   where the boundaries will be placed on the same ordinal scale as the
-   participants' skills before and after the module. This is then used to
-   calculate a quality for each different version of the modules, defined
-   as the probability that a person starting with poor skills will have
-   good skills after taking the course module.
+   A skill_boundaries object should be given to a study object, where it
+   will be used to evaluate the performance of the participants.
    
    Optionally, it is possible to also supply a minimal difference in
    quality which we consider to be practically significant.
@@ -575,19 +528,11 @@ class skill_boundaries:
    Attributes
    ----------
    poor : float
-   \tThe level below which participants are considered to have low digital
-   \tcompetence
+   \tThe fraction of correct answers below which participants are
+   \tconsidered to have low digital competence
    good : float
-   \tThe level above which participants are considered to have high
-   \tdigital competence
-   poor_ordinal : int
-   \tThe level for low digital competence, placed on an ordinal scale
-   \ttogether with the skills of a group of participants. This is
-   \tinitially set to nan.
-   good_ordinal : int
-   \tThe level for high digital competence, placed on an ordinal scale
-   \ttogether with the skills of a group of participants. This is
-   \tinitially set to nan.
+   \tThe fraction of correct answers above which participants are
+   \tconsidered to have high digital competence
    minimum_quality_difference : float
    \tThe difference in quality which we consider to be practically signif-
    \ticant. This defaults to zero, meaning that any different is taken to
@@ -608,13 +553,16 @@ class skill_boundaries:
       \tDescribed under attributes
       """
       if poor > good:
-         print("Poor digital skills are higher than good!")
-         print("Assuming you meant the other way around...")
-         poor, good = good, poor
+         print("Poor results are higher than good!")
+         return
+      if good > 1.0:
+         print("It is not possible to have more than 100% correct results")
+         return
+      if poor < 0.0:
+         print("It is not possible to have less than 0% correct results")
+         return
       self.poor = poor
       self.good = good
-      self.poor_ordinal = np.nan
-      self.good_ordinal = np.nan
       self.minimum_quality_difference = minimum_quality_difference
       return
 
@@ -628,12 +576,13 @@ class participants(ABC):
    If there are known background variables the participants are divided
    into smaller groups where all members are affected in the same way.
    """
-   def __init__(self, bounds):
+   def __init__(self, boundaries):
       """
       This simply sets some dummy values which must be defined by the
-      inheriting classes
+      inheriting classes. It must be passed something to act as a boundaries
+      object, although this can simply be a None.
       """
-      self.bounds = bounds
+      self.boundaries = boundaries
       
       self.n = np.nan
       self.known_backgrounds = []
@@ -643,16 +592,9 @@ class participants(ABC):
       self.ids = []
       self.backgrounds = []
       self.background_flags = {}
-         
-      ## NOTE: The ordinal digicomps will probably be replaced by results instead,
-      ## representing correct answers to learning module questions
-      self.digicomp_pre = []
-      self.digicomp_post = []
-      
-      self.digicomp_pre_ordinal = []
-      self.digicomp_post_ordinal = []
-      
-      self.digicomp_set = False
+
+      self.results_pre = []
+      self.results_post = []
       return
    
    ### Methods for saving data to disk
@@ -689,20 +631,34 @@ class participants(ABC):
       f.close()
       return
       
-   def save_digicomp(self, path):
+   def _save_results(self, path, results):
       """
-      Save a file listing the digital competence before and after the course
+      Save a file listing the results before or after the course
       module, for each participant
       """
-      if not self.digicomp_set:
-         print('There is no digital competence to save!')
+      if not self.results_set:
+         print('There are no results to save!')
          return
       f = open(path, 'w')
       f.write("# File generated by demodigi.py\n")
       f.write("Participants:\n")
       for i in range(self.n):
-         f.write("{}, {}, {}\n".format(self.ids[i], self.digicomp_pre[i], self.digicomp_post[i]))
+         f.write("{}, {}\n".format(self.ids[i], results[i]))
       f.close()
+      return
+      
+   def save_results_pre(self, path):
+      """
+      Save results of a test taken prior to the learning module
+      """
+      self._save_results(path, self.results_pre)
+      return
+
+   def save_results_post(self, path):
+      """
+      Save the results of the actual learning module
+      """
+      self._save_results(path, self.results_post)
       return
 
    ### Methods for reading data from disk
@@ -773,56 +729,40 @@ class participants(ABC):
       self.background_flags = background_flags
       self.n_backgrounds = len(known_backgrounds)
       return
-      
-   ## Note: This will probably be changed, as we only have access to results, not the underlying
-   ## competence
-   def load_digicomp(self, path):
-      """
-      Read a file describing the digital competence before and after taking
-      the course module.
-      """
+
+   def _load_results(self, path):
       f = open(path, 'r')
       lines = f.readlines()
       f.close()
       lines = _trim_comments(lines)
+      
       try:
          start_participants = lines.index("Participants:")
       except ValueError:
          print("File does not match expected format")
          return
       ids = []
-      digicomp_pre = []
-      digicomp_post = []
+      results = []
       for participant_line in lines[start_participants+1:]:
          words = participant_line.split(',')
          ids.append(words[0])
-         digicomp_pre.append(float(words[1]))
-         digicomp_post.append(float(words[2]))
-         
+         results.append(float(words[1]))
       try:
-         digicomp_pre = np.asarray(_match_ids(self.ids, ids, digicomp_pre), dtype = np.float64)
-         digicomp_post = np.asarray(_match_ids(self.ids, ids, digicomp_post), dtype = np.float64)
+         results = np.asarray(_match_ids(self.ids, ids, results), dtype = np.float64)
       except IDMismatchError:
          print("Cannot read data from file!")
          print("IDs in file do not match IDs of participants in study")
          return
-         
-      self.digicomp_pre = digicomp_pre
-      self.digicomp_post = digicomp_post
-      
-      # Fix ordinal data
-      data_to_ordinalise = [self.digicomp_pre, self.digicomp_post]
-      if self.bounds != None:
-         data_to_ordinalise += [np.asarray([self.bounds.poor]), np.asarray([self.bounds.good])]
-      ordinal_data = _ordinalise_many(data_to_ordinalise)
-      self.digicomp_pre_ordinal = ordinal_data[0]
-      self.digicomp_post_ordinal = ordinal_data[1]
-      if self.bounds != None:
-         self.bounds.poor_ordinal = ordinal_data[2]
-         self.bounds.good_ordinal = ordinal_data[3]
-         
-      self.digicomp_set = True
+      return results
+
+   def load_results_pre(self, path):
+      self.results_pre = self._load_results(path)
       return
+
+   def load_results_post(self, path):
+      self.results_post = self._load_results(path)
+      return
+
 
 class simulated_participants(participants):
    """
@@ -838,9 +778,9 @@ class simulated_participants(participants):
    ----------
    n : int
    \tThe number of participants in the study
-   initial_distribution : function int->float ndarray
-   \tThe statistical distribution that describes the digital competence of
-   \tthe participants prior to taking the course
+   default_digicomp : float
+   \tThe digital competence of participants affected by no background
+   \tvariables, prior to taking the learning module
    known_backgrounds : list of simulated_background
    \tBackgrounds that affect some subset of participants, and which are
    \tassumed to be known to the experimenters
@@ -865,7 +805,7 @@ class simulated_participants(participants):
    digicomp_set : bool
    \tWhether anything has set digicomp_pre and digicomp_post
    """
-   def __init__(self, n, initial_distribution, known_backgrounds = [], unknown_backgrounds = [], bounds = None):
+   def __init__(self, n, default_digicomp, known_backgrounds = [], unknown_backgrounds = [], boundaries = None):
       """
       Parameters
       ----------
@@ -880,11 +820,13 @@ class simulated_participants(participants):
       \tDescribed under attributes
       unknown_backgrounds : list of background
       \tDescribed under attributes
+      boundaries : boundaries
+      \tDescribed under boundaries
       """
-      participants.__init__(self, bounds)
+      participants.__init__(self, boundaries)
       self.n = n
       self.ids = range(n)
-      self.initial_distribution = initial_distribution
+      self.default_digicomp = default_digicomp
       self.known_backgrounds = known_backgrounds
       self.unknown_backgrounds = unknown_backgrounds
       self.backgrounds = self.known_backgrounds + self.unknown_backgrounds
@@ -893,21 +835,25 @@ class simulated_participants(participants):
       self.background_flags = {}
       for background in self.backgrounds:
          self.background_flags[background.name] = rd.random(self.n) < background.fraction
-         
+      
       #Divide the participants into subgroups where the members are subject
       #to the same known backgrounds
       self.subgroups = _define_subgroups(self.n, self.known_backgrounds, self.background_flags)
       self.digicomp_pre = self._calculate_digicomp_pre()
+
+      # This cannot be calculated without a study object that specifies the
+      # default effect of the learning modules and any manipulations
       self.digicomp_post = np.nan * np.zeros(self.n)
       return
+   
+   ### Methods for calculating digital competence
    
    def _calculate_digicomp_pre(self):
       """
       Calculate the digital competence prior to the start of the course,
-      using the initial distribution and adding the relevant background
-      effects
+      using the default and adding the relevant background effects
       """
-      digicomp_pre = self.initial_distribution(self.n)
+      digicomp_pre = np.ones(self.n) * self.default_digicomp
       for background in self.backgrounds:
           digicomp_pre[self.background_flags[background.name]] = background.pre_transformation(digicomp_pre[self.background_flags[background.name]])
       return digicomp_pre
@@ -915,28 +861,36 @@ class simulated_participants(participants):
    def calculate_digicomp_post(self, default_effect, manipulations = [], manipulation_flags = []):
       """
       Calculates the digital competence after finishing the course. To do
-      this a default effect, together with manipulations and
-      manipulation flags must be provided.
+      this a default effect, together with manipulations and manipulation
+      flags must be provided.
       """
-      self.digicomp_post = self.digicomp_pre + default_effect(self.digicomp_pre)
+      self.digicomp_post = default_effect(self.digicomp_pre)
       
       for manipulation in manipulations:
          self.digicomp_post[manipulation_flags[manipulation.name]] = manipulation.transformation(self.digicomp_post[manipulation_flags[manipulation.name]])
       for background in self.backgrounds:
          self.digicomp_post[self.background_flags[background.name]] = background.post_transformation(self.digicomp_post[self.background_flags[background.name]])
-
-      data_to_ordinalise = [self.digicomp_pre, self.digicomp_post]
-      if self.bounds != None:
-         data_to_ordinalise += [np.asarray([self.bounds.poor]), np.asarray([self.bounds.good])]
-      ordinal_data = _ordinalise_many(data_to_ordinalise)
-      self.digicomp_pre_ordinal = ordinal_data[0]
-      self.digicomp_post_ordinal = ordinal_data[1]
-      self.digicomp_set = True
-      
-      if self.bounds != None:
-         self.bounds.poor_ordinal = ordinal_data[2]
-         self.bounds.good_ordinal = ordinal_data[3]
       return
+      
+   ### Methods for calculating results based on digital competence
+   
+   def _calculate_results(self, digicomp_list, n_questions):
+      comp_array = np.zeros((self.n, n_questions))
+      for i in range(self.n):
+         comp_array[i,:] = digicomp_list[i]
+   
+      flat_random = rd.random((self.n, n_questions))
+      correct = flat_random < comp_array
+      results = np.sum(correct, axis = 1) / n_questions
+      return results
+      
+   def calculate_results_pre(self, n_questions):
+      self.results_pre = self._calculate_results(self.digicomp_pre, n_questions)
+
+   def calculate_results_post(self, n_questions):
+      self.results_post = self._calculate_results(self.digicomp_post, n_questions)
+
+   ### Methods for output
    
    def describe(self):
       """
@@ -992,11 +946,11 @@ class real_participants(participants):
    digicomp_set : bool
    \tWhether anything has set digicomp_pre and digicomp_post
    """
-   def __init__(self, id_path, background_path, digicomp_path, bounds = None):
-      participants.__init__(self, bounds)
+   def __init__(self, id_path, background_path, results_path, boundaries = None):
+      participants.__init__(self, boundaries)
       self.load_ids(id_path)
       self.load_backgrounds(background_path)
-      self.load_digicomp(digicomp_path)
+      self.load_results(results_path)
       #Divide the participants into subgroups where the members are subject
       #to the same known backgrounds
       self.subgroups = _define_subgroups(self.n, self.backgrounds, self.background_flags)
@@ -1032,7 +986,7 @@ class study:
    boundary_tests_run : bool
    \tWhether the tests implied by the bounds have been run
    """
-   def __init__(self, name, participants):
+   def __init__(self, name, participants, n_questions, boundaries = None):
       """
       Parameters
       ----------
@@ -1040,9 +994,21 @@ class study:
       \tDescribed under attributes
       participants : participants
       \tDescribed under attributes
+      n_questions int
+      \tDescribed under attributes
+      Optional parameters
+      -------------------
+      pre_test : bool
+      \tWhether a diagnostic test is given prior to the learning module
+      boundaries : boundaries
+      \tBoundaries defining good and poor test results
       """
       self.name = name
       self.participants = participants
+      self.n_questions = n_questions
+      
+      self.pre_test = True
+      self.boundaries = boundaries
       self.boundary_tests_run = False
       
       # These need to be loaded, either by supplying a list of manipulations
@@ -1173,7 +1139,10 @@ class study:
       increasing in digital competence as they do so. Then simulate the
       experimenters studying the results.
       """
+      if self.pre_test:
+         self.participants.calculate_results_pre(self.n_questions)
       self.participants.calculate_digicomp_post(default_effect, self.manipulations, self.manipulation_flags)
+      self.participants.calculate_results_post(self.n_questions)
       return
 
    ### Functions using standard frequentist tests
@@ -1185,7 +1154,7 @@ class study:
       statistics = {}
       statistics['treatment group median'] = np.median(treatment_group)
       statistics['control group median'] = np.median(control_group)
-      s, p, m, table = st.median_test(treatment_group, control_group)
+      s, p, m, table = st.median_test(treatment_group, control_group, ties = "above")
       statistics['median test test statistic'] = s
       statistics['median test p-value'] = p
       statistic, pvalue = st.mannwhitneyu(treatment_group, control_group)
@@ -1220,14 +1189,16 @@ class study:
       nan_qki = np.sum(np.isnan(qki))
       if nan_qki != 0:
          print("Problem in calculation!")
-         print("Out of {} calculated values of qki {} are nan".format(self._qk_samples, nan_qki))
+         print("Out of {} calculated values of qki {} {} nan".format(self._qk_samples, nan_qki, _is_are(nan_qki)))
          print("Skipping boundary tests")
          return
 
       qki_mass = qki * self._qk_sample_width
-      if np.abs(sum(qki_mass) - 1) > 0.01:
+      total_mass = sum(qki_mass)
+      if np.abs(total_mass - 1) > 0.01:
          print("Problem in calculation!")
          print("Probability density function not well normalised")
+         print("Total probability mass {:.2f}".format(total_mass))
       dictionary['Probabilities of qualities'] = qki
       dictionary['log-probabilities of qualities'] = log_qki
       dictionary['Probability mass per sampled quality'] = qki_mass
@@ -1272,12 +1243,21 @@ class study:
       definition of bounds for low and high quality when creating the study.
       """
       with np.errstate(divide = 'ignore'):
-         log_qki = nlh * np.log(Qki) + (nl - nlh) * np.log(1 - Qki) - logB(nlh + 1, nl - nlh + 1)
+         log_qki = np.zeros(len(Qki))
+         log_qki[1:-1] = nlh * np.log(Qki[1:-1]) + (nl - nlh) * np.log(1 - Qki[1:-1]) - logB(nlh + 1, nl - nlh + 1)
+         if nlh > 0:
+            log_qki[0] = - np.inf
+         else:
+            log_qki[0] = - logB(nlh + 1, nl - nlh + 1)
+         if nl - nlh > 0:
+            log_qki[-1] = - np.inf
+         else:
+            log_qki[-1] = - logB(nlh + 1, nl - nlh + 1)
       return log_qki
       
    def _boundary_tests(self, pre, post):
-      poor = self.participants.bounds.poor_ordinal
-      good = self.participants.bounds.good_ordinal   
+      poor = self.participants.boundaries.poor
+      good = self.participants.boundaries.good
       
       boundary_test_result = {}
       boundary_test_result['members with initially poor skills'] = np.count_nonzero(pre < poor)
@@ -1302,25 +1282,25 @@ class study:
       Runs boundary tests for the entire module, to check whether it has any
       noteworthy effect to begin with.
       """
-      return self._boundary_tests(participants.digicomp_pre_ordinal, participants.digicomp_post_ordinal)
+      return self._boundary_tests(participants.results_pre, participants.results_post)
 
    def _boundary_test_background_or_manipulation(self, flags, participants):
       """
       Runs boundary tests with respect to some background or manipulation.
       """
-      treatment_group_pre = participants.digicomp_pre_ordinal[flags]
-      control_group_pre = participants.digicomp_pre_ordinal[np.invert(flags)]
-      treatment_group_post = participants.digicomp_post_ordinal[flags]
-      control_group_post = participants.digicomp_post_ordinal[np.invert(flags)]
+      treatment_group_pre = participants.results_pre[flags]
+      control_group_pre = participants.results_pre[np.invert(flags)]
+      treatment_group_post = participants.results_post[flags]
+      control_group_post = participants.results_post[np.invert(flags)]
       
-      poor = self.participants.bounds.poor_ordinal
-      good = self.participants.bounds.good_ordinal
+      poor = self.participants.boundaries.poor
+      good = self.participants.boundaries.poor
       
       boundary_tests = {'treatment group':{}, 'control group':{}}
       for text, pre, post in [('treatment group', treatment_group_pre, treatment_group_post), ('control group', control_group_pre, control_group_post)]:
          boundary_tests[text] = self._boundary_tests(pre, post)
       
-      self._fill_dictionary_with_qk_and_dk(boundary_tests, self.participants.bounds.minimum_quality_difference)
+      self._fill_dictionary_with_qk_and_dk(boundary_tests, self.participants.boundaries.minimum_quality_difference)
       self.boundary_tests_run = True
       return boundary_tests
       
@@ -1328,7 +1308,16 @@ class study:
       
    def _logL_median(self, Qki, nki, n_good):
       with np.errstate(divide = 'ignore'):
-         log_qki = n_good * np.log(Qki) + (nki - n_good) * np.log(1 - Qki) - logB(n_good + 1, nki - n_good + 1)
+         log_qki = np.zeros(len(Qki))
+         log_qki[1:-1] = n_good * np.log(Qki[1:-1]) + (nki - n_good) * np.log(1 - Qki[1:-1]) - logB(n_good + 1, nki - n_good + 1)
+         if n_good > 0:
+            log_qki[0] = - np.inf
+         else:
+            log_qki[0] = - logB(n_good + 1, nki - n_good + 1)
+         if nki - n_good > 0:
+            log_qki[-1] = - np.inf
+         else:
+            log_qki[-1] = - logB(n_good + 1, nki - n_good + 1)
       return log_qki
       
    def _median_tests(self, control, treat):
@@ -1338,9 +1327,11 @@ class study:
       median_test_result['control group']['total members'] = len(control)
       median_test_result['control group']['members below median'] = np.count_nonzero(control < median)
       median_test_result['control group']['members above median'] = np.count_nonzero(control > median)
+      median_test_result['control group']['members on median'] = np.count_nonzero(control == median)
       median_test_result['treatment group']['total members'] = len(treat)
       median_test_result['treatment group']['members below median'] = np.count_nonzero(treat < median)
       median_test_result['treatment group']['members above median'] = np.count_nonzero(treat > median)
+      median_test_result['treatment group']['members on median'] = np.count_nonzero(treat == median)
 
       for group, group_name in [(control, 'control group'), (treat, 'treatment group')]:
          n_good = median_test_result[group_name]['members above median']
@@ -1359,8 +1350,8 @@ class study:
       themselves at another point in time.
       """
       median_tests = {}
-      median_tests['after module'] = self._median_tests(participants.digicomp_pre_ordinal, participants.digicomp_post_ordinal)
-      median_tests['before module'] = self._median_tests(participants.digicomp_post_ordinal, participants.digicomp_pre_ordinal)
+      median_tests['after module'] = self._median_tests(participants.results_pre, participants.results_post)
+      median_tests['before module'] = self._median_tests(participants.results_post, participants.results_pre)
       self._fill_dictionary_with_qk_and_dk(median_tests['after module'], 0.1) 
       return median_tests
       
@@ -1370,10 +1361,10 @@ class study:
       control or treatment group does better than the median for the control
       and treatment groups together.
       """
-      treatment_group_pre = participants.digicomp_pre_ordinal[flags]
-      control_group_pre = participants.digicomp_pre_ordinal[np.invert(flags)]
-      treatment_group_post = participants.digicomp_post_ordinal[flags]
-      control_group_post = participants.digicomp_post_ordinal[np.invert(flags)]
+      treatment_group_pre = participants.results_pre[flags]
+      control_group_pre = participants.results_pre[np.invert(flags)]
+      treatment_group_post = participants.results_post[flags]
+      control_group_post = participants.results_post[np.invert(flags)]
       
       median_tests = {}
       for text, control, treat in [('before module', control_group_pre, treatment_group_pre), ('after module', control_group_post, treatment_group_post)]:
@@ -1390,14 +1381,14 @@ class study:
       self.measured_results = {}
       self.measured_results['quick tests'] = {}
       for manipulation in self.manipulations:
-         self.measured_results['quick tests'][manipulation.name] = self._compare_flagged(self.manipulation_flags[manipulation.name], self.participants.digicomp_post_ordinal)
+         self.measured_results['quick tests'][manipulation.name] = self._compare_flagged(self.manipulation_flags[manipulation.name], self.participants.results_post)
       for background in self.participants.known_backgrounds:
-         self.measured_results['quick tests'][background.name] = self._compare_flagged(self.participants.background_flags[background.name], self.participants.digicomp_post_ordinal)
+         self.measured_results['quick tests'][background.name] = self._compare_flagged(self.participants.background_flags[background.name], self.participants.results_post)
          
       self.measured_results['quick tests']['total'] = {}
-      self.measured_results['quick tests']['total']['pre-course median'] = np.median(self.participants.digicomp_pre_ordinal)
-      self.measured_results['quick tests']['total']['post-course median'] = np.median(self.participants.digicomp_post_ordinal)
-      n_improved = np.sum(self.participants.digicomp_post_ordinal > self.participants.digicomp_pre_ordinal)
+      self.measured_results['quick tests']['total']['pre-course median'] = np.median(self.participants.results_pre)
+      self.measured_results['quick tests']['total']['post-course median'] = np.median(self.participants.results_post)
+      n_improved = np.sum(self.participants.results_post > self.participants.results_pre)
       with np.errstate(divide = 'ignore'):
          pvalue = st.binom_test(n_improved, self.participants.n)
       self.measured_results['quick tests']['total']['sign test p-value'] = pvalue
@@ -1409,7 +1400,7 @@ class study:
       for background in self.participants.known_backgrounds:
          self.measured_results['median tests'][background.name] = self._median_test_background_or_manipulation(self.participants.background_flags[background.name], self.participants)
          
-      if self.participants.bounds != None:
+      if self.participants.boundaries != None:
          self.measured_results['boundary tests'] = {}
          self.measured_results['boundary tests']['total'] = self._boundary_test_total(self.participants)
          for manipulation in self.manipulations:
@@ -1611,8 +1602,8 @@ class study:
          plt.plot(self._Dk_range, test_data['Probabilities of quality differences'], label = 'Difference')
          plt.xlim(-1, 1)
          plt.axvline(x = 0.0, c = 'k')
-         plt.axvline(x = self.participants.bounds.minimum_quality_difference, linestyle = '--', c = 'k')
-         plt.axvline(x =-self.participants.bounds.minimum_quality_difference, linestyle = '--', c = 'k')
+         plt.axvline(x = self.participants.boundaries.minimum_quality_difference, linestyle = '--', c = 'k')
+         plt.axvline(x =-self.participants.boundaries.minimum_quality_difference, linestyle = '--', c = 'k')
          plt.savefig('./{}/ill_{}_{}_{}_{}_difference.png'.format(self.plot_folder, self.name.replace(' ', '_'), test_name, description, choice.name.replace(' ', '_')))
          return
       
