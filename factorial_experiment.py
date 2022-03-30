@@ -303,9 +303,11 @@ def deterioration(digicomp_pre, factor):
 standard_transformations = {"large improvement": lambda digicomp_pre : improvement(digicomp_pre, 1/2),
                             "moderate improvement": lambda digicomp_pre : improvement(digicomp_pre, 2/3),
                             "slight improvement": lambda digicomp_pre : improvement(digicomp_pre, 4/5),
+                            "minimal improvement": lambda digicomp_pre : improvement(digicomp_pre, 9/10),
                             "large deterioration": lambda digicomp_pre : deterioration(digicomp_pre, 1/2),
                             "moderate deterioration": lambda digicomp_pre : deterioration(digicomp_pre, 2/3),
                             "slight deterioration": lambda digicomp_pre : deterioration(digicomp_pre, 4/5),
+                            "minimal deterioration": lambda digicomp_pre : deterioration(digicomp_pre, 9/10),
                             "no effect": lambda digicomp_pre : digicomp_pre[:]}
 
 ### Classes
@@ -1163,30 +1165,30 @@ class study:
       total_mass = sum(qki_mass)
       if np.abs(total_mass - 1) > 0.01:
          print("Problem in calculation!")
-         print("Probability density function not well normalised")
+         print("probability density function not well normalised")
          print("Total probability mass {:.2f}".format(total_mass))
-      dictionary['Probabilities of qualities'] = qki
+      dictionary['probabilities of qualities'] = qki
       dictionary['log-probabilities of qualities'] = log_qki
-      dictionary['Probability mass per sampled quality'] = qki_mass
-      dictionary['Peak of Qki'] = self._Qki_range[np.argmax(qki)]
-      dictionary['Percentiles of qki'] = self._make_percentiles(self._Qki_range, qki_mass)
-      dictionary['Median of qki'] = dictionary['Percentiles of qki'][50.0]
+      dictionary['probability mass per sampled quality'] = qki_mass
+      dictionary['peak of Qki'] = self._Qki_range[np.argmax(qki)]
+      dictionary['percentiles of qki'] = self._make_percentiles(self._Qki_range, qki_mass)
+      dictionary['median of qki'] = dictionary['percentiles of qki'][50.0]
       return
       
    def _fill_dictionary_with_qk_and_dk(self, dictionary, practical_significance_cutoff):
-      qktreat = dictionary['treatment group']['Probability mass per sampled quality']
-      qkcont = dictionary['control group']['Probability mass per sampled quality']
+      qktreat = dictionary['treatment group']['probability mass per sampled quality']
+      qkcont = dictionary['control group']['probability mass per sampled quality']
       dk = np.convolve(qktreat, np.flip(qkcont))
       
-      dictionary['Range of quality differences'] = self._Dk_range
-      dictionary['Probabilities of quality differences'] = dk
-      dictionary['Peak of dk'] = self._Dk_range[np.argmax(dk)]
-      dictionary['Percentiles of dk'] = self._make_percentiles(self._Dk_range, dk)
-      dictionary['Median of dk'] = dictionary['Percentiles of dk'][50.0]
+      dictionary['range of quality differences'] = self._Dk_range
+      dictionary['probabilities of quality differences'] = dk
+      dictionary['peak of dk'] = self._Dk_range[np.argmax(dk)]
+      dictionary['percentiles of dk'] = self._make_percentiles(self._Dk_range, dk)
+      dictionary['median of dk'] = dictionary['percentiles of dk'][50.0]
       PDl0 = np.sum(dk[:self._qk_samples])
       PDg0 = np.sum(dk[self._qk_samples+1:])
-      dictionary['Probability that treatment group does better than control group'] = PDg0
-      dictionary['Probability that treatment group does worse than control group'] = PDl0
+      dictionary['probability that treatment group does better than control group'] = PDg0
+      dictionary['probability that treatment group does worse than control group'] = PDl0
 
       # Look very closely at this
       cutoff = int(practical_significance_cutoff / self._qk_sample_width)
@@ -1194,9 +1196,9 @@ class study:
       PDll0 = np.sum(dk[:self._qk_samples - cutoff])
       PDap0 = np.sum(dk[self._qk_samples - cutoff:self._qk_samples + cutoff])
       PDgg0 = np.sum(dk[self._qk_samples + cutoff:])
-      dictionary['Probability that treatment group does much better than control group'] = PDgg0
-      dictionary['Probability that treatment group does much worse than control group'] = PDll0
-      dictionary['Probability that treatment group does about as well as control group'] = PDap0
+      dictionary['probability that treatment group does much better than control group'] = PDgg0
+      dictionary['probability that treatment group does much worse than control group'] = PDll0
+      dictionary['probability that treatment group does about as well as control group'] = PDap0
       return dictionary
    
    ### Functions specific to the boundary tests
@@ -1422,36 +1424,36 @@ class study:
       """
       def print_poor_to_high(group_name, group_data, base_indent):
          print("{}In {}, out of {} members with poor skills {} acquire good skills".format(_indent(base_indent), group_name, group_data['members with initially poor skills'], group_data['members moving from poor to good skills']))
-         print("{}Quality estimated to be: {:.2f}".format(_indent(base_indent + 1), group_data['Median of qki']))
-         print("{}One sigma bounds at: {:.2f} - {:.2f}".format(_indent(base_indent + 1), group_data['Percentiles of qki'][15.87], group_data['Percentiles of qki'][84.13]))
-         print("{}Two sigma bounds at: {:.2f} - {:.2f}".format(_indent(base_indent + 1), group_data['Percentiles of qki'][2.28], group_data['Percentiles of qki'][97.72]))
+         print("{}Quality estimated to be: {:.2f}".format(_indent(base_indent + 1), group_data['median of qki']))
+         print("{}One sigma bounds at: {:.2f} - {:.2f}".format(_indent(base_indent + 1), group_data['percentiles of qki'][15.87], group_data['percentiles of qki'][84.13]))
+         print("{}Two sigma bounds at: {:.2f} - {:.2f}".format(_indent(base_indent + 1), group_data['percentiles of qki'][2.28], group_data['percentiles of qki'][97.72]))
          return
          
       def print_above_median(group_name, group_data, base_indent):
          print("{}In {}, out of {} members {} end up above median".format(_indent(base_indent), group_name, group_data['total members'], group_data['members above median']))
-         print("{}Quality estimated to be: {:.2f}".format(_indent(base_indent + 1), group_data['Median of qki']))
-         print("{}One sigma bounds at: {:.2f} - {:.2f}".format(_indent(base_indent + 1), group_data['Percentiles of qki'][15.87], group_data['Percentiles of qki'][84.13]))
-         print("{}Two sigma bounds at: {:.2f} - {:.2f}".format(_indent(base_indent + 1), group_data['Percentiles of qki'][2.28], group_data['Percentiles of qki'][97.72]))
+         print("{}Quality estimated to be: {:.2f}".format(_indent(base_indent + 1), group_data['median of qki']))
+         print("{}One sigma bounds at: {:.2f} - {:.2f}".format(_indent(base_indent + 1), group_data['percentiles of qki'][15.87], group_data['percentiles of qki'][84.13]))
+         print("{}Two sigma bounds at: {:.2f} - {:.2f}".format(_indent(base_indent + 1), group_data['percentiles of qki'][2.28], group_data['percentiles of qki'][97.72]))
          return
       
       def print_dk_permutations(dk_dict, base_indent):
-         for descriptor in ['Probability that treatment group does better than control group', 'Probability that treatment group does worse than control group','Probability that treatment group does much better than control group','Probability that treatment group does much worse than control group','Probability that treatment group does about as well as control group']:
+         for descriptor in ['probability that treatment group does better than control group', 'probability that treatment group does worse than control group','probability that treatment group does much better than control group','probability that treatment group does much worse than control group','probability that treatment group does about as well as control group']:
             print("{}{}: {:.2f}".format(_indent(base_indent), descriptor, dk_dict[descriptor]))
          return
       
       def print_total_median(dk_dict, base_indent):
          print("{}After taking the course module, {} out of {} members are above the total median".format(_indent(base_indent), dk_dict['treatment group']['members above median'], dk_dict['treatment group']['total members']))
-         print("{}'Quality difference' before and after module estimated to be: {:.2f}".format(_indent(base_indent), dk_dict['Median of dk']))
-         print("{}One sigma bounds at: {:.2f} - {:.2f}".format(_indent(base_indent), dk_dict['Percentiles of dk'][15.87], dk_dict['Percentiles of dk'][84.13]))
-         print("{}Two sigma bounds at: {:.2f} - {:.2f}".format(_indent(base_indent), dk_dict['Percentiles of dk'][2.28], dk_dict['Percentiles of dk'][97.72]))
+         print("{}'Quality difference' before and after module estimated to be: {:.2f}".format(_indent(base_indent), dk_dict['median of dk']))
+         print("{}One sigma bounds at: {:.2f} - {:.2f}".format(_indent(base_indent), dk_dict['percentiles of dk'][15.87], dk_dict['percentiles of dk'][84.13]))
+         print("{}Two sigma bounds at: {:.2f} - {:.2f}".format(_indent(base_indent), dk_dict['percentiles of dk'][2.28], dk_dict['percentiles of dk'][97.72]))
          print_dk_permutations(dk_dict, base_indent)
          return
       
       def print_quality_difference(dk_dict, base_indent):
          print("{}Comparing control group and test group".format(_indent(base_indent)))
-         print("{}Quality difference estimated to be: {:.2f}".format(_indent(base_indent + 1), dk_dict['Median of dk']))
-         print("{}One sigma bounds at: {:.2f} - {:.2f}".format(_indent(base_indent + 1), dk_dict['Percentiles of dk'][15.87], dk_dict['Percentiles of dk'][84.13]))
-         print("{}Two sigma bounds at: {:.2f} - {:.2f}".format(_indent(base_indent + 1), dk_dict['Percentiles of dk'][2.28], dk_dict['Percentiles of dk'][97.72]))
+         print("{}Quality difference estimated to be: {:.2f}".format(_indent(base_indent + 1), dk_dict['median of dk']))
+         print("{}One sigma bounds at: {:.2f} - {:.2f}".format(_indent(base_indent + 1), dk_dict['percentiles of dk'][15.87], dk_dict['percentiles of dk'][84.13]))
+         print("{}Two sigma bounds at: {:.2f} - {:.2f}".format(_indent(base_indent + 1), dk_dict['percentiles of dk'][2.28], dk_dict['percentiles of dk'][97.72]))
          print_dk_permutations(dk_dict, base_indent + 1)
          return
          
@@ -1489,7 +1491,7 @@ class study:
 
    def plot_participants(self):
       """
-      Plot group membership of all participants.
+      Plot group membership of all participants
       """
       def plot_flags(flags, name):
          side = int(np.ceil(np.sqrt(self.participants.n)))
@@ -1549,8 +1551,8 @@ class study:
       def plot_quality(test_name, test_data):
          plt.clf()
          plt.tight_layout()
-         plt.plot(self._Qki_range, test_data['control group']['Probabilities of qualities'], label = 'Control')
-         plt.plot(self._Qki_range, test_data['treatment group']['Probabilities of qualities'], label = 'Treatment')
+         plt.plot(self._Qki_range, test_data['control group']['probabilities of qualities'], label = 'Control')
+         plt.plot(self._Qki_range, test_data['treatment group']['probabilities of qualities'], label = 'Treatment')
          plt.xlim(0, 1)
          plt.legend()
          plt.savefig('./{}/ill_{}_{}_{}_{}.png'.format(self.plot_folder, self.name.replace(' ', '_'), test_name, description, choice.name.replace(' ', '_')))
@@ -1565,7 +1567,7 @@ class study:
                
          plt.clf()
          plt.tight_layout()  
-         plt.plot(self._Dk_range, test_data['Probabilities of quality differences'], label = 'Difference')
+         plt.plot(self._Dk_range, test_data['probabilities of quality differences'], label = 'Difference')
          plt.xlim(-1, 1)
          plt.axvline(x = 0.0, c = 'k')
          plt.axvline(x = self.participants.boundaries.minimum_quality_difference, linestyle = '--', c = 'k')
