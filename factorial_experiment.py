@@ -1596,3 +1596,66 @@ class study:
             if self.boundary_tests_run:
                plot_quality('btest', self.measured_results['boundary tests'][choice.name])
       return
+      
+class minimal_size_experiment:
+   """
+   This is intended to run multiple simulations of studies that are
+   identical except that the number of participants varies
+   """
+   def __init__(self, name, default_digicomp, default_effect, n_questions, manipulations, known_backgrounds, n_min, n_max, n_steps = 10, iterations = 10):
+      """
+      Parameters
+      ----------
+      Under construction
+      """
+      self.name = name
+      self.name_for_file = _trim_for_filename(self.name)
+      self.default_digicomp = default_digicomp
+      self.default_effect = default_effect
+      self.n_questions = n_questions
+      self.manipulations = manipulations
+      self.known_backgrounds = known_backgrounds
+      self.n_min = n_min
+      self.n_max = n_max
+      self.n_steps = n_steps
+      self.iterations = iterations
+      self.ns = np.linspace(self.n_min, self.n_max, num = self.n_steps, endpoint = True, dtype = np.int64)
+      self.median_pDpos = {'total':[]}
+      for manipulation_or_background in self.manipulations + self.known_backgrounds:
+         self.median_pDpos[manipulation_or_background.name] = []     
+      self.plot_folder = ''
+      return
+      
+   def run(self):
+      for n in self.ns:
+         pDpos = {}
+         for key in self.median_pDpos.keys():
+            pDpos[key] = []
+         for i in range(self.iterations):
+            part = simulated_participants(n, default_digicomp = self.default_digicomp, known_backgrounds = self.known_backgrounds, unknown_backgrounds = [], boundaries = None)
+            simulated_study = study('Group size {}, simulation {}'.format(n, i), part, self.n_questions)
+            simulated_study.set_manipulations(self.manipulations)
+            simulated_study.simulate_study(self.default_effect)
+            simulated_study.do_tests()
+            pDpos['total'].append(simulated_study.measured_results['median tests']['total']['after module']['probability that treatment group does better than control group'])
+            for key in pDpos.keys():
+               pDpos[key].append(simulated_study.measured_results['median tests'][key]['after module']['probability that treatment group does better than control group'])
+        
+         for key in self.median_pDpos.keys():
+            self.median_pDpos[key].append(np.median(pDpos[key]))
+      return
+      
+   def plot(self):
+      plt.clf()
+      for key in self.median_pDpos.keys():
+         plt.plot(self.ns, self.median_pDpos[key], label = key)
+      plt.xlabel(r"$n$")
+      plt.ylabel(r"$P\left( D > 0 \right)$")
+      plt.xlim(self.n_min, self.n_max)
+      plt.ylim(0, 1)
+      plt.legend()
+      if self.plot_folder == '':
+         plt.show()
+      else:
+         plt.savefig('./{}/ill_{}_pDpos.png'.format(self.plot_folder, self.name_for_file))
+      return
