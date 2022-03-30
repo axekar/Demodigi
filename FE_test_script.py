@@ -21,7 +21,7 @@ that were saved by save_results. This is mostly to allow quickly
 testing that the loading and saving works.
 """
 
-import factorial_experiment as dd
+import factorial_experiment as fe
 
 # Prints verbose output describing the simulated study
 print_results = True
@@ -39,15 +39,15 @@ load_results = True
 # skill and the effectiveness of the intervention, and one which affects
 # only the effectiveness of the intervention.
 
-known_background_1 = dd.simulated_background("hates computers", dd.standard_transformations["large deterioration"], dd.standard_transformations["slight deterioration"], 0.2)
-known_background_2 = dd.simulated_background("kazoo band outside office", dd.standard_transformations["no effect"], dd.standard_transformations["slight deterioration"], 0.1)
+known_background_1 = fe.simulated_background("hates computers", fe.standard_transformations["large deterioration"], fe.standard_transformations["slight deterioration"], 0.2)
+known_background_2 = fe.simulated_background("kazoo band outside office", fe.standard_transformations["no effect"], fe.standard_transformations["slight deterioration"], 0.1)
 known_backgrounds = [known_background_1, known_background_2]
 
 
 # We introduce one unknown background, which affects both initial skill
 # and the effectiveness of the intervention.
 
-unknown_background_1 = dd.simulated_background("secretly a ghost", dd.standard_transformations["moderate deterioration"], dd.standard_transformations["slight deterioration"], 0.1)
+unknown_background_1 = fe.simulated_background("secretly a ghost", fe.standard_transformations["moderate deterioration"], fe.standard_transformations["slight deterioration"], 0.1)
 unknown_backgrounds = [unknown_background_1]
 
 
@@ -57,7 +57,7 @@ unknown_backgrounds = [unknown_background_1]
 # that it does not simply look at how many are pushed from just below
 # to just above the threshold for poor competence.
 
-bounds = dd.boundaries(0.5, 0.75, minimum_quality_difference = 0.1)
+bounds = fe.boundaries(0.5, 0.75, minimum_quality_difference = 0.1)
 
 
 # We define a test group of 8000 participants, who are assumed to have
@@ -65,7 +65,7 @@ bounds = dd.boundaries(0.5, 0.75, minimum_quality_difference = 0.1)
 # visible to the simulated experimentalists. They only have access to
 # ordinal data).
 
-testgroup = dd.simulated_participants(8000, 0.5, known_backgrounds = known_backgrounds, unknown_backgrounds = unknown_backgrounds, boundaries = bounds)
+testgroup = fe.simulated_participants(8000, 0.5, known_backgrounds = known_backgrounds, unknown_backgrounds = unknown_backgrounds, boundaries = bounds)
 if print_results:
    testgroup.describe()
 if save_results:
@@ -76,22 +76,22 @@ if save_results:
 # Define the effect that the teaching module has, in the absence of any
 # manipulations
 
-default = dd.standard_transformations["large improvement"]
+default = fe.standard_transformations["large improvement"]
 
 
 # Define three manipulations, two of which have a slight effect and one
 # of which does nothing.
 
-manipulation_1 = dd.simulated_manipulation("funny hats", dd.standard_transformations["slight improvement"])
-manipulation_2 = dd.simulated_manipulation("prayer and incense", dd.standard_transformations["slight improvement"])
-manipulation_3 = dd.simulated_manipulation("all text in comic sans", dd.standard_transformations["no effect"])
+manipulation_1 = fe.simulated_manipulation("funny hats", fe.standard_transformations["slight improvement"])
+manipulation_2 = fe.simulated_manipulation("prayer and incense", fe.standard_transformations["slight improvement"])
+manipulation_3 = fe.simulated_manipulation("all text in comic sans", fe.standard_transformations["no effect"])
 manipulations = [manipulation_1, manipulation_2, manipulation_3]
 
 
 # Everything is put together into a study, which is then run and the
 # desired output is displayed
 
-trial_study = dd.study('test', testgroup, 40)
+trial_study = fe.study('test', testgroup, 40)
 trial_study.set_manipulations(manipulations)
 if print_results:
    trial_study.describe()
@@ -111,12 +111,12 @@ if save_results:
    trial_study.participants.save_results_post('simulated_results_post.csv')
 
 
-# The data that was just saved is loaded again.
+# The data that was just saved is loaded again
 
 if load_results:
    print('Loading saved data...')
-   loaded_participants = dd.real_participants('simulated_participants.csv', 'simulated_backgrounds.csv', 'simulated_results_pre.csv', 'simulated_results_post.csv', boundaries = bounds)
-   loaded_study = dd.study('test of loading', loaded_participants, 40)
+   loaded_participants = fe.real_participants('simulated_participants.csv', 'simulated_backgrounds.csv', 'simulated_results_pre.csv', 'simulated_results_post.csv', boundaries = bounds)
+   loaded_study = fe.study('test of loading', loaded_participants, 40)
    loaded_study.load_manipulations('simulated_manipulations.csv')
    loaded_study.do_tests()
    if print_results:
