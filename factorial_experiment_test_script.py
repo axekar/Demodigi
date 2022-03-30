@@ -30,10 +30,10 @@ print_results = True
 plot_results = True
 
 # Output three files containing flags and results for the participants
-save_results = False
+save_results = True
 
 # Test that loading the results works
-load_results = False
+load_results = True
 
 # We introduce two known backgrounds, one which affects both initial
 # skill and the effectiveness of the intervention, and one which affects
@@ -107,15 +107,16 @@ if plot_results:
    trial_study.plot_results()
    trial_study.plot_participants()
 if save_results:
-   trial_study.participants.save_digicomp('simulated_results.csv')
+   trial_study.participants.save_results_pre('simulated_results_pre.csv')
+   trial_study.participants.save_results_post('simulated_results_post.csv')
 
 
 # The data that was just saved is loaded again.
 
 if load_results:
    print('Loading saved data...')
-   loaded_participants = dd.real_participants('simulated_participants.csv', 'simulated_backgrounds.csv', 'simulated_results.csv', bounds = bounds)
-   loaded_study = dd.study('test of loading', loaded_participants)
+   loaded_participants = dd.real_participants('simulated_participants.csv', 'simulated_backgrounds.csv', 'simulated_results_pre.csv', 'simulated_results_post.csv', boundaries = bounds)
+   loaded_study = dd.study('test of loading', loaded_participants, 40)
    loaded_study.load_manipulations('simulated_manipulations.csv')
    loaded_study.do_tests()
    if print_results:
