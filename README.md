@@ -8,7 +8,7 @@ The current contents of the repository are:
 
 `FE_test_script.py`: Script intended as a test of the module `factorial_experiment`, by implementing a simple simulated study. It can also be seen as a demo of how to use the module. To make that easier, it has verbose comments explaining what happens at every step along the way.
 
-`FE_simulation_script.py`: Script using the module `factorial_experiment` to simulate an experiment that we actually intend to do.
+`FE_minimal_size_script`: Script using the module `factorial_experiment` to try to find the minimal number of participants that we need in order to measure the effects that we are interested in.
 
 `behavioural_experiment.py`: Python module for simulating a behavioural experiment that we plan to do as part of the study. With time, I will also add code for analysis the results of the actual experiment.
 
