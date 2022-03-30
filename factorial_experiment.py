@@ -300,39 +300,13 @@ def improvement(digicomp_pre, factor):
 def deterioration(digicomp_pre, factor):
    return factor * digicomp_pre
 
-def large_improvement(digicomp_pre):
-   return improvement(digicomp_pre, 1/2)
-
-def moderate_improvement(digicomp_pre):
-   return improvement(digicomp_pre, 2/3)
-
-def slight_improvement(digicomp_pre):
-   return improvement(digicomp_pre, 4/5)
-   
-def large_deterioration(digicomp_pre):
-   return deterioration(digicomp_pre, 1/2)
-
-def moderate_deterioration(digicomp_pre):
-   return deterioration(digicomp_pre, 2/3)
-   
-def slight_deterioration(digicomp_pre):
-   return deterioration(digicomp_pre, 4/5)
-   
-def zero_improvement(digicomp_pre):
-   """
-   This represents a manipulation or background that does nothing to
-   digital competence.
-   """
-   return digicomp_pre[:]
-
-# Todo: Rewrite this using lambda functions
-standard_transformations = {"large improvement":large_improvement,
-                            "moderate improvement":moderate_improvement,
-                            "slight improvement":slight_improvement,
-                            "large deterioration":large_deterioration,
-                            "moderate deterioration":moderate_deterioration,
-                            "slight deterioration":slight_deterioration,
-                            "no effect": zero_improvement}
+standard_transformations = {"large improvement": lambda digicomp_pre : improvement(digicomp_pre, 1/2),
+                            "moderate improvement": lambda digicomp_pre : improvement(digicomp_pre, 2/3),
+                            "slight improvement": lambda digicomp_pre : improvement(digicomp_pre, 4/5),
+                            "large deterioration": lambda digicomp_pre : deterioration(digicomp_pre, 1/2),
+                            "moderate deterioration": lambda digicomp_pre : deterioration(digicomp_pre, 2/3),
+                            "slight deterioration": lambda digicomp_pre : deterioration(digicomp_pre, 4/5),
+                            "no effect": lambda digicomp_pre : digicomp_pre[:]}
 
 ### Classes
 
