@@ -1122,12 +1122,18 @@ class study:
       statistics = {}
       statistics['treatment group median'] = np.median(treatment_group)
       statistics['control group median'] = np.median(control_group)
-      s, p, m, table = st.median_test(treatment_group, control_group, ties = "above")
-      statistics['median test test statistic'] = s
-      statistics['median test p-value'] = p
-      statistic, pvalue = st.mannwhitneyu(treatment_group, control_group)
-      statistics['Mann-Whitney U rank test test statistic'] = statistic
-      statistics['Mann-Whitney U rank test p-value'] = pvalue
+      if len(treatment_group) > 0 and len(control_group) > 0:
+         s, p, m, table = st.median_test(treatment_group, control_group, ties = "above")
+         statistics['median test test statistic'] = s
+         statistics['median test p-value'] = p
+         statistic, pvalue = st.mannwhitneyu(treatment_group, control_group)
+         statistics['Mann-Whitney U rank test test statistic'] = statistic
+         statistics['Mann-Whitney U rank test p-value'] = pvalue
+      else:
+         statistics['median test test statistic'] = np.nan
+         statistics['median test p-value'] = np.nan
+         statistics['Mann-Whitney U rank test test statistic'] = np.nan
+         statistics['Mann-Whitney U rank test p-value'] = np.nan
       return statistics
 
       
