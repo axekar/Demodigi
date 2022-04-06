@@ -534,12 +534,9 @@ class boundaries:
       self.minimum_quality_difference = minimum_quality_difference
       return
 
-
-class participants(ABC):
+class learning_module(ABC):
    """
-   This represents the people participating in the study, each of whom is
-   taking some version of the module intended to improve their digital
-   competence.
+   This represents one learning module in the project.
   
    If there are known background variables the participants are divided
    into smaller groups where all members are affected in the same way.
@@ -729,9 +726,9 @@ class participants(ABC):
       return
 
 
-class simulated_participants(participants):
+class simulated_learning_module(learning_module):
    """
-   See base class participants for definition.
+   See base class learning_module for definition.
    
    This is used when simulating a study. It requires the user to specify:
    
@@ -788,7 +785,7 @@ class simulated_participants(participants):
       boundaries : boundaries
       \tDescribed under boundaries
       """
-      participants.__init__(self, boundaries)
+      learning_module.__init__(self, boundaries)
       self.n = n
       self.ids = range(n)
       self.default_digicomp = default_digicomp
@@ -884,9 +881,9 @@ class simulated_participants(participants):
       print("\n")
       return
       
-class real_participants(participants):
+class real_learning_module(learning_module):
    """
-   See base class participants for definition.
+   See base class learning_module for definition.
    
    This needs to read three files of participant IDs, backgrounds and
    digital competence.
@@ -912,7 +909,7 @@ class real_participants(participants):
    \tWhether anything has set digicomp_pre and digicomp_post
    """
    def __init__(self, id_path, background_path, results_pre_path, results_post_path, boundaries = None):
-      participants.__init__(self, boundaries)
+      learning_module.__init__(self, boundaries)
       self.load_ids(id_path)
       self.load_backgrounds(background_path)
       self.load_results_pre(results_pre_path)
@@ -932,8 +929,8 @@ class study:
    ----------
    name : string
    \tName of the study. Used for filenames when plotting.
-   participants : participants
-   \tThe people taking the course
+   learning_module : learning_module
+   \tThe learning module that we are studying the results of
    n_questions : int
    \tThe number of summative questions given to the participants
    boundaries : boundaries or None
@@ -957,13 +954,13 @@ class study:
    \tPath to a folder where plots can be saved. If none is specified,
    \tplots will be displayed but not saved.
    """
-   def __init__(self, name, participants, n_questions, boundaries = None):
+   def __init__(self, name, learning_module, n_questions, boundaries = None):
       """
       Parameters
       ----------
       name : string
       \tDescribed under attributes
-      participants : participants
+      learning_module : learning_module
       \tDescribed under attributes
       n_questions int
       \tDescribed under attributes
@@ -974,7 +971,7 @@ class study:
       \tBoundaries defining good and poor test results
       """
       self.name = name
-      self.participants = participants
+      self.learning_module = learning_module
       self.n_questions = n_questions
       
       self.boundaries = boundaries
@@ -997,7 +994,7 @@ class study:
       
       # Used when calculating and comparing the qualities for different
       # versions of the course
-      self._qk_samples = self.participants.n * 10
+      self._qk_samples = self.learning_module.n * 10
       self._qk_sample_width = 1 / self._qk_samples
       self._Qki_range = np.linspace(0.0, 1.0, num=self._qk_samples)
       self._dk_samples = 2 * self._qk_samples - 1
@@ -1011,10 +1008,10 @@ class study:
 
       manipulation_flags = {}
       for i in range(n_manipulations):
-         flags = np.zeros(self.participants.n, dtype = np.bool)
+         flags = np.zeros(self.learning_module.n, dtype = np.bool)
          manipulation = self.manipulations[i]
 
-         for subgroup_name, subgroup_indices in self.participants.subgroups.items():
+         for subgroup_name, subgroup_indices in self.learning_module.subgroups.items():
             n_blocks = 2**(i+1)
             block_exact_breakpoints = np.linspace(0, len(subgroup_indices), 2**(i+1) + 1)
             block_breakpoints = np.rint(block_exact_breakpoints).astype(int)
@@ -1032,8 +1029,8 @@ class study:
       self.manipulations = manipulations
       self.n_manipulations = len(self.manipulations)
       self.manipulation_flags = self._set_manipulation_flags()
-      self.all_flags = {**self.manipulation_flags, **self.participants.background_flags}
-      self.manipulation_groups = _define_subgroups(self.participants.n, self.manipulations, self.manipulation_flags)
+      self.all_flags = {**self.manipulation_flags, **self.learning_module.background_flags}
+      self.manipulation_groups = _define_subgroups(self.learning_module.n, self.manipulations, self.manipulation_flags)
       return
       
    def save_manipulations(self, path):
@@ -1047,8 +1044,8 @@ class study:
       for i in range(len(self.manipulations)):
          f.write("{}: {}\n".format(i, self.manipulations[i].name))
       f.write("Participants:\n")
-      for i in range(self.participants.n):
-         f.write("{}".format(self.participants.ids[i]))
+      for i in range(self.learning_module.n):
+         f.write("{}".format(self.learning_module.ids[i]))
          for manipulation in self.manipulations:
             f.write(", {}".format(self.manipulation_flags[manipulation.name][i]))
          f.write("\n")
@@ -1088,7 +1085,7 @@ class study:
                         
       for manipulation in manipulations:
          try:
-            manipulation_flags[manipulation.name] = np.asarray(_match_ids(self.participants.ids, ids, manipulation_flags[manipulation.name]), dtype = np.bool)
+            manipulation_flags[manipulation.name] = np.asarray(_match_ids(self.learning_module.ids, ids, manipulation_flags[manipulation.name]), dtype = np.bool)
          except IDMismatchError:
             print("Cannot read data from file!")
             print("IDs in file do not match IDs of participants in study")
@@ -1108,9 +1105,9 @@ class study:
       increasing in digital competence as they do so. Then simulate the
       experimenters studying the results.
       """
-      self.participants.calculate_results_pre(self.n_questions)
-      self.participants.calculate_digicomp_post(default_effect, self.manipulations, self.manipulation_flags)
-      self.participants.calculate_results_post(self.n_questions)
+      self.learning_module.calculate_results_pre(self.n_questions)
+      self.learning_module.calculate_digicomp_post(default_effect, self.manipulations, self.manipulation_flags)
+      self.learning_module.calculate_results_post(self.n_questions)
       return
 
    ### Functions using standard frequentist tests
@@ -1230,8 +1227,8 @@ class study:
       return log_qki
       
    def _boundary_tests(self, pre, post):
-      poor = self.participants.boundaries.poor
-      good = self.participants.boundaries.good
+      poor = self.learning_module.boundaries.poor
+      good = self.learning_module.boundaries.good
       
       boundary_test_result = {}
       boundary_test_result['members with initially poor skills'] = np.count_nonzero(pre < poor)
@@ -1251,30 +1248,30 @@ class study:
       self._calculate_qki_and_fill_in_dict(self._logL_bounds(self._Qki_range, nl, nlh), boundary_test_result)
       return boundary_test_result
       
-   def _boundary_test_total(self, participants):
+   def _boundary_test_total(self, learning_module):
       """
       Runs boundary tests for the entire module, to check whether it has any
       noteworthy effect to begin with.
       """
-      return self._boundary_tests(participants.results_pre, participants.results_post)
+      return self._boundary_tests(learning_module.results_pre, learning_module.results_post)
 
-   def _boundary_test_background_or_manipulation(self, flags, participants):
+   def _boundary_test_background_or_manipulation(self, flags, learning_module):
       """
       Runs boundary tests with respect to some background or manipulation.
       """
-      treatment_group_pre = participants.results_pre[flags]
-      control_group_pre = participants.results_pre[np.invert(flags)]
-      treatment_group_post = participants.results_post[flags]
-      control_group_post = participants.results_post[np.invert(flags)]
+      treatment_group_pre = learning_module.results_pre[flags]
+      control_group_pre = learning_module.results_pre[np.invert(flags)]
+      treatment_group_post = learning_module.results_post[flags]
+      control_group_post = learning_module.results_post[np.invert(flags)]
       
-      poor = self.participants.boundaries.poor
-      good = self.participants.boundaries.poor
+      poor = self.learning_module.boundaries.poor
+      good = self.learning_module.boundaries.poor
       
       boundary_tests = {'treatment group':{}, 'control group':{}}
       for text, pre, post in [('treatment group', treatment_group_pre, treatment_group_post), ('control group', control_group_pre, control_group_post)]:
          boundary_tests[text] = self._boundary_tests(pre, post)
       
-      self._fill_dictionary_with_qk_and_dk(boundary_tests, self.participants.boundaries.minimum_quality_difference)
+      self._fill_dictionary_with_qk_and_dk(boundary_tests, self.learning_module.boundaries.minimum_quality_difference)
       self.boundary_tests_run = True
       return boundary_tests
       
@@ -1314,7 +1311,7 @@ class study:
          self._calculate_qki_and_fill_in_dict(log_qki, median_test_result[group_name])
       return median_test_result
       
-   def _median_test_total(self, participants):
+   def _median_test_total(self, learning_module):
       """
       Runs median tests for the entire module. This tests whether the skills
       before or after taking the module are higher than the median skill for
@@ -1324,21 +1321,21 @@ class study:
       themselves at another point in time.
       """
       median_tests = {}
-      median_tests['after module'] = self._median_tests(participants.results_pre, participants.results_post)
-      median_tests['before module'] = self._median_tests(participants.results_post, participants.results_pre)
+      median_tests['after module'] = self._median_tests(learning_module.results_pre, learning_module.results_post)
+      median_tests['before module'] = self._median_tests(learning_module.results_post, learning_module.results_pre)
       self._fill_dictionary_with_qk_and_dk(median_tests['after module'], 0.1) 
       return median_tests
       
-   def _median_test_background_or_manipulation(self, flags, participants):
+   def _median_test_background_or_manipulation(self, flags, learning_module):
       """
       This tests how likely it seems to be that a participant in either the
       control or treatment group does better than the median for the control
       and treatment groups together.
       """
-      treatment_group_pre = participants.results_pre[flags]
-      control_group_pre = participants.results_pre[np.invert(flags)]
-      treatment_group_post = participants.results_post[flags]
-      control_group_post = participants.results_post[np.invert(flags)]
+      treatment_group_pre = learning_module.results_pre[flags]
+      control_group_pre = learning_module.results_pre[np.invert(flags)]
+      treatment_group_post = learning_module.results_post[flags]
+      control_group_post = learning_module.results_post[np.invert(flags)]
       
       median_tests = {}
       for text, control, treat in [('before module', control_group_pre, treatment_group_pre), ('after module', control_group_post, treatment_group_post)]:
@@ -1355,32 +1352,32 @@ class study:
       self.measured_results = {}
       self.measured_results['quick tests'] = {}
       for manipulation in self.manipulations:
-         self.measured_results['quick tests'][manipulation.name] = self._compare_flagged(self.manipulation_flags[manipulation.name], self.participants.results_post)
-      for background in self.participants.known_backgrounds:
-         self.measured_results['quick tests'][background.name] = self._compare_flagged(self.participants.background_flags[background.name], self.participants.results_post)
+         self.measured_results['quick tests'][manipulation.name] = self._compare_flagged(self.manipulation_flags[manipulation.name], self.learning_module.results_post)
+      for background in self.learning_module.known_backgrounds:
+         self.measured_results['quick tests'][background.name] = self._compare_flagged(self.learning_module.background_flags[background.name], self.learning_module.results_post)
          
       self.measured_results['quick tests']['total'] = {}
-      self.measured_results['quick tests']['total']['pre-course median'] = np.median(self.participants.results_pre)
-      self.measured_results['quick tests']['total']['post-course median'] = np.median(self.participants.results_post)
-      n_improved = np.sum(self.participants.results_post > self.participants.results_pre)
+      self.measured_results['quick tests']['total']['pre-course median'] = np.median(self.learning_module.results_pre)
+      self.measured_results['quick tests']['total']['post-course median'] = np.median(self.learning_module.results_post)
+      n_improved = np.sum(self.learning_module.results_post > self.learning_module.results_pre)
       with np.errstate(divide = 'ignore'):
-         pvalue = st.binom_test(n_improved, self.participants.n)
+         pvalue = st.binom_test(n_improved, self.learning_module.n)
       self.measured_results['quick tests']['total']['sign test p-value'] = pvalue
 
       self.measured_results['median tests'] = {}
-      self.measured_results['median tests']['total'] = self._median_test_total(self.participants)
+      self.measured_results['median tests']['total'] = self._median_test_total(self.learning_module)
       for manipulation in self.manipulations:     
-         self.measured_results['median tests'][manipulation.name] = self._median_test_background_or_manipulation(self.manipulation_flags[manipulation.name], self.participants)
-      for background in self.participants.known_backgrounds:
-         self.measured_results['median tests'][background.name] = self._median_test_background_or_manipulation(self.participants.background_flags[background.name], self.participants)
+         self.measured_results['median tests'][manipulation.name] = self._median_test_background_or_manipulation(self.manipulation_flags[manipulation.name], self.learning_module)
+      for background in self.learning_module.known_backgrounds:
+         self.measured_results['median tests'][background.name] = self._median_test_background_or_manipulation(self.learning_module.background_flags[background.name], self.learning_module)
          
-      if self.participants.boundaries != None:
+      if self.learning_module.boundaries != None:
          self.measured_results['boundary tests'] = {}
-         self.measured_results['boundary tests']['total'] = self._boundary_test_total(self.participants)
+         self.measured_results['boundary tests']['total'] = self._boundary_test_total(self.learning_module)
          for manipulation in self.manipulations:
-            self.measured_results['boundary tests'][manipulation.name] = self._boundary_test_background_or_manipulation(self.manipulation_flags[manipulation.name], self.participants)
-         for background in self.participants.known_backgrounds:
-            self.measured_results['boundary tests'][background.name] = self._boundary_test_background_or_manipulation(self.participants.background_flags[background.name], self.participants)
+            self.measured_results['boundary tests'][manipulation.name] = self._boundary_test_background_or_manipulation(self.manipulation_flags[manipulation.name], self.learning_module)
+         for background in self.learning_module.known_backgrounds:
+            self.measured_results['boundary tests'][background.name] = self._boundary_test_background_or_manipulation(self.learning_module.background_flags[background.name], self.learning_module)
       return
 
    ### Functions for giving print output
@@ -1391,27 +1388,27 @@ class study:
       are assumed to be known prior to the study being carried out.
       """
       print("Description of the study itself:\n")
-      print("There {} {} participant{}".format(_is_are(self.participants.n), self.participants.n, _plural_ending(self.participants.n)))
+      print("There {} {} participant{}".format(_is_are(self.learning_module.n), self.learning_module.n, _plural_ending(self.learning_module.n)))
       print("We are testing {} manipulation{}:".format(self.n_manipulations, _plural_ending(self.n_manipulations)))
       for manipulation in self.manipulations:
          print("{}{}".format(_indent(1), manipulation.name))
          
-      n_backgrounds = len(self.participants.known_backgrounds)
+      n_backgrounds = len(self.learning_module.known_backgrounds)
       if n_backgrounds > 0:
          print("\nThere {} {} known background{}:".format(_is_are(n_backgrounds), n_backgrounds, _plural_ending(n_backgrounds)))
-         for background in self.participants.known_backgrounds:
+         for background in self.learning_module.known_backgrounds:
             print("{}{}".format(_indent(1), background.name))
-         print("Hence, the participants are split into {} subgroups\n".format(len(self.participants.subgroups)))
+         print("Hence, the participants are split into {} subgroups\n".format(len(self.learning_module.subgroups)))
 
-      n_unknown_backgrounds = len(self.participants.unknown_backgrounds)
+      n_unknown_backgrounds = len(self.learning_module.unknown_backgrounds)
       if n_unknown_backgrounds > 0:
          print("There {} {} unknown background{}:".format(_is_are(n_unknown_backgrounds), n_unknown_backgrounds, _plural_ending(n_unknown_backgrounds)))
-         for background in self.participants.unknown_backgrounds:
+         for background in self.learning_module.unknown_backgrounds:
             print("{}{}".format(_indent(1), background.name))
          print("This may affect the study\n")
             
       print("Group membership:")
-      for subgroup_name, subgroup_members in self.participants.subgroups.items():
+      for subgroup_name, subgroup_members in self.learning_module.subgroups.items():
          n_members = len(subgroup_members)
          print("{}Group '{}' has {} member{}".format(_indent(1), subgroup_name, n_members, _plural_ending(n_members)))
          # Maybe move this?
@@ -1474,7 +1471,7 @@ class study:
          print("{}Results of boundary tests:".format(_indent(1)))
          print_poor_to_high('total', self.measured_results['boundary tests']['total'], 1)
       
-      for variation, description in [(self.manipulations, 'manipulation'), (self.participants.known_backgrounds, 'background')]:
+      for variation, description in [(self.manipulations, 'manipulation'), (self.learning_module.known_backgrounds, 'background')]:
          for choice in variation:
             results = self.measured_results['quick tests'][choice.name]
             print("\nResults for {} {}:".format(description, choice.name))
@@ -1500,8 +1497,8 @@ class study:
       Plot group membership of all participants
       """
       def plot_flags(flags, name):
-         side = int(np.ceil(np.sqrt(self.participants.n)))
-         i = np.arange(self.participants.n)
+         side = int(np.ceil(np.sqrt(self.learning_module.n)))
+         i = np.arange(self.learning_module.n)
          x = i % side
          y = i // side
          plt.clf()
@@ -1514,9 +1511,9 @@ class study:
          
       def plot_group_subgroup(flags_1, flags_2, name_1, name_2):
          # The dummy is to prevent sorted from also sorting based on flags_2
-         sorted_1, dummy, sorted_2 = zip(*sorted(zip(flags_1, range(self.participants.n), flags_2)))
-         side = int(np.ceil(np.sqrt(self.participants.n)))
-         i = np.arange(self.participants.n)
+         sorted_1, dummy, sorted_2 = zip(*sorted(zip(flags_1, range(self.learning_module.n), flags_2)))
+         side = int(np.ceil(np.sqrt(self.learning_module.n)))
+         i = np.arange(self.learning_module.n)
          x = i % side
          y = i // side
          
@@ -1576,8 +1573,8 @@ class study:
          plt.plot(self._Dk_range, test_data['probabilities of quality differences'], label = 'Difference')
          plt.xlim(-1, 1)
          plt.axvline(x = 0.0, c = 'k')
-         plt.axvline(x = self.participants.boundaries.minimum_quality_difference, linestyle = '--', c = 'k')
-         plt.axvline(x =-self.participants.boundaries.minimum_quality_difference, linestyle = '--', c = 'k')
+         plt.axvline(x = self.learning_module.boundaries.minimum_quality_difference, linestyle = '--', c = 'k')
+         plt.axvline(x =-self.learning_module.boundaries.minimum_quality_difference, linestyle = '--', c = 'k')
          plt.savefig('./{}/ill_{}_{}_{}_{}_difference.png'.format(self.plot_folder, self.name.replace(' ', '_'), test_name, description, choice.name.replace(' ', '_')))
          return
       
@@ -1589,7 +1586,7 @@ class study:
          print("This needs to be run in the same directory as a directory named '{}'".format(self.plot_folder))
          return
 
-      for variation, description in [(self.manipulations, 'manipulation'), (self.participants.known_backgrounds, 'background')]:
+      for variation, description in [(self.manipulations, 'manipulation'), (self.learning_module.known_backgrounds, 'background')]:
          for choice in variation:
             plot_quality('mtest', self.measured_results['median tests'][choice.name]['after module'])
 
@@ -1632,7 +1629,7 @@ class minimal_size_experiment:
          for key in self.median_pDpos.keys():
             pDpos[key] = []
          for i in range(self.iterations):
-            part = simulated_participants(n, default_digicomp = self.default_digicomp, known_backgrounds = self.known_backgrounds, unknown_backgrounds = [], boundaries = None)
+            part = simulated_learning_module(n, default_digicomp = self.default_digicomp, known_backgrounds = self.known_backgrounds, unknown_backgrounds = [], boundaries = None)
             simulated_study = study('Group size {}, simulation {}'.format(n, i), part, self.n_questions)
             simulated_study.set_manipulations(self.manipulations)
             simulated_study.simulate_study(self.default_effect)

@@ -65,7 +65,7 @@ bounds = fe.boundaries(0.5, 0.75, minimum_quality_difference = 0.1)
 # visible to the simulated experimentalists. They only have access to
 # ordinal data).
 
-testgroup = fe.simulated_participants(8000, 0.5, known_backgrounds = known_backgrounds, unknown_backgrounds = unknown_backgrounds, boundaries = bounds)
+testgroup = fe.simulated_learning_module(1000, 0.5, known_backgrounds = known_backgrounds, unknown_backgrounds = unknown_backgrounds, boundaries = bounds)
 if print_results:
    testgroup.describe()
 if save_results:
@@ -107,16 +107,16 @@ if plot_results:
    trial_study.plot_results()
    trial_study.plot_participants()
 if save_results:
-   trial_study.participants.save_results_pre('simulated_results_pre.csv')
-   trial_study.participants.save_results_post('simulated_results_post.csv')
+   trial_study.learning_module.save_results_pre('simulated_results_pre.csv')
+   trial_study.learning_module.save_results_post('simulated_results_post.csv')
 
 
 # The data that was just saved is loaded again
 
 if load_results:
    print('Loading saved data...')
-   loaded_participants = fe.real_participants('simulated_participants.csv', 'simulated_backgrounds.csv', 'simulated_results_pre.csv', 'simulated_results_post.csv', boundaries = bounds)
-   loaded_study = fe.study('test of loading', loaded_participants, 40)
+   loaded_learning_module = fe.real_learning_module('simulated_participants.csv', 'simulated_backgrounds.csv', 'simulated_results_pre.csv', 'simulated_results_post.csv', boundaries = bounds)
+   loaded_study = fe.study('test of loading', loaded_learning_module, 40)
    loaded_study.load_manipulations('simulated_manipulations.csv')
    loaded_study.do_tests()
    if print_results:
