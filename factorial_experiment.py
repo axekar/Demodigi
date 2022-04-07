@@ -555,10 +555,12 @@ class participant(ABC):
    results_read : bool
    \tWhether any results have been set for the participant, either by
    \tactual data being read from a file or simulated data being calculated
-   last_wrong : int ndarray
+   last_wrong : int ndarray of length n_skills
    \tBy which session the participant last answered wrong on the first try
    \ton the questions testing each particular skill. Negative one should
    \tbe taken to mean that they got it right on the first try.
+   count_last_wrong : int ndarray of length n_sessions
+   \tHow many skills that were learned after a particular number of secion
    """
    def __init__(self, ID):
       """
@@ -571,6 +573,7 @@ class participant(ABC):
       self.results = np.asarray([], dtype = bool)
       self.results_read = False
       self.last_wrong = np.asarray([], dtype = np.int64)
+      self.count_last_wrong = np.asarray([], dtype = np.int64)
       return
       
    def _evaluate_results_according_to_last_wrong(self):
@@ -588,9 +591,14 @@ class participant(ABC):
       if not self.results_read:
          print('No results to evaluate')
          return
-      self.last_wrong = np.zeros(self.n_skills, dtype = np.int64) * np.nan
+      self.last_wrong = np.zeros(self.n_skills, dtype = np.int64)
       for i in range(self.n_skills):
          self.last_wrong[i] = last_wrong_per_skill(self.results[i,:])
+      self.count_last_wrong = np.zeros(self.n_sessions, dtype = np.int64)
+      for last_session in self.last_wrong:
+         if last_session == -1:
+            last_session = 0 # This is a weird edge case I'll have to figure out how to deal with
+         self.count_last_wrong[last_session] += 1
       return
       
    def save_results(self, folder_path):
