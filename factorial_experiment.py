@@ -704,23 +704,23 @@ class learning_module(ABC):
       self.n_backgrounds = np.nan      
       self.known_backgrounds = []
       self.unknown_backgrounds = []
+
+      self.ids = []
+      self.backgrounds = []
+      self.background_flags = {}
       
       self.n_manipulations = np.nan
       self.manipulations = {}
       self.manipulation_flags = {}
+      self.manipulation_groups = {}
 
       self.all_flags = {}
-      self.manipulation_groups = {}
-      
-      self.ids = []
-      self.backgrounds = []
-      self.background_flags = {}
 
       self.results_pre = []
       self.results_post = []
       return
    
-   ### Functions currently taken directly from the study module
+   ### Methods for setting manipulations
    
    def _set_manipulation_flags(self):
       n_manipulations = len(self.manipulations)
@@ -751,52 +751,7 @@ class learning_module(ABC):
       self.all_flags = {**self.manipulation_flags, **self.background_flags}
       self.manipulation_groups = _define_subgroups(self.n, self.manipulations, self.manipulation_flags)
       return
-      
-   def save_manipulations(self, path):
-      """
-      Save a file starting with the manipulations, followed by suggested
-      flags for the participants
-      """
-      jsonable_manipulation_names = []
-      jsonable_manipulation_flags = {}
-      for manipulation in self.manipulations:
-         jsonable_manipulation_names.append(manipulation.name)
-         jsonable_manipulation_flags[manipulation.name] = self.manipulation_flags[manipulation.name].tolist()
-      f = open(path, 'w')
-      packed = json.dumps({'IDs':self.ids, 'Manipulations': jsonable_manipulation_names, 'Manipulation flags':jsonable_manipulation_flags})
-      f.write(packed)
-      f.close()
-      return
-
-   def load_manipulations(self, path):
-      """
-      Load a file with manipulations and flags for the participants
-      """
-      f = open(path, 'r')
-      packed = f.read()
-      f.close()
-      unpacked = json.loads(packed)
-      
-      ids = unpacked['IDs']
-      manipulations = []
-      for name in unpacked['Manipulations']:
-         manipulations.append(real_manipulation(name))
-      manipulation_flags = unpacked['Manipulation flags']
-      
-      for manipulation in manipulations:
-         try:
-            manipulation_flags[manipulation.name] = np.asarray(_match_ids(self.ids, ids, manipulation_flags[manipulation.name]), dtype = np.bool)
-         except IDMismatchError:
-            print("Cannot read data from file!")
-            print("IDs in file do not match IDs of participants in study")
-            return
-
-      self.manipulations = manipulations
-      self.manipulation_flags = manipulation_flags
-      self.n_manipulations = len(manipulations)
-      return
-     
-   
+         
    
    ### Methods for saving data to disk
    
@@ -826,7 +781,23 @@ class learning_module(ABC):
       f.write(packed)
       f.close()
       return
-      
+
+   def save_manipulations(self, path):
+      """
+      Save a file starting with the manipulations, followed by suggested
+      flags for the participants
+      """
+      jsonable_manipulation_names = []
+      jsonable_manipulation_flags = {}
+      for manipulation in self.manipulations:
+         jsonable_manipulation_names.append(manipulation.name)
+         jsonable_manipulation_flags[manipulation.name] = self.manipulation_flags[manipulation.name].tolist()
+      f = open(path, 'w')
+      packed = json.dumps({'IDs':self.ids, 'Manipulations': jsonable_manipulation_names, 'Manipulation flags':jsonable_manipulation_flags})
+      f.write(packed)
+      f.close()
+      return
+
    def _save_results(self, path, results):
       """
       Save a file listing the results before or after the course
@@ -897,6 +868,35 @@ class learning_module(ABC):
       self.background_flags = background_flags
       self.n_backgrounds = len(known_backgrounds)
       return
+      
+   def load_manipulations(self, path):
+      """
+      Load a file with manipulations and flags for the participants
+      """
+      f = open(path, 'r')
+      packed = f.read()
+      f.close()
+      unpacked = json.loads(packed)
+      
+      ids = unpacked['IDs']
+      manipulations = []
+      for name in unpacked['Manipulations']:
+         manipulations.append(real_manipulation(name))
+      manipulation_flags = unpacked['Manipulation flags']
+      
+      for manipulation in manipulations:
+         try:
+            manipulation_flags[manipulation.name] = np.asarray(_match_ids(self.ids, ids, manipulation_flags[manipulation.name]), dtype = np.bool)
+         except IDMismatchError:
+            print("Cannot read data from file!")
+            print("IDs in file do not match IDs of participants in study")
+            return
+
+      self.manipulations = manipulations
+      self.manipulation_flags = manipulation_flags
+      self.n_manipulations = len(manipulations)
+      return
+
 
    def _load_results(self, path):
       f = open(path, 'r')
