@@ -13,7 +13,7 @@ Setting plot_results to true causes it to attempt to make plots in a
 folder named DD_plots, which has to be in the same directory as the
 script is run in.
 
-Setting save_results to true causes it to save csv files with
+Setting save_results to true causes it to save json files with
 information about the study.
 
 setting load_results to true causes it to attempt to load the results
@@ -79,9 +79,9 @@ testgroup.set_manipulations(manipulations)
 if print_results:
    testgroup.describe()
 if save_results:
-   testgroup.save_ids('simulated_participants.csv')
-   testgroup.save_backgrounds('simulated_backgrounds.csv')
-   testgroup.save_manipulations('simulated_manipulations.csv')
+   testgroup.save_ids('simulated_participants.json')
+   testgroup.save_backgrounds('simulated_backgrounds.json')
+   testgroup.save_manipulations('simulated_manipulations.json')
 
 # Define the effect that the teaching module has, in the absence of any
 # manipulations
@@ -107,16 +107,16 @@ if plot_results:
    trial_study.plot_results()
    trial_study.plot_participants()
 if save_results:
-   trial_study.learning_module.save_results_pre('simulated_results_pre.csv')
-   trial_study.learning_module.save_results_post('simulated_results_post.csv')
+   trial_study.learning_module.save_results_pre('simulated_results_pre.json')
+   trial_study.learning_module.save_results_post('simulated_results_post.json')
 
 
 # The data that was just saved is loaded again
 
 if load_results:
    print('Loading saved data...')
-   loaded_learning_module = fe.real_learning_module('simulated_participants.csv', 'simulated_backgrounds.csv', 'simulated_results_pre.csv', 'simulated_results_post.csv', boundaries = bounds)
-   loaded_learning_module.load_manipulations('simulated_manipulations.csv')
+   loaded_learning_module = fe.real_learning_module('simulated_participants.json', 'simulated_backgrounds.json', 'simulated_results_pre.json', 'simulated_results_post.json', boundaries = bounds)
+   loaded_learning_module.load_manipulations('simulated_manipulations.json')
    loaded_study = fe.study('test of loading', loaded_learning_module, 40)
    loaded_study.do_tests()
    if print_results:
