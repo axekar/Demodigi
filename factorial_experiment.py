@@ -691,7 +691,7 @@ class learning_module(ABC):
    If there are known background variables the participants are divided
    into smaller groups where all members are affected in the same way.
    """
-   def __init__(self, n_sessions, boundaries):
+   def __init__(self, n_skills, boundaries):
       """
       This simply sets some dummy values which must be defined by the
       inheriting classes. It must be passed something to act as a boundaries
@@ -700,7 +700,7 @@ class learning_module(ABC):
       self.boundaries = boundaries
       
       self.n = np.nan
-      self.n_sessions = n_sessions
+      self.n_skills = n_skills
 
       self.n_backgrounds = np.nan      
       self.known_backgrounds = []
@@ -966,7 +966,7 @@ class simulated_learning_module(learning_module):
    digicomp_set : bool
    \tWhether anything has set digicomp_pre and digicomp_post
    """
-   def __init__(self, n_sessions, n, default_digicomp, known_backgrounds = [], unknown_backgrounds = [], boundaries = None):
+   def __init__(self, n_skills, n, default_digicomp, known_backgrounds = [], unknown_backgrounds = [], boundaries = None):
       """
       Parameters
       ----------
@@ -984,7 +984,7 @@ class simulated_learning_module(learning_module):
       boundaries : boundaries
       \tDescribed under boundaries
       """
-      learning_module.__init__(self, n_sessions, boundaries)
+      learning_module.__init__(self, n_skills, boundaries)
       self.n = n
       self.ids = [str(number) for number in range(self.n)]
       self.default_digicomp = default_digicomp
@@ -1036,13 +1036,13 @@ class simulated_learning_module(learning_module):
    ### Methods for calculating results based on digital competence
    
    def _calculate_results(self, digicomp_list):
-      comp_array = np.zeros((self.n, self.n_sessions))
+      comp_array = np.zeros((self.n, self.n_skills))
       for i in range(self.n):
          comp_array[i,:] = digicomp_list[i]
    
-      flat_random = rd.random((self.n, self.n_sessions))
+      flat_random = rd.random((self.n, self.n_skills))
       correct = flat_random < comp_array
-      results = np.sum(correct, axis = 1) / self.n_sessions
+      results = np.sum(correct, axis = 1) / self.n_skills
       return results
       
    def calculate_results_pre(self):
@@ -1119,8 +1119,8 @@ class real_learning_module(learning_module):
    digicomp_set : bool
    \tWhether anything has set digicomp_pre and digicomp_post
    """
-   def __init__(self, n_sessions, id_path, background_path, results_pre_path, results_post_path, boundaries = None):
-      learning_module.__init__(self, n_sessions, boundaries)
+   def __init__(self, n_skills, id_path, background_path, results_pre_path, results_post_path, boundaries = None):
+      learning_module.__init__(self, n_skills, boundaries)
       self.load_ids(id_path)
       self.load_backgrounds(background_path)
       self.load_results_pre(results_pre_path)
@@ -1132,9 +1132,8 @@ class real_learning_module(learning_module):
 
 class study:
    """
-   This represents a test run of a course module, in which data about the
-   participants' digital competence is collected before and after taking
-   the module.
+   This represents the analysis of the results of a learning module. This
+   can be either a simulated learning module or the results of a real one.
    
    Attributes
    ----------
@@ -1689,7 +1688,7 @@ class minimal_size_experiment:
    This is intended to run multiple simulations of studies that are
    identical except that the number of participants varies
    """
-   def __init__(self, name, default_digicomp, default_effect, n_sessions, manipulations, known_backgrounds, n_min, n_max, n_steps = 10, iterations = 10):
+   def __init__(self, name, default_digicomp, default_effect, n_skills, manipulations, known_backgrounds, n_min, n_max, n_steps = 10, iterations = 10):
       """
       Parameters
       ----------
@@ -1699,7 +1698,7 @@ class minimal_size_experiment:
       self.name_for_file = _trim_for_filename(self.name)
       self.default_digicomp = default_digicomp
       self.default_effect = default_effect
-      self.n_sessions = n_sessions
+      self.n_skills = n_skills
       self.manipulations = manipulations
       self.known_backgrounds = known_backgrounds
       self.n_min = n_min
@@ -1719,7 +1718,7 @@ class minimal_size_experiment:
          for key in self.median_pDpos.keys():
             pDpos[key] = []
          for i in range(self.iterations):
-            part = simulated_learning_module(self.n_sessions, n, default_digicomp = self.default_digicomp, known_backgrounds = self.known_backgrounds, unknown_backgrounds = [], boundaries = None)
+            part = simulated_learning_module(self.n_skills, n, default_digicomp = self.default_digicomp, known_backgrounds = self.known_backgrounds, unknown_backgrounds = [], boundaries = None)
             part.set_manipulations(self.manipulations)            
             part.run_simulation(self.default_effect)
             simulated_study = study('Group size {}, simulation {}'.format(n, i), part)

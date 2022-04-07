@@ -74,9 +74,9 @@ bounds = fe.boundaries(0.5, 0.75, minimum_quality_difference = 0.1)
 # visible to the simulated experimentalists. They only have access to
 # ordinal data).
 
-n_sessions = 40
+n_skills = 40
 
-testgroup = fe.simulated_learning_module(n_sessions, 1000, 0.5, known_backgrounds = known_backgrounds, unknown_backgrounds = unknown_backgrounds, boundaries = bounds)
+testgroup = fe.simulated_learning_module(n_skills, 1000, 0.5, known_backgrounds = known_backgrounds, unknown_backgrounds = unknown_backgrounds, boundaries = bounds)
 testgroup.set_manipulations(manipulations)
 if print_results:
    testgroup.describe()
@@ -117,7 +117,7 @@ if save_results:
 
 if load_results:
    print('Loading saved data...')
-   loaded_learning_module = fe.real_learning_module(n_sessions, 'simulated_participants.json', 'simulated_backgrounds.json', 'simulated_results_pre.json', 'simulated_results_post.json', boundaries = bounds)
+   loaded_learning_module = fe.real_learning_module(n_skills, 'simulated_participants.json', 'simulated_backgrounds.json', 'simulated_results_pre.json', 'simulated_results_post.json', boundaries = bounds)
    loaded_learning_module.load_manipulations('simulated_manipulations.json')
    loaded_study = fe.study('test of loading', loaded_learning_module)
    loaded_study.do_tests()
