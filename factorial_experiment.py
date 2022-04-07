@@ -534,6 +534,7 @@ class boundaries:
       self.minimum_quality_difference = minimum_quality_difference
       return
 
+
 class participant(ABC):
    """
    This represents a single person taking part in the project.
@@ -554,6 +555,9 @@ class participant(ABC):
    results_read : bool
    \tWhether any results have been set for the participant, either by
    \tactual data being read from a file or simulated data being calculated
+   last_wrong : int ndarray
+   \tBy which session the participant last answered wrong on the first try
+   \ton the questions testing each particular skill
    """
    def __init__(self, ID):
       """
@@ -565,7 +569,7 @@ class participant(ABC):
       self.n_skills = np.nan
       self.results = np.asarray([], dtype = bool)
       self.results_read = False
-      self.last_wrong = np.asarray([], dtype = bool)
+      self.last_wrong = np.asarray([], dtype = np.int64)
       return
       
    def _evaluate_results_according_to_last_wrong(self):
@@ -583,7 +587,7 @@ class participant(ABC):
       if not self.results_read:
          print('No results to evaluate')
          return
-      self.last_wrong = np.zeros(self.n_skills) * np.nan
+      self.last_wrong = np.zeros(self.n_skills, dtype = np.int64) * np.nan
       for i in range(self.n_skills):
          self.last_wrong[i] = last_wrong_per_skill(self.results[i,:])
       return
@@ -619,20 +623,13 @@ class participant(ABC):
       To be implemented
       """
       return
-      
+
+
 class real_participant(participant):
    """
    This represents a single person taking part in the project.
    
-   Attributes
-   ----------
-   ID : string
-   \tSome unique identifier of the participant. For privacy reasons, this
-   \tis unlikely to be their actual name.
-   results : bool ndarray
-   \tArray stating whether the first answer attempt was correct for each
-   \tskill during each session. The first index denotes skill, the second
-   \tdenotes session
+   See base class for attributes
    """
    def __init__(self, ID):
       """
@@ -644,10 +641,12 @@ class real_participant(participant):
       participant.__init__(self, ID)
       return
 
+
 class simulated_participant(participant):
    """
    This represents a single person taking part in the project.
 
+   See base class for attributes
    """
    def __init__(self, ID):
       """
@@ -678,8 +677,8 @@ class simulated_participant(participant):
       else:
          print('Digicomp needs to be set to calculate results before and after')
       return
-      
-      
+
+
 class learning_module(ABC):
    """
    This represents one learning module in the project.
