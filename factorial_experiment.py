@@ -407,7 +407,7 @@ class simulated_background(background):
    
    This is used when simulating a study. It requires the user to define
    transformations that describe how the background affects both the
-   initial digital competence and the effect of the teaching module.
+   initial digital competence and the effect of the learning module.
    
    Some backgrounds are assumed to be known and some are assumed to be
    unknown. One goal of these simulations is to get an idea of how much
@@ -1639,14 +1639,14 @@ class study:
       """
       Plot the results of the study. This includes:
       
-      - The estimated quality of the teaching module with and without each
+      - The estimated quality of the learning module with and without each
       manipulation
       
       - The logarithm of the above. This can be interesting since the
       distributions often drop off exponentially, meaning that normally only
       a sharp peak is visible.
       
-      - The estimated difference between the versions of the teaching module
+      - The estimated difference between the versions of the learning module
       with and without each manipulation
       """
       def plot_quality(test_name, test_data):

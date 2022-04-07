@@ -69,13 +69,15 @@ manipulations = [manipulation_1, manipulation_2, manipulation_3]
 bounds = fe.boundaries(0.5, 0.75, minimum_quality_difference = 0.1)
 
 
-# We define a test group of 8000 participants, who are assumed to have
-# skills following a normal distribution. (Note that this is not
-# visible to the simulated experimentalists. They only have access to
-# ordinal data).
+# We define a test group of 8000 participants, who are assumed to start
+# out with a digital competence of 0.5, meaning that they have a 50%
+# chance of answering a question correctly.
 
+# Number of summative questions given in the learning module
 n_skills = 40
 
+# Define the effect that the learning module has, in the absence of any
+# manipulations
 default = fe.standard_transformations["large improvement"]
 
 testgroup = fe.simulated_learning_module(n_skills, 1000, 0.5, default, known_backgrounds = known_backgrounds, unknown_backgrounds = unknown_backgrounds, boundaries = bounds)
@@ -86,13 +88,6 @@ if save_results:
    testgroup.save_ids('simulated_participants.json')
    testgroup.save_backgrounds('simulated_backgrounds.json')
    testgroup.save_manipulations('simulated_manipulations.json')
-
-
-# Define the effect that the teaching module has, in the absence of any
-# manipulations
-
-
-
 testgroup.run_simulation()
 
 # Everything is put together into a study, which is then run and the
@@ -101,8 +96,6 @@ testgroup.run_simulation()
 trial_study = fe.study('test', testgroup)
 if print_results:
    trial_study.describe()
-
-   
 trial_study.do_tests()
 if print_results:
    trial_study.summarise_results()
