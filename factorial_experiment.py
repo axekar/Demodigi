@@ -1050,6 +1050,18 @@ class simulated_learning_module(learning_module):
    def calculate_results_post(self, n_questions):
       self.results_post = self._calculate_results(self.digicomp_post, n_questions)
 
+   ### Method for running simulation
+   
+   def run_simulation(self, default_effect, n_questions):
+      """
+      Simulate the participants taking their various versions of the course,
+      increasing in digital competence as they do so.
+      """
+      self.calculate_results_pre(n_questions)
+      self.calculate_digicomp_post(default_effect, self.manipulations, self.manipulation_flags)
+      self.calculate_results_post(n_questions)
+      return
+
    ### Methods for output
    
    def describe(self):
@@ -1191,21 +1203,6 @@ class study:
       self._Dk_range = np.linspace(-1.0, 1.0, num=self._dk_samples)
       return
       
-   
- 
-
-   ### Functions for getting or simulating test results
-   
-   def simulate_study(self, default_effect):
-      """
-      Simulate the participants taking their various versions of the course,
-      increasing in digital competence as they do so. Then simulate the
-      experimenters studying the results.
-      """
-      self.learning_module.calculate_results_pre(self.n_questions)
-      self.learning_module.calculate_digicomp_post(default_effect, self.learning_module.manipulations, self.learning_module.manipulation_flags)
-      self.learning_module.calculate_results_post(self.n_questions)
-      return
 
    ### Functions using standard frequentist tests
 

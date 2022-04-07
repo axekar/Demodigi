@@ -83,22 +83,22 @@ if save_results:
    testgroup.save_backgrounds('simulated_backgrounds.json')
    testgroup.save_manipulations('simulated_manipulations.json')
 
+
 # Define the effect that the teaching module has, in the absence of any
 # manipulations
 
 default = fe.standard_transformations["large improvement"]
-
-
+n_questions = 40
+testgroup.run_simulation(default, n_questions)
 
 # Everything is put together into a study, which is then run and the
 # desired output is displayed
 
-trial_study = fe.study('test', testgroup, 40)
+trial_study = fe.study('test', testgroup, n_questions)
 if print_results:
    trial_study.describe()
 
    
-trial_study.simulate_study(default)
 trial_study.do_tests()
 if print_results:
    trial_study.summarise_results()
