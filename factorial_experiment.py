@@ -1719,10 +1719,10 @@ class minimal_size_experiment:
          for key in self.median_pDpos.keys():
             pDpos[key] = []
          for i in range(self.iterations):
-            part = simulated_learning_module(n, default_digicomp = self.default_digicomp, known_backgrounds = self.known_backgrounds, unknown_backgrounds = [], boundaries = None)
-            simulated_study = study('Group size {}, simulation {}'.format(n, i), part, self.n_sessions)
-            simulated_learning_module.set_manipulations(self.manipulations)
-            simulated_study.simulate_study(self.default_effect)
+            part = simulated_learning_module(self.n_sessions, n, default_digicomp = self.default_digicomp, known_backgrounds = self.known_backgrounds, unknown_backgrounds = [], boundaries = None)
+            part.set_manipulations(self.manipulations)            
+            part.run_simulation(self.default_effect)
+            simulated_study = study('Group size {}, simulation {}'.format(n, i), part)
             simulated_study.do_tests()
             pDpos['total'].append(simulated_study.measured_results['median tests']['total']['after module']['probability that treatment group does better than control group'])
             for key in pDpos.keys():
