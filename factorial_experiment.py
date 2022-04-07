@@ -541,8 +541,7 @@ class participant(ABC):
    def __init__(self, ID):
       """
       This simply sets some dummy values which must be defined by the
-      inheriting classes. It must be passed something to act as a boundaries
-      object, although this can simply be a None.
+      inheriting classes.
       """
       self.ID = ID
       self.results = np.asarray([], dtype = bool)
