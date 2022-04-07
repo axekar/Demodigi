@@ -6,17 +6,17 @@ are three background variables that affect the initial digital
 competence, the effect of the learning module, or both. Two of them are
 known, and one is unknown.
 
-Setting print_results to true gives a verbose description of the
+Setting print_results to True gives a verbose description of the
 results of the study.
 
-Setting plot_results to true causes it to attempt to make plots in a
+Setting plot_results to True causes it to attempt to make plots in a
 folder named DD_plots, which has to be in the same directory as the
 script is run in.
 
-Setting save_results to true causes it to save json files with
+Setting save_results to True causes it to save json files with
 information about the study.
 
-setting load_results to true causes it to attempt to load the results
+setting load_results to True causes it to attempt to load the results
 that were saved by save_results. This is mostly to allow quickly
 testing that the loading and saving works.
 """
