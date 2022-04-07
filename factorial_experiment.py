@@ -691,7 +691,7 @@ class learning_module(ABC):
    If there are known background variables the participants are divided
    into smaller groups where all members are affected in the same way.
    """
-   def __init__(self, boundaries):
+   def __init__(self, n_sessions, boundaries):
       """
       This simply sets some dummy values which must be defined by the
       inheriting classes. It must be passed something to act as a boundaries
@@ -700,6 +700,7 @@ class learning_module(ABC):
       self.boundaries = boundaries
       
       self.n = np.nan
+      self.n_sessions = n_sessions
 
       self.n_backgrounds = np.nan      
       self.known_backgrounds = []
@@ -965,7 +966,7 @@ class simulated_learning_module(learning_module):
    digicomp_set : bool
    \tWhether anything has set digicomp_pre and digicomp_post
    """
-   def __init__(self, n, default_digicomp, known_backgrounds = [], unknown_backgrounds = [], boundaries = None):
+   def __init__(self, n_sessions, n, default_digicomp, known_backgrounds = [], unknown_backgrounds = [], boundaries = None):
       """
       Parameters
       ----------
@@ -983,7 +984,7 @@ class simulated_learning_module(learning_module):
       boundaries : boundaries
       \tDescribed under boundaries
       """
-      learning_module.__init__(self, boundaries)
+      learning_module.__init__(self, n_sessions, boundaries)
       self.n = n
       self.ids = [str(number) for number in range(self.n)]
       self.default_digicomp = default_digicomp
@@ -1034,32 +1035,32 @@ class simulated_learning_module(learning_module):
       
    ### Methods for calculating results based on digital competence
    
-   def _calculate_results(self, digicomp_list, n_questions):
-      comp_array = np.zeros((self.n, n_questions))
+   def _calculate_results(self, digicomp_list):
+      comp_array = np.zeros((self.n, self.n_sessions))
       for i in range(self.n):
          comp_array[i,:] = digicomp_list[i]
    
-      flat_random = rd.random((self.n, n_questions))
+      flat_random = rd.random((self.n, self.n_sessions))
       correct = flat_random < comp_array
-      results = np.sum(correct, axis = 1) / n_questions
+      results = np.sum(correct, axis = 1) / self.n_sessions
       return results
       
-   def calculate_results_pre(self, n_questions):
-      self.results_pre = self._calculate_results(self.digicomp_pre, n_questions)
+   def calculate_results_pre(self):
+      self.results_pre = self._calculate_results(self.digicomp_pre)
 
-   def calculate_results_post(self, n_questions):
-      self.results_post = self._calculate_results(self.digicomp_post, n_questions)
+   def calculate_results_post(self):
+      self.results_post = self._calculate_results(self.digicomp_post)
 
    ### Method for running simulation
    
-   def run_simulation(self, default_effect, n_questions):
+   def run_simulation(self, default_effect):
       """
       Simulate the participants taking their various versions of the course,
       increasing in digital competence as they do so.
       """
-      self.calculate_results_pre(n_questions)
+      self.calculate_results_pre()
       self.calculate_digicomp_post(default_effect, self.manipulations, self.manipulation_flags)
-      self.calculate_results_post(n_questions)
+      self.calculate_results_post()
       return
 
    ### Methods for output
@@ -1118,8 +1119,8 @@ class real_learning_module(learning_module):
    digicomp_set : bool
    \tWhether anything has set digicomp_pre and digicomp_post
    """
-   def __init__(self, id_path, background_path, results_pre_path, results_post_path, boundaries = None):
-      learning_module.__init__(self, boundaries)
+   def __init__(self, n_sessions, id_path, background_path, results_pre_path, results_post_path, boundaries = None):
+      learning_module.__init__(self, n_sessions, boundaries)
       self.load_ids(id_path)
       self.load_backgrounds(background_path)
       self.load_results_pre(results_pre_path)
@@ -1141,8 +1142,6 @@ class study:
    \tName of the study. Used for filenames when plotting.
    learning_module : learning_module
    \tThe learning module that we are studying the results of
-   n_questions : int
-   \tThe number of summative questions given to the participants
    boundaries : boundaries or None
    \tThe boundaries defining what counts as good or poor results
    boundary_tests_run: bool
@@ -1164,15 +1163,13 @@ class study:
    \tPath to a folder where plots can be saved. If none is specified,
    \tplots will be displayed but not saved.
    """
-   def __init__(self, name, learning_module, n_questions, boundaries = None):
+   def __init__(self, name, learning_module, boundaries = None):
       """
       Parameters
       ----------
       name : string
       \tDescribed under attributes
       learning_module : learning_module
-      \tDescribed under attributes
-      n_questions int
       \tDescribed under attributes
       
       Optional parameters
@@ -1182,7 +1179,6 @@ class study:
       """
       self.name = name
       self.learning_module = learning_module
-      self.n_questions = n_questions
       
       self.boundaries = boundaries
       self.boundary_tests_run = False
@@ -1693,7 +1689,7 @@ class minimal_size_experiment:
    This is intended to run multiple simulations of studies that are
    identical except that the number of participants varies
    """
-   def __init__(self, name, default_digicomp, default_effect, n_questions, manipulations, known_backgrounds, n_min, n_max, n_steps = 10, iterations = 10):
+   def __init__(self, name, default_digicomp, default_effect, n_sessions, manipulations, known_backgrounds, n_min, n_max, n_steps = 10, iterations = 10):
       """
       Parameters
       ----------
@@ -1703,7 +1699,7 @@ class minimal_size_experiment:
       self.name_for_file = _trim_for_filename(self.name)
       self.default_digicomp = default_digicomp
       self.default_effect = default_effect
-      self.n_questions = n_questions
+      self.n_sessions = n_sessions
       self.manipulations = manipulations
       self.known_backgrounds = known_backgrounds
       self.n_min = n_min
@@ -1724,7 +1720,7 @@ class minimal_size_experiment:
             pDpos[key] = []
          for i in range(self.iterations):
             part = simulated_learning_module(n, default_digicomp = self.default_digicomp, known_backgrounds = self.known_backgrounds, unknown_backgrounds = [], boundaries = None)
-            simulated_study = study('Group size {}, simulation {}'.format(n, i), part, self.n_questions)
+            simulated_study = study('Group size {}, simulation {}'.format(n, i), part, self.n_sessions)
             simulated_learning_module.set_manipulations(self.manipulations)
             simulated_study.simulate_study(self.default_effect)
             simulated_study.do_tests()
