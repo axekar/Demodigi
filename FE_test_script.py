@@ -76,7 +76,9 @@ bounds = fe.boundaries(0.5, 0.75, minimum_quality_difference = 0.1)
 
 n_skills = 40
 
-testgroup = fe.simulated_learning_module(n_skills, 1000, 0.5, known_backgrounds = known_backgrounds, unknown_backgrounds = unknown_backgrounds, boundaries = bounds)
+default = fe.standard_transformations["large improvement"]
+
+testgroup = fe.simulated_learning_module(n_skills, 1000, 0.5, default, known_backgrounds = known_backgrounds, unknown_backgrounds = unknown_backgrounds, boundaries = bounds)
 testgroup.set_manipulations(manipulations)
 if print_results:
    testgroup.describe()
@@ -89,9 +91,9 @@ if save_results:
 # Define the effect that the teaching module has, in the absence of any
 # manipulations
 
-default = fe.standard_transformations["large improvement"]
 
-testgroup.run_simulation(default)
+
+testgroup.run_simulation()
 
 # Everything is put together into a study, which is then run and the
 # desired output is displayed

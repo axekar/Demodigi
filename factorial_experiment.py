@@ -537,7 +537,7 @@ class boundaries:
 
 class participant(ABC):
    """
-   This represents a single person taking part in the project.
+   This represents a single person taking a learning module.
    
    Attributes
    ----------
@@ -688,8 +688,8 @@ class learning_module(ABC):
    """
    This represents one learning module in the project.
   
-   If there are known background variables the participants are divided
-   into smaller groups where all members are affected in the same way.
+   The participants are divided into smaller groups, first according to
+   the known background variables and then according to the manipulations.
    """
    def __init__(self, n_skills, boundaries):
       """
@@ -917,10 +917,18 @@ class learning_module(ABC):
       return results
 
    def load_results_pre(self, path):
+      """
+      Load the participants' results in a diagnostic test prior to taking
+      the course module
+      """
       self.results_pre = self._load_results(path)
       return
 
    def load_results_post(self, path):
+      """
+      Load the participants' results on the final session of the course
+      module
+      """
       self.results_post = self._load_results(path)
       return
 
@@ -966,7 +974,7 @@ class simulated_learning_module(learning_module):
    digicomp_set : bool
    \tWhether anything has set digicomp_pre and digicomp_post
    """
-   def __init__(self, n_skills, n, default_digicomp, known_backgrounds = [], unknown_backgrounds = [], boundaries = None):
+   def __init__(self, n_skills, n, default_digicomp, default_effect, known_backgrounds = [], unknown_backgrounds = [], boundaries = None):
       """
       Parameters
       ----------
@@ -988,6 +996,7 @@ class simulated_learning_module(learning_module):
       self.n = n
       self.ids = [str(number) for number in range(self.n)]
       self.default_digicomp = default_digicomp
+      self.default_effect = default_effect
       self.known_backgrounds = known_backgrounds
       self.unknown_backgrounds = unknown_backgrounds
       self.backgrounds = self.known_backgrounds + self.unknown_backgrounds
@@ -1019,13 +1028,13 @@ class simulated_learning_module(learning_module):
           digicomp_pre[self.background_flags[background.name]] = background.pre_transformation(digicomp_pre[self.background_flags[background.name]])
       return digicomp_pre
       
-   def calculate_digicomp_post(self, default_effect, manipulations = [], manipulation_flags = []):
+   def calculate_digicomp_post(self, manipulations = [], manipulation_flags = []):
       """
       Calculates the digital competence after finishing the course. To do
       this a default effect, together with manipulations and manipulation
       flags must be provided.
       """
-      self.digicomp_post = default_effect(self.digicomp_pre)
+      self.digicomp_post = self.default_effect(self.digicomp_pre)
       
       for manipulation in manipulations:
          self.digicomp_post[manipulation_flags[manipulation.name]] = manipulation.transformation(self.digicomp_post[manipulation_flags[manipulation.name]])
@@ -1053,13 +1062,13 @@ class simulated_learning_module(learning_module):
 
    ### Method for running simulation
    
-   def run_simulation(self, default_effect):
+   def run_simulation(self):
       """
       Simulate the participants taking their various versions of the course,
       increasing in digital competence as they do so.
       """
       self.calculate_results_pre()
-      self.calculate_digicomp_post(default_effect, self.manipulations, self.manipulation_flags)
+      self.calculate_digicomp_post(self.manipulations, self.manipulation_flags)
       self.calculate_results_post()
       return
 
@@ -1718,9 +1727,9 @@ class minimal_size_experiment:
          for key in self.median_pDpos.keys():
             pDpos[key] = []
          for i in range(self.iterations):
-            part = simulated_learning_module(self.n_skills, n, default_digicomp = self.default_digicomp, known_backgrounds = self.known_backgrounds, unknown_backgrounds = [], boundaries = None)
+            part = simulated_learning_module(self.n_skills, n, self.default_effect, default_digicomp = self.default_digicomp, known_backgrounds = self.known_backgrounds, unknown_backgrounds = [], boundaries = None)
             part.set_manipulations(self.manipulations)            
-            part.run_simulation(self.default_effect)
+            part.run_simulation()
             simulated_study = study('Group size {}, simulation {}'.format(n, i), part)
             simulated_study.do_tests()
             pDpos['total'].append(simulated_study.measured_results['median tests']['total']['after module']['probability that treatment group does better than control group'])
