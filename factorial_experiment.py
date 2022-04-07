@@ -565,6 +565,27 @@ class participant(ABC):
       self.n_skills = np.nan
       self.results = np.asarray([], dtype = bool)
       self.results_read = False
+      self.last_wrong = np.asarray([], dtype = bool)
+      return
+      
+   def _evaluate_results_according_to_last_wrong(self):
+      """
+      Evaluate the quality of the participants' results by looking at from
+      which session onwards they consistently answered the questions on a
+      particular skill correctly.
+      """
+      def last_wrong_per_skill(skill_row):
+         column = self.n_sessions - 1
+         while skill_row[column] and column >= 0:
+            column -= 1
+         return column
+         
+      if not self.results_read:
+         print('No results to evaluate')
+         return
+      self.last_wrong = np.zeros(self.n_skills) * np.nan
+      for i in range(self.n_skills):
+         self.last_wrong[i] = last_wrong_per_skill(self.results[i,:])
       return
       
    def save_results(self, folder_path):
@@ -593,7 +614,7 @@ class participant(ABC):
          print('No results to write!') # Should at some point define an exception handling this
       return
       
-   def load_results(self, path):
+   def load_results(self, folder_path):
       """
       To be implemented
       """
@@ -653,6 +674,7 @@ class simulated_participant(participant):
          digicomp_array = np.tile(np.linspace(self.digicomp_pre, self.digicomp_post, num = n_sessions), (n_skills, 1))
          self.results = flat_random < digicomp_array
          self.results_read = True
+         self._evaluate_results_according_to_last_wrong()
       else:
          print('Digicomp needs to be set to calculate results before and after')
       return
