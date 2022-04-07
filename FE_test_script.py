@@ -35,6 +35,7 @@ save_results = True
 # Test that loading the results works
 load_results = True
 
+
 # We introduce two known backgrounds, one which affects both initial
 # skill and the effectiveness of the intervention, and one which affects
 # only the effectiveness of the intervention.
