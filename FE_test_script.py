@@ -1,6 +1,6 @@
 """
 This is a script for testing the module demodigi, by running a
-simulated study with 8000 participants and three manipulations, two of
+simulated study with 1000 participants and three manipulations, two of
 which give a slight improvement and one of which does nothing. There
 are three background variables that affect the initial digital
 competence, the effect of the learning module, or both. Two of them are
