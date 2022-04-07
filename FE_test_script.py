@@ -51,6 +51,15 @@ unknown_background_1 = fe.simulated_background("secretly a ghost", fe.standard_t
 unknown_backgrounds = [unknown_background_1]
 
 
+# Define three manipulations, two of which have a slight effect and one
+# of which does nothing.
+
+manipulation_1 = fe.simulated_manipulation("funny hats", fe.standard_transformations["slight improvement"])
+manipulation_2 = fe.simulated_manipulation("prayer and incense", fe.standard_transformations["slight improvement"])
+manipulation_3 = fe.simulated_manipulation("all text in comic sans", fe.standard_transformations["no effect"])
+manipulations = [manipulation_1, manipulation_2, manipulation_3]
+
+
 # Define the bounds for what we consider to be good and poor digital
 # competence. The study will then, among other things, test how many
 # participants who are moved from poor to good competence. (This means
@@ -66,12 +75,13 @@ bounds = fe.boundaries(0.5, 0.75, minimum_quality_difference = 0.1)
 # ordinal data).
 
 testgroup = fe.simulated_learning_module(1000, 0.5, known_backgrounds = known_backgrounds, unknown_backgrounds = unknown_backgrounds, boundaries = bounds)
+testgroup.set_manipulations(manipulations)
 if print_results:
    testgroup.describe()
 if save_results:
    testgroup.save_ids('simulated_participants.csv')
    testgroup.save_backgrounds('simulated_backgrounds.csv')
-
+   testgroup.save_manipulations('simulated_manipulations.csv')
 
 # Define the effect that the teaching module has, in the absence of any
 # manipulations
@@ -79,24 +89,14 @@ if save_results:
 default = fe.standard_transformations["large improvement"]
 
 
-# Define three manipulations, two of which have a slight effect and one
-# of which does nothing.
-
-manipulation_1 = fe.simulated_manipulation("funny hats", fe.standard_transformations["slight improvement"])
-manipulation_2 = fe.simulated_manipulation("prayer and incense", fe.standard_transformations["slight improvement"])
-manipulation_3 = fe.simulated_manipulation("all text in comic sans", fe.standard_transformations["no effect"])
-manipulations = [manipulation_1, manipulation_2, manipulation_3]
-
 
 # Everything is put together into a study, which is then run and the
 # desired output is displayed
 
 trial_study = fe.study('test', testgroup, 40)
-trial_study.set_manipulations(manipulations)
 if print_results:
    trial_study.describe()
-if save_results:
-   trial_study.save_manipulations('simulated_manipulations.csv')
+
    
 trial_study.simulate_study(default)
 trial_study.do_tests()
@@ -116,8 +116,8 @@ if save_results:
 if load_results:
    print('Loading saved data...')
    loaded_learning_module = fe.real_learning_module('simulated_participants.csv', 'simulated_backgrounds.csv', 'simulated_results_pre.csv', 'simulated_results_post.csv', boundaries = bounds)
+   loaded_learning_module.load_manipulations('simulated_manipulations.csv')
    loaded_study = fe.study('test of loading', loaded_learning_module, 40)
-   loaded_study.load_manipulations('simulated_manipulations.csv')
    loaded_study.do_tests()
    if print_results:
       loaded_study.summarise_results()
