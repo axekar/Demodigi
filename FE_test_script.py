@@ -80,6 +80,7 @@ n_skills = 40
 n_sessions = 5
 initial_digital_competence = 0.5
 
+
 # Define the effect that the learning module has, in the absence of any
 # manipulations
 default_effect = fe.standard_transformations["large improvement"]
@@ -94,6 +95,7 @@ if save_results:
    testgroup.save_backgrounds('simulated_backgrounds.json')
    testgroup.save_manipulations('simulated_manipulations.json')
    testgroup.save_results('Simulated_results')
+
 
 # Everything is put together into a study, which is then run and the
 # desired output is displayed

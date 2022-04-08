@@ -1423,6 +1423,9 @@ class study:
       This tests how likely it seems to be that a participant in either the
       control or treatment group does better than the median for the control
       and treatment groups together.
+      
+      Note that when looking at the results after the module, it uses the
+      ranking, which makes use of all results.
       """
       treatment_group_initial = learning_module.results_initial[flags]
       control_group_initial = learning_module.results_initial[np.invert(flags)]
@@ -1516,7 +1519,7 @@ class study:
    def summarise_results(self):
       """
       Summarise the findings that the experimentalists have at the end of the
-      study.
+      study
       """
       def print_poor_to_high(group_name, group_data, base_indent):
          print("{}In {}, out of {} members with poor skills {} acquire good skills".format(_indent(base_indent), group_name, group_data['members with initially poor skills'], group_data['members moving from poor to good skills']))
