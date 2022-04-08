@@ -75,13 +75,15 @@ bounds = fe.boundaries(0.5, 0.75, minimum_quality_difference = 0.1)
 # chance of answering a question correctly.
 
 # Number of summative questions given in the learning module
+n_participants = 1000
 n_skills = 40
+n_sessions = 5
 
 # Define the effect that the learning module has, in the absence of any
 # manipulations
 default = fe.standard_transformations["large improvement"]
 
-testgroup = fe.simulated_learning_module(n_skills, 1000, 0.5, default, known_backgrounds = known_backgrounds, unknown_backgrounds = unknown_backgrounds, boundaries = bounds)
+testgroup = fe.simulated_learning_module(n_skills, n_sessions, n_participants, 0.5, default, known_backgrounds = known_backgrounds, unknown_backgrounds = unknown_backgrounds, boundaries = bounds)
 testgroup.set_manipulations(manipulations)
 if print_results:
    testgroup.describe()
@@ -113,7 +115,7 @@ if save_results:
 
 if load_results:
    print('Loading saved data...')
-   loaded_learning_module = fe.real_learning_module(n_skills, 'simulated_participants.json', 'simulated_backgrounds.json', 'simulated_results_pre.json', 'simulated_results_post.json', boundaries = bounds)
+   loaded_learning_module = fe.real_learning_module(n_skills, n_sessions, 'simulated_participants.json', 'simulated_backgrounds.json', 'simulated_results_pre.json', 'simulated_results_post.json', boundaries = bounds)
    loaded_learning_module.load_manipulations('simulated_manipulations.json')
    loaded_study = fe.study('test of loading', loaded_learning_module)
    loaded_study.do_tests()

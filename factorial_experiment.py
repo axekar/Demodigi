@@ -576,7 +576,8 @@ class participant(ABC):
       self.last_wrong = np.asarray([], dtype = np.int64)
       self.correct_onwards = np.asarray([], dtype = np.int64)
       return
-      
+
+   
    def _evaluate_results_according_to_last_wrong(self):
       """
       Evaluate the quality of the participants' results by looking at from
@@ -594,13 +595,13 @@ class participant(ABC):
          return
       self.last_wrong = np.zeros(self.n_skills, dtype = np.int64)
       for i in range(self.n_skills):
-         self.last_wrong[i] = last_wrong_per_skill(self.results[i,:])
+         self.last_wrong[i] = last_wrong_per_skill(self.results[i,:]) # Replace this w. something neater. I'm pretty sure you could just use index
 
       self.correct_onwards = np.zeros(self.n_sessions, dtype = np.int64)      
       for i in range(self.n_sessions):
          self.correct_onwards[i] = np.sum(self.last_wrong < i)
       return
-      
+   
    def save_results(self, folder_path):
       """
       Save a file listing the first answer attempts to each question
@@ -615,6 +616,10 @@ class participant(ABC):
       return
       
    def load_results(self, folder_path):
+      """
+      Load the results from a folder, which has to contain a file with a
+      filename following the format [participant ID].json
+      """
       if folder_path[-1] != '/':
          folder_path += '/'
       f = open(folder_path + self.ID + '.json', 'r')
@@ -665,6 +670,13 @@ class simulated_participant(participant):
       self.digicomp_set = False
       return
       
+   
+   def set_digicomp(self, digicomp_pre, digicomp_post):
+      self.digicomp_pre = digicomp_pre
+      self.digicomp_post = digicomp_post
+      self.digicomp_set = True
+      return
+   
    def calculate_results(self, n_sessions, n_skills):
       """
       Simulate results of a learning module
@@ -690,7 +702,7 @@ class learning_module(ABC):
    The participants are divided into smaller groups, first according to
    the known background variables and then according to the manipulations.
    """
-   def __init__(self, n_skills, boundaries):
+   def __init__(self, n_skills, n_sessions, boundaries):
       """
       This simply sets some dummy values which must be defined by the
       inheriting classes. It must be passed something to act as a boundaries
@@ -700,12 +712,14 @@ class learning_module(ABC):
       
       self.n_participants = np.nan
       self.n_skills = n_skills
+      self.n_sessions = n_sessions
 
       self.n_backgrounds = np.nan      
       self.known_backgrounds = []
       self.unknown_backgrounds = []
 
       self.ids = []
+      self.participants = []
       
       self.backgrounds = []
       self.background_flags = {}
@@ -899,6 +913,7 @@ class learning_module(ABC):
       return
 
 
+   # This stuff will have to be replaced
    def _load_results(self, path):
       f = open(path, 'r')
       packed = f.read()
@@ -974,7 +989,7 @@ class simulated_learning_module(learning_module):
    digicomp_set : bool
    \tWhether anything has set digicomp_pre and digicomp_post
    """
-   def __init__(self, n_skills, n_participants, default_digicomp, default_effect, known_backgrounds = [], unknown_backgrounds = [], boundaries = None):
+   def __init__(self, n_skills, n_sessions, n_participants, default_digicomp, default_effect, known_backgrounds = [], unknown_backgrounds = [], boundaries = None):
       """
       Parameters
       ----------
@@ -992,16 +1007,19 @@ class simulated_learning_module(learning_module):
       boundaries : boundaries
       \tDescribed under boundaries
       """
-      learning_module.__init__(self, n_skills, boundaries)
+      learning_module.__init__(self, n_skills, n_sessions, boundaries)
       self.n_participants = n_participants
+
       self.ids = [str(number) for number in range(self.n_participants)]
+      for ID in self.ids:
+         self.participants.append(simulated_participant(ID))
+
       self.default_digicomp = default_digicomp
       self.default_effect = default_effect
       self.known_backgrounds = known_backgrounds
       self.unknown_backgrounds = unknown_backgrounds
       self.backgrounds = self.known_backgrounds + self.unknown_backgrounds
       self.n_backgrounds = len(self.backgrounds)
-
       self.background_flags = {}
       for background in self.backgrounds:
          self.background_flags[background.name] = rd.random(self.n_participants) < background.fraction
@@ -1014,6 +1032,7 @@ class simulated_learning_module(learning_module):
       # This cannot be calculated without a study object that specifies the
       # default effect of the learning modules and any manipulations
       self.digicomp_post = np.nan * np.zeros(self.n_participants)
+      
       return
    
    ### Methods for calculating digital competence
@@ -1044,6 +1063,18 @@ class simulated_learning_module(learning_module):
       
    ### Methods for calculating results based on digital competence
    
+   def calculate_results(self):
+      self.results_pre = np.zeros(self.n_participants)
+      self.results_post = np.zeros(self.n_participants)
+      for i in range(self.n_participants):
+         participant, digicomp_pre, digicomp_post = self.participants[i], self.digicomp_pre[i], self.digicomp_post[i]
+         participant.set_digicomp(digicomp_pre, digicomp_post)
+         participant.calculate_results(self.n_sessions, self.n_skills)
+         self.results_pre[i] = participant.correct_onwards[0]
+         self.results_post[i] = participant.correct_onwards[self.n_sessions - 1]
+      return
+   
+   """
    def _calculate_results(self, digicomp_list):
       comp_array = np.zeros((self.n_participants, self.n_skills))
       for i in range(self.n_participants):
@@ -1059,6 +1090,7 @@ class simulated_learning_module(learning_module):
 
    def calculate_results_post(self):
       self.results_post = self._calculate_results(self.digicomp_post)
+   """
 
    ### Method for running simulation
    
@@ -1067,9 +1099,12 @@ class simulated_learning_module(learning_module):
       Simulate the participants taking their various versions of the course,
       increasing in digital competence as they do so.
       """
-      self.calculate_results_pre()
+
+
+      #self.calculate_results_pre()
       self.calculate_digicomp_post(self.manipulations, self.manipulation_flags)
-      self.calculate_results_post()
+      #self.calculate_results_post()
+      self.calculate_results()
       return
 
    ### Methods for output
@@ -1128,8 +1163,8 @@ class real_learning_module(learning_module):
    digicomp_set : bool
    \tWhether anything has set digicomp_pre and digicomp_post
    """
-   def __init__(self, n_skills, id_path, background_path, results_pre_path, results_post_path, boundaries = None):
-      learning_module.__init__(self, n_skills, boundaries)
+   def __init__(self, n_skills, n_sessions, id_path, background_path, results_pre_path, results_post_path, boundaries = None):
+      learning_module.__init__(self, n_skills, n_sessions, boundaries)
       self.load_ids(id_path)
       self.load_backgrounds(background_path)
       self.load_results_pre(results_pre_path)
