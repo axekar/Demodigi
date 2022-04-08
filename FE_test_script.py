@@ -71,20 +71,20 @@ manipulations = [manipulation_1, manipulation_2, manipulation_3]
 bounds = fe.boundaries(0.5, 0.75, minimum_quality_difference = 0.1)
 
 
-# We define a test group of 8000 participants, who are assumed to start
+# We define a test group of 1000 participants, who are assumed to start
 # out with a digital competence of 0.5, meaning that they have a 50%
-# chance of answering a question correctly.
-
-# Number of summative questions given in the learning module
+# chance of answering a question correctly. They are taught 40 different
+# skills over the course of 5 sessions.
 n_participants = 1000
 n_skills = 40
 n_sessions = 5
+initial_digital_competence = 0.5
 
 # Define the effect that the learning module has, in the absence of any
 # manipulations
-default = fe.standard_transformations["large improvement"]
+default_effect = fe.standard_transformations["large improvement"]
 
-testgroup = fe.simulated_learning_module(n_skills, n_sessions, n_participants, 0.5, default, known_backgrounds = known_backgrounds, unknown_backgrounds = unknown_backgrounds, boundaries = bounds)
+testgroup = fe.simulated_learning_module(n_skills, n_sessions, n_participants, initial_digital_competence, default_effect, known_backgrounds = known_backgrounds, unknown_backgrounds = unknown_backgrounds, boundaries = bounds)
 testgroup.set_manipulations(manipulations)
 if print_results:
    testgroup.describe()
