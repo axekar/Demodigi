@@ -221,7 +221,7 @@ def _define_subgroups(n, backgrounds_or_manipulations, background_or_manipulatio
 
 def _ordinalise(ndarray):
    """
-   Takes an ndarray and makes the data ordinal. That is to say, the
+   Takes a 1-d ndarray and makes the data ordinal. That is to say, the
    elements will be turned into integers denoting the lowest, second
    lowest, etcetera.
    """
@@ -734,6 +734,23 @@ class learning_module(ABC):
       self.results = np.asarray([])
       self.results_initial = np.asarray([])
       self.results_final = np.asarray([])
+      self.ranking_by_session = np.asarray([])
+      self.ranking = np.asarray([])
+      return
+   
+   ### Method for ranking participants based on results
+   
+   def _rank_participants(self):
+      self.ranking_by_session = np.zeros((self.n_participants, self.n_sessions))
+      for i in range(self.n_sessions):
+         self.ranking_by_session[:,i] = _ordinalise(self.results[:,i])
+         
+      total_ranking = np.zeros(self.n_participants)
+      # I think this whole think makes sense, but I'm kind of tired so I'll have to 
+      # think it through at some latter point
+      for i in range(self.n_sessions - 1):
+         total_ranking += self.ranking_by_session[:,-1-i] / (self.n_participants + 1)**i
+      self.ranking = _ordinalise(total_ranking)
       return
    
    ### Methods for setting manipulations
@@ -906,6 +923,7 @@ class learning_module(ABC):
          self.results[i,:] = participant.correct_onwards
       self.results_initial = self.results[:,0]
       self.results_final = self.results[:,self.n_sessions - 1]
+      self._rank_participants()
       return
 
 
@@ -1033,6 +1051,7 @@ class simulated_learning_module(learning_module):
          self.results[i,:] = participant.correct_onwards
       self.results_initial = self.results[:,0]
       self.results_final = self.results[:,self.n_sessions - 1]
+      self._rank_participants()
       return
 
    ### Method for running simulation
@@ -1074,7 +1093,8 @@ class simulated_learning_module(learning_module):
                print("{}{}: {}".format(_indent(3), background.name, sum(self.background_flags[background.name][subgroup_members])))
       print("\n")
       return
-      
+
+
 class real_learning_module(learning_module):
    """
    See base class learning_module for definition.
@@ -1111,6 +1131,7 @@ class real_learning_module(learning_module):
       #to the same known backgrounds
       self.subgroups = _define_subgroups(self.n_participants, self.backgrounds, self.background_flags)
       return
+
 
 class study:
    """
