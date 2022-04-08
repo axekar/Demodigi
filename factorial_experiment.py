@@ -731,8 +731,9 @@ class learning_module(ABC):
 
       self.all_flags = {}
 
-      self.results_initial = []
-      self.results_final = []
+      self.results = np.asarray([])
+      self.results_initial = np.asarray([])
+      self.results_final = np.asarray([])
       return
    
    ### Methods for setting manipulations
@@ -1064,14 +1065,14 @@ class simulated_learning_module(learning_module):
    ### Methods for calculating results based on digital competence
    
    def calculate_results(self):
-      self.results_initial = np.zeros(self.n_participants)
-      self.results_final = np.zeros(self.n_participants)
+      self.results = np.zeros((self.n_participants, self.n_sessions))
       for i in range(self.n_participants):
          participant, digicomp_initial, digicomp_final = self.participants[i], self.digicomp_initial[i], self.digicomp_final[i]
          participant.set_digicomp(digicomp_initial, digicomp_final)
          participant.calculate_results(self.n_sessions, self.n_skills)
-         self.results_initial[i] = participant.correct_onwards[0]
-         self.results_final[i] = participant.correct_onwards[self.n_sessions - 1]
+         self.results[i,:] = participant.correct_onwards
+      self.results_initial = self.results[:,0]
+      self.results_final = self.results[:,self.n_sessions - 1]
       return
 
    ### Method for running simulation
