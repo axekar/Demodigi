@@ -290,25 +290,25 @@ def _match_ids(reference_ids, ids, data):
 # corresponding to the probability of correctly answering a summative
 # question in the learning module.
 
-def improvement(digicomp_pre, factor):
+def improvement(digicomp_initial, factor):
    """
    Represents an improvement which decreases the risk of incorrectly
    answering a summative question by factor
    """
-   return 1 - factor * (1 - digicomp_pre)
+   return 1 - factor * (1 - digicomp_initial)
 
-def deterioration(digicomp_pre, factor):
-   return factor * digicomp_pre
+def deterioration(digicomp_initial, factor):
+   return factor * digicomp_initial
 
-standard_transformations = {"large improvement": lambda digicomp_pre : improvement(digicomp_pre, 1/2),
-                            "moderate improvement": lambda digicomp_pre : improvement(digicomp_pre, 2/3),
-                            "slight improvement": lambda digicomp_pre : improvement(digicomp_pre, 4/5),
-                            "minimal improvement": lambda digicomp_pre : improvement(digicomp_pre, 9/10),
-                            "large deterioration": lambda digicomp_pre : deterioration(digicomp_pre, 1/2),
-                            "moderate deterioration": lambda digicomp_pre : deterioration(digicomp_pre, 2/3),
-                            "slight deterioration": lambda digicomp_pre : deterioration(digicomp_pre, 4/5),
-                            "minimal deterioration": lambda digicomp_pre : deterioration(digicomp_pre, 9/10),
-                            "no effect": lambda digicomp_pre : digicomp_pre[:]}
+standard_transformations = {"large improvement": lambda digicomp_initial : improvement(digicomp_initial, 1/2),
+                            "moderate improvement": lambda digicomp_initial : improvement(digicomp_initial, 2/3),
+                            "slight improvement": lambda digicomp_initial : improvement(digicomp_initial, 4/5),
+                            "minimal improvement": lambda digicomp_initial : improvement(digicomp_initial, 9/10),
+                            "large deterioration": lambda digicomp_initial : deterioration(digicomp_initial, 1/2),
+                            "moderate deterioration": lambda digicomp_initial : deterioration(digicomp_initial, 2/3),
+                            "slight deterioration": lambda digicomp_initial : deterioration(digicomp_initial, 4/5),
+                            "minimal deterioration": lambda digicomp_initial : deterioration(digicomp_initial, 9/10),
+                            "no effect": lambda digicomp_initial : digicomp_initial[:]}
 
 ### Classes
 
@@ -665,15 +665,15 @@ class simulated_participant(participant):
       \tUnique identifier for the person
       """
       participant.__init__(self, ID)
-      self.digicomp_pre = np.nan
-      self.digicomp_post = np.nan
+      self.digicomp_initial = np.nan
+      self.digicomp_final = np.nan
       self.digicomp_set = False
       return
       
    
-   def set_digicomp(self, digicomp_pre, digicomp_post):
-      self.digicomp_pre = digicomp_pre
-      self.digicomp_post = digicomp_post
+   def set_digicomp(self, digicomp_initial, digicomp_final):
+      self.digicomp_initial = digicomp_initial
+      self.digicomp_final = digicomp_final
       self.digicomp_set = True
       return
    
@@ -686,7 +686,7 @@ class simulated_participant(participant):
          self.n_skills = n_skills
          self.results = np.zeros((n_skills, n_sessions), dtype = bool)
          flat_random = rd.random((n_skills, n_sessions))
-         digicomp_array = np.tile(np.linspace(self.digicomp_pre, self.digicomp_post, num = n_sessions), (n_skills, 1))
+         digicomp_array = np.tile(np.linspace(self.digicomp_initial, self.digicomp_final, num = n_sessions), (n_skills, 1))
          self.results = flat_random < digicomp_array
          self.results_read = True
          self._evaluate_results_according_to_last_wrong()
@@ -731,8 +731,8 @@ class learning_module(ABC):
 
       self.all_flags = {}
 
-      self.results_pre = []
-      self.results_post = []
+      self.results_initial = []
+      self.results_final = []
       return
    
    ### Methods for setting manipulations
@@ -824,18 +824,18 @@ class learning_module(ABC):
       f.close()
       return
       
-   def save_results_pre(self, path):
+   def save_results_initial(self, path):
       """
       Save results of a test taken prior to the learning module
       """
-      self._save_results(path, self.results_pre)
+      self._save_results(path, self.results_initial)
       return
 
-   def save_results_post(self, path):
+   def save_results_final(self, path):
       """
       Save the results of the actual learning module
       """
-      self._save_results(path, self.results_post)
+      self._save_results(path, self.results_final)
       return
 
    ### Methods for reading data from disk
@@ -913,7 +913,7 @@ class learning_module(ABC):
       return
 
 
-   # This stuff will have to be replaced
+   # This stuff will have to be replaced at some point
    def _load_results(self, path):
       f = open(path, 'r')
       packed = f.read()
@@ -931,20 +931,20 @@ class learning_module(ABC):
          return
       return results
 
-   def load_results_pre(self, path):
+   def load_results_initial(self, path):
       """
       Load the participants' results in a diagnostic test prior to taking
       the course module
       """
-      self.results_pre = self._load_results(path)
+      self.results_initial = self._load_results(path)
       return
 
-   def load_results_post(self, path):
+   def load_results_final(self, path):
       """
       Load the participants' results on the final session of the course
       module
       """
-      self.results_post = self._load_results(path)
+      self.results_final = self._load_results(path)
       return
 
 
@@ -979,15 +979,15 @@ class simulated_learning_module(learning_module):
    subgroups : dict of int ndarrays
    \tDictionary containing the indices of the participants in each
    \tsubgroup
-   digicomp_pre : float ndarray
+   digicomp_initial : float ndarray
    \tThe digital competence of the participants before taking the module
-   digicomp_post : float ndarray
+   digicomp_final : float ndarray
    \tThe digital competence of the participants after taking the module.
    \tThis is initially set to nan, and can be calculated by supplying some
    \tdefault effect of the module, and optionally a list of manipulations.
    \tTypically, this is done by a study object.
    digicomp_set : bool
-   \tWhether anything has set digicomp_pre and digicomp_post
+   \tWhether anything has set digicomp_initial and digicomp_final
    """
    def __init__(self, n_skills, n_sessions, n_participants, default_digicomp, default_effect, known_backgrounds = [], unknown_backgrounds = [], boundaries = None):
       """
@@ -1027,51 +1027,51 @@ class simulated_learning_module(learning_module):
       #Divide the participants into subgroups where the members are subject
       #to the same known backgrounds
       self.subgroups = _define_subgroups(self.n_participants, self.known_backgrounds, self.background_flags)
-      self.digicomp_pre = self._calculate_digicomp_pre()
+      self.digicomp_initial = self._calculate_digicomp_initial()
 
       # This cannot be calculated without a study object that specifies the
       # default effect of the learning modules and any manipulations
-      self.digicomp_post = np.nan * np.zeros(self.n_participants)
+      self.digicomp_final = np.nan * np.zeros(self.n_participants)
       
       return
    
    ### Methods for calculating digital competence
    
-   def _calculate_digicomp_pre(self):
+   def _calculate_digicomp_initial(self):
       """
       Calculate the digital competence prior to the start of the course,
       using the default and adding the relevant background effects
       """
-      digicomp_pre = np.ones(self.n_participants) * self.default_digicomp
+      digicomp_initial = np.ones(self.n_participants) * self.default_digicomp
       for background in self.backgrounds:
-          digicomp_pre[self.background_flags[background.name]] = background.pre_transformation(digicomp_pre[self.background_flags[background.name]])
-      return digicomp_pre
+          digicomp_initial[self.background_flags[background.name]] = background.pre_transformation(digicomp_initial[self.background_flags[background.name]])
+      return digicomp_initial
       
-   def calculate_digicomp_post(self, manipulations = [], manipulation_flags = []):
+   def calculate_digicomp_final(self, manipulations = [], manipulation_flags = []):
       """
       Calculates the digital competence after finishing the course. To do
       this a default effect, together with manipulations and manipulation
       flags must be provided.
       """
-      self.digicomp_post = self.default_effect(self.digicomp_pre)
+      self.digicomp_final = self.default_effect(self.digicomp_initial)
       
       for manipulation in manipulations:
-         self.digicomp_post[manipulation_flags[manipulation.name]] = manipulation.transformation(self.digicomp_post[manipulation_flags[manipulation.name]])
+         self.digicomp_final[manipulation_flags[manipulation.name]] = manipulation.transformation(self.digicomp_final[manipulation_flags[manipulation.name]])
       for background in self.backgrounds:
-         self.digicomp_post[self.background_flags[background.name]] = background.post_transformation(self.digicomp_post[self.background_flags[background.name]])
+         self.digicomp_final[self.background_flags[background.name]] = background.post_transformation(self.digicomp_final[self.background_flags[background.name]])
       return
       
    ### Methods for calculating results based on digital competence
    
    def calculate_results(self):
-      self.results_pre = np.zeros(self.n_participants)
-      self.results_post = np.zeros(self.n_participants)
+      self.results_initial = np.zeros(self.n_participants)
+      self.results_final = np.zeros(self.n_participants)
       for i in range(self.n_participants):
-         participant, digicomp_pre, digicomp_post = self.participants[i], self.digicomp_pre[i], self.digicomp_post[i]
-         participant.set_digicomp(digicomp_pre, digicomp_post)
+         participant, digicomp_initial, digicomp_final = self.participants[i], self.digicomp_initial[i], self.digicomp_final[i]
+         participant.set_digicomp(digicomp_initial, digicomp_final)
          participant.calculate_results(self.n_sessions, self.n_skills)
-         self.results_pre[i] = participant.correct_onwards[0]
-         self.results_post[i] = participant.correct_onwards[self.n_sessions - 1]
+         self.results_initial[i] = participant.correct_onwards[0]
+         self.results_final[i] = participant.correct_onwards[self.n_sessions - 1]
       return
 
    ### Method for running simulation
@@ -1081,7 +1081,7 @@ class simulated_learning_module(learning_module):
       Simulate the participants taking their various versions of the course,
       increasing in digital competence as they do so.
       """
-      self.calculate_digicomp_post(self.manipulations, self.manipulation_flags)
+      self.calculate_digicomp_final(self.manipulations, self.manipulation_flags)
       self.calculate_results()
       return
 
@@ -1134,19 +1134,19 @@ class real_learning_module(learning_module):
    subgroups : dict of int ndarrays
    \tDictionary containing the indices of the participants in each
    \tsubgroup
-   digicomp_pre : float ndarray
+   digicomp_initial : float ndarray
    \tThe digital competence of the participants before taking the module
-   digicomp_post : float ndarray
+   digicomp_final : float ndarray
    \tThe digital competence of the participants after taking the module
    digicomp_set : bool
-   \tWhether anything has set digicomp_pre and digicomp_post
+   \tWhether anything has set digicomp_initial and digicomp_final
    """
-   def __init__(self, n_skills, n_sessions, id_path, background_path, results_pre_path, results_post_path, boundaries = None):
+   def __init__(self, n_skills, n_sessions, id_path, background_path, results_initial_path, results_final_path, boundaries = None):
       learning_module.__init__(self, n_skills, n_sessions, boundaries)
       self.load_ids(id_path)
       self.load_backgrounds(background_path)
-      self.load_results_pre(results_pre_path)
-      self.load_results_post(results_post_path)
+      self.load_results_initial(results_initial_path)
+      self.load_results_final(results_final_path)
       #Divide the participants into subgroups where the members are subject
       #to the same known backgrounds
       self.subgroups = _define_subgroups(self.n_participants, self.backgrounds, self.background_flags)
@@ -1364,22 +1364,22 @@ class study:
       Runs boundary tests for the entire module, to check whether it has any
       noteworthy effect to begin with.
       """
-      return self._boundary_tests(learning_module.results_pre, learning_module.results_post)
+      return self._boundary_tests(learning_module.results_initial, learning_module.results_final)
 
    def _boundary_test_background_or_manipulation(self, flags, learning_module):
       """
       Runs boundary tests with respect to some background or manipulation.
       """
-      treatment_group_pre = learning_module.results_pre[flags]
-      control_group_pre = learning_module.results_pre[np.invert(flags)]
-      treatment_group_post = learning_module.results_post[flags]
-      control_group_post = learning_module.results_post[np.invert(flags)]
+      treatment_group_initial = learning_module.results_initial[flags]
+      control_group_initial = learning_module.results_initial[np.invert(flags)]
+      treatment_group_final = learning_module.results_final[flags]
+      control_group_final = learning_module.results_final[np.invert(flags)]
       
       poor = self.learning_module.boundaries.poor
       good = self.learning_module.boundaries.poor
       
       boundary_tests = {'treatment group':{}, 'control group':{}}
-      for text, pre, post in [('treatment group', treatment_group_pre, treatment_group_post), ('control group', control_group_pre, control_group_post)]:
+      for text, pre, post in [('treatment group', treatment_group_initial, treatment_group_final), ('control group', control_group_initial, control_group_final)]:
          boundary_tests[text] = self._boundary_tests(pre, post)
       
       self._fill_dictionary_with_qk_and_dk(boundary_tests, self.learning_module.boundaries.minimum_quality_difference)
@@ -1432,8 +1432,8 @@ class study:
       themselves at another point in time.
       """
       median_tests = {}
-      median_tests['after module'] = self._median_tests(learning_module.results_pre, learning_module.results_post)
-      median_tests['before module'] = self._median_tests(learning_module.results_post, learning_module.results_pre)
+      median_tests['after module'] = self._median_tests(learning_module.results_initial, learning_module.results_final)
+      median_tests['before module'] = self._median_tests(learning_module.results_final, learning_module.results_initial)
       self._fill_dictionary_with_qk_and_dk(median_tests['after module'], 0.1) 
       return median_tests
       
@@ -1443,13 +1443,13 @@ class study:
       control or treatment group does better than the median for the control
       and treatment groups together.
       """
-      treatment_group_pre = learning_module.results_pre[flags]
-      control_group_pre = learning_module.results_pre[np.invert(flags)]
-      treatment_group_post = learning_module.results_post[flags]
-      control_group_post = learning_module.results_post[np.invert(flags)]
+      treatment_group_initial = learning_module.results_initial[flags]
+      control_group_initial = learning_module.results_initial[np.invert(flags)]
+      treatment_group_final = learning_module.results_final[flags]
+      control_group_final = learning_module.results_final[np.invert(flags)]
       
       median_tests = {}
-      for text, control, treat in [('before module', control_group_pre, treatment_group_pre), ('after module', control_group_post, treatment_group_post)]:
+      for text, control, treat in [('before module', control_group_initial, treatment_group_initial), ('after module', control_group_final, treatment_group_final)]:
          median_tests[text] = self._median_tests(control, treat)
          self._fill_dictionary_with_qk_and_dk(median_tests[text], 0.1) # Fix magic number
       return median_tests
@@ -1463,14 +1463,14 @@ class study:
       self.measured_results = {}
       self.measured_results['quick tests'] = {}
       for manipulation in self.learning_module.manipulations:
-         self.measured_results['quick tests'][manipulation.name] = self._compare_flagged(self.learning_module.manipulation_flags[manipulation.name], self.learning_module.results_post)
+         self.measured_results['quick tests'][manipulation.name] = self._compare_flagged(self.learning_module.manipulation_flags[manipulation.name], self.learning_module.results_final)
       for background in self.learning_module.known_backgrounds:
-         self.measured_results['quick tests'][background.name] = self._compare_flagged(self.learning_module.background_flags[background.name], self.learning_module.results_post)
+         self.measured_results['quick tests'][background.name] = self._compare_flagged(self.learning_module.background_flags[background.name], self.learning_module.results_final)
          
       self.measured_results['quick tests']['total'] = {}
-      self.measured_results['quick tests']['total']['pre-course median'] = np.median(self.learning_module.results_pre)
-      self.measured_results['quick tests']['total']['post-course median'] = np.median(self.learning_module.results_post)
-      n_improved = np.sum(self.learning_module.results_post > self.learning_module.results_pre)
+      self.measured_results['quick tests']['total']['pre-course median'] = np.median(self.learning_module.results_initial)
+      self.measured_results['quick tests']['total']['post-course median'] = np.median(self.learning_module.results_final)
+      n_improved = np.sum(self.learning_module.results_final > self.learning_module.results_initial)
       with np.errstate(divide = 'ignore'):
          pvalue = st.binom_test(n_improved, self.learning_module.n_participants)
       self.measured_results['quick tests']['total']['sign test p-value'] = pvalue

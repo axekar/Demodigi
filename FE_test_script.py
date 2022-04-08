@@ -107,15 +107,15 @@ if plot_results:
    trial_study.plot_results()
    trial_study.plot_participants()
 if save_results:
-   trial_study.learning_module.save_results_pre('simulated_results_pre.json')
-   trial_study.learning_module.save_results_post('simulated_results_post.json')
+   trial_study.learning_module.save_results_initial('simulated_results_initial.json')
+   trial_study.learning_module.save_results_final('simulated_results_final.json')
 
 
 # The data that was just saved is loaded again
 
 if load_results:
    print('Loading saved data...')
-   loaded_learning_module = fe.real_learning_module(n_skills, n_sessions, 'simulated_participants.json', 'simulated_backgrounds.json', 'simulated_results_pre.json', 'simulated_results_post.json', boundaries = bounds)
+   loaded_learning_module = fe.real_learning_module(n_skills, n_sessions, 'simulated_participants.json', 'simulated_backgrounds.json', 'simulated_results_initial.json', 'simulated_results_final.json', boundaries = bounds)
    loaded_learning_module.load_manipulations('simulated_manipulations.json')
    loaded_study = fe.study('test of loading', loaded_learning_module)
    loaded_study.do_tests()
