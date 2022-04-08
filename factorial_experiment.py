@@ -746,7 +746,7 @@ class learning_module(ABC):
          self.ranking_by_session[:,i] = _ordinalise(self.results[:,i])
          
       total_ranking = np.zeros(self.n_participants)
-      # I think this whole think makes sense, but I'm kind of tired so I'll have to 
+      # I think this whole thing makes sense, but I'm kind of tired so I'll have to 
       # think it through at some latter point
       for i in range(self.n_sessions - 1):
          total_ranking += self.ranking_by_session[:,-1-i] / (self.n_participants + 1)**i
@@ -1426,11 +1426,12 @@ class study:
       """
       treatment_group_initial = learning_module.results_initial[flags]
       control_group_initial = learning_module.results_initial[np.invert(flags)]
-      treatment_group_final = learning_module.results_final[flags]
-      control_group_final = learning_module.results_final[np.invert(flags)]
+      
+      treatment_group_ranks = learning_module.ranking[flags]
+      control_group_ranks = learning_module.ranking[np.invert(flags)]
       
       median_tests = {}
-      for text, control, treat in [('before module', control_group_initial, treatment_group_initial), ('after module', control_group_final, treatment_group_final)]:
+      for text, control, treat in [('before module', control_group_initial, treatment_group_initial), ('after module', control_group_ranks, treatment_group_ranks)]:
          median_tests[text] = self._median_tests(control, treat)
          self._fill_dictionary_with_qk_and_dk(median_tests[text], 0.1) # Fix magic number
       return median_tests
