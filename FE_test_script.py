@@ -13,8 +13,9 @@ Setting plot_results to True causes it to attempt to make plots in a
 folder named DD_plots, which has to be in the same directory as the
 script is run in.
 
-Setting save_results to True causes it to save json files with
-information about the study.
+Setting save_results to True causes it to save json files with the
+simulated particpants' results in a folder named Simulated_results,
+which has to be in the same directory as the script is run in.
 
 setting load_results to True causes it to attempt to load the results
 that were saved by save_results. This is mostly to allow quickly
