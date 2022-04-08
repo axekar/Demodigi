@@ -699,7 +699,7 @@ class learning_module(ABC):
       """
       self.boundaries = boundaries
       
-      self.n = np.nan
+      self.n_participants = np.nan
       self.n_skills = n_skills
 
       self.n_backgrounds = np.nan      
@@ -728,7 +728,7 @@ class learning_module(ABC):
 
       manipulation_flags = {}
       for i in range(n_manipulations):
-         flags = np.zeros(self.n, dtype = np.bool)
+         flags = np.zeros(self.n_participants, dtype = np.bool)
          manipulation = self.manipulations[i]
 
          for subgroup_name, subgroup_indices in self.subgroups.items():
@@ -750,7 +750,7 @@ class learning_module(ABC):
       self.n_manipulations = len(self.manipulations)
       self.manipulation_flags = self._set_manipulation_flags()
       self.all_flags = {**self.manipulation_flags, **self.background_flags}
-      self.manipulation_groups = _define_subgroups(self.n, self.manipulations, self.manipulation_flags)
+      self.manipulation_groups = _define_subgroups(self.n_participants, self.manipulations, self.manipulation_flags)
       return
          
    
@@ -835,7 +835,7 @@ class learning_module(ABC):
       f.close()
       unpacked = json.loads(packed)
       self.ids = unpacked['IDs']
-      self.n = len(self.ids)
+      self.n_participants = len(self.ids)
       return
 
    def load_backgrounds(self, path):
@@ -974,7 +974,7 @@ class simulated_learning_module(learning_module):
    digicomp_set : bool
    \tWhether anything has set digicomp_pre and digicomp_post
    """
-   def __init__(self, n_skills, n, default_digicomp, default_effect, known_backgrounds = [], unknown_backgrounds = [], boundaries = None):
+   def __init__(self, n_skills, n_participants, default_digicomp, default_effect, known_backgrounds = [], unknown_backgrounds = [], boundaries = None):
       """
       Parameters
       ----------
@@ -993,8 +993,8 @@ class simulated_learning_module(learning_module):
       \tDescribed under boundaries
       """
       learning_module.__init__(self, n_skills, boundaries)
-      self.n = n
-      self.ids = [str(number) for number in range(self.n)]
+      self.n_participants = n_participants
+      self.ids = [str(number) for number in range(self.n_participants)]
       self.default_digicomp = default_digicomp
       self.default_effect = default_effect
       self.known_backgrounds = known_backgrounds
@@ -1004,16 +1004,16 @@ class simulated_learning_module(learning_module):
 
       self.background_flags = {}
       for background in self.backgrounds:
-         self.background_flags[background.name] = rd.random(self.n) < background.fraction
+         self.background_flags[background.name] = rd.random(self.n_participants) < background.fraction
       
       #Divide the participants into subgroups where the members are subject
       #to the same known backgrounds
-      self.subgroups = _define_subgroups(self.n, self.known_backgrounds, self.background_flags)
+      self.subgroups = _define_subgroups(self.n_participants, self.known_backgrounds, self.background_flags)
       self.digicomp_pre = self._calculate_digicomp_pre()
 
       # This cannot be calculated without a study object that specifies the
       # default effect of the learning modules and any manipulations
-      self.digicomp_post = np.nan * np.zeros(self.n)
+      self.digicomp_post = np.nan * np.zeros(self.n_participants)
       return
    
    ### Methods for calculating digital competence
@@ -1023,7 +1023,7 @@ class simulated_learning_module(learning_module):
       Calculate the digital competence prior to the start of the course,
       using the default and adding the relevant background effects
       """
-      digicomp_pre = np.ones(self.n) * self.default_digicomp
+      digicomp_pre = np.ones(self.n_participants) * self.default_digicomp
       for background in self.backgrounds:
           digicomp_pre[self.background_flags[background.name]] = background.pre_transformation(digicomp_pre[self.background_flags[background.name]])
       return digicomp_pre
@@ -1045,11 +1045,11 @@ class simulated_learning_module(learning_module):
    ### Methods for calculating results based on digital competence
    
    def _calculate_results(self, digicomp_list):
-      comp_array = np.zeros((self.n, self.n_skills))
-      for i in range(self.n):
+      comp_array = np.zeros((self.n_participants, self.n_skills))
+      for i in range(self.n_participants):
          comp_array[i,:] = digicomp_list[i]
    
-      flat_random = rd.random((self.n, self.n_skills))
+      flat_random = rd.random((self.n_participants, self.n_skills))
       correct = flat_random < comp_array
       results = np.sum(correct, axis = 1) / self.n_skills
       return results
@@ -1079,7 +1079,7 @@ class simulated_learning_module(learning_module):
       Gives a summary of the most important facts about the participants
       """
       print("Description of the participants:\n")
-      print("There {} {} participant{}".format(_is_are(self.n), self.n, _plural_ending(self.n)))
+      print("There {} {} participant{}".format(_is_are(self.n_participants), self.n_participants, _plural_ending(self.n_participants)))
       for wording, background_dict in [("known", self.known_backgrounds), ("unknown", self.unknown_backgrounds)]:
          n_backgrounds = len(background_dict)
          print("\nThere {} {} background{} {} to the experimenters".format(_is_are(n_backgrounds), n_backgrounds, _plural_ending(n_backgrounds), wording))
@@ -1087,7 +1087,7 @@ class simulated_learning_module(learning_module):
             n_affected = np.sum(self.background_flags[background.name])
             print("{}Background: {}".format(_indent(1), background.name))
             print("{}Affects {} participant{}".format(_indent(2), n_affected, _plural_ending(n_affected)))
-            print("{}Which makes up {:.2f} of total".format(_indent(2), n_affected / self.n))
+            print("{}Which makes up {:.2f} of total".format(_indent(2), n_affected / self.n_participants))
       
       if len(self.known_backgrounds) > 0:
          print("\nThe known backgrounds require splitting the group into the following subgroups")
@@ -1136,7 +1136,7 @@ class real_learning_module(learning_module):
       self.load_results_post(results_post_path)
       #Divide the participants into subgroups where the members are subject
       #to the same known backgrounds
-      self.subgroups = _define_subgroups(self.n, self.backgrounds, self.background_flags)
+      self.subgroups = _define_subgroups(self.n_participants, self.backgrounds, self.background_flags)
       return
 
 class study:
@@ -1200,7 +1200,7 @@ class study:
       
       # Used when calculating and comparing the qualities for different
       # versions of the course
-      self._qk_samples = self.learning_module.n * 10
+      self._qk_samples = self.learning_module.n_participants * 10
       self._qk_sample_width = 1 / self._qk_samples
       self._Qki_range = np.linspace(0.0, 1.0, num=self._qk_samples)
       self._dk_samples = 2 * self._qk_samples - 1
@@ -1459,7 +1459,7 @@ class study:
       self.measured_results['quick tests']['total']['post-course median'] = np.median(self.learning_module.results_post)
       n_improved = np.sum(self.learning_module.results_post > self.learning_module.results_pre)
       with np.errstate(divide = 'ignore'):
-         pvalue = st.binom_test(n_improved, self.learning_module.n)
+         pvalue = st.binom_test(n_improved, self.learning_module.n_participants)
       self.measured_results['quick tests']['total']['sign test p-value'] = pvalue
 
       self.measured_results['median tests'] = {}
@@ -1486,7 +1486,7 @@ class study:
       are assumed to be known prior to the study being carried out.
       """
       print("Description of the study itself:\n")
-      print("There {} {} participant{}".format(_is_are(self.learning_module.n), self.learning_module.n, _plural_ending(self.learning_module.n)))
+      print("There {} {} participant{}".format(_is_are(self.learning_module.n_participants), self.learning_module.n_participants, _plural_ending(self.learning_module.n_participants)))
       print("We are testing {} manipulation{}:".format(self.learning_module.n_manipulations, _plural_ending(self.learning_module.n_manipulations)))
       for manipulation in self.learning_module.manipulations:
          print("{}{}".format(_indent(1), manipulation.name))
@@ -1595,8 +1595,8 @@ class study:
       Plot group membership of all participants
       """
       def plot_flags(flags, name):
-         side = int(np.ceil(np.sqrt(self.learning_module.n)))
-         i = np.arange(self.learning_module.n)
+         side = int(np.ceil(np.sqrt(self.learning_module.n_participants)))
+         i = np.arange(self.learning_module.n_participants)
          x = i % side
          y = i // side
          plt.clf()
@@ -1609,9 +1609,9 @@ class study:
          
       def plot_group_subgroup(flags_1, flags_2, name_1, name_2):
          # The dummy is to prevent sorted from also sorting based on flags_2
-         sorted_1, dummy, sorted_2 = zip(*sorted(zip(flags_1, range(self.learning_module.n), flags_2)))
-         side = int(np.ceil(np.sqrt(self.learning_module.n)))
-         i = np.arange(self.learning_module.n)
+         sorted_1, dummy, sorted_2 = zip(*sorted(zip(flags_1, range(self.learning_module.n_participants), flags_2)))
+         side = int(np.ceil(np.sqrt(self.learning_module.n_participants)))
+         i = np.arange(self.learning_module.n_participants)
          x = i % side
          y = i // side
          
