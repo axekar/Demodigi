@@ -87,11 +87,12 @@ testgroup = fe.simulated_learning_module(n_skills, n_sessions, n_participants, 0
 testgroup.set_manipulations(manipulations)
 if print_results:
    testgroup.describe()
+testgroup.run_simulation()
 if save_results:
    testgroup.save_ids('simulated_participants.json')
    testgroup.save_backgrounds('simulated_backgrounds.json')
    testgroup.save_manipulations('simulated_manipulations.json')
-testgroup.run_simulation()
+   testgroup.save_results('Simulated_results')
 
 # Everything is put together into a study, which is then run and the
 # desired output is displayed
@@ -106,16 +107,13 @@ if plot_results:
    trial_study.plot_folder = 'DD_plots'
    trial_study.plot_results()
    trial_study.plot_participants()
-if save_results:
-   trial_study.learning_module.save_results_initial('simulated_results_initial.json')
-   trial_study.learning_module.save_results_final('simulated_results_final.json')
 
 
 # The data that was just saved is loaded again
 
 if load_results:
    print('Loading saved data...')
-   loaded_learning_module = fe.real_learning_module(n_skills, n_sessions, 'simulated_participants.json', 'simulated_backgrounds.json', 'simulated_results_initial.json', 'simulated_results_final.json', boundaries = bounds)
+   loaded_learning_module = fe.real_learning_module(n_skills, n_sessions, 'simulated_participants.json', 'simulated_backgrounds.json', 'Simulated_results', boundaries = bounds)
    loaded_learning_module.load_manipulations('simulated_manipulations.json')
    loaded_study = fe.study('test of loading', loaded_learning_module)
    loaded_study.do_tests()

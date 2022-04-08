@@ -814,30 +814,11 @@ class learning_module(ABC):
       f.close()
       return
 
-   def _save_results(self, path, results):
-      """
-      Save a file listing the results before or after the course
-      module, for each participant
-      """
-      f = open(path, 'w')
-      packed = json.dumps({'IDs':self.ids, 'Results': results.tolist()})
-      f.write(packed)
-      f.close()
-      return
-      
-   def save_results_initial(self, path):
-      """
-      Save results of a test taken prior to the learning module
-      """
-      self._save_results(path, self.results_initial)
+   def save_results(self, folder_path):
+      for participant in self.participants:
+         participant.save_results(folder_path)
       return
 
-   def save_results_final(self, path):
-      """
-      Save the results of the actual learning module
-      """
-      self._save_results(path, self.results_final)
-      return
 
    ### Methods for reading data from disk
    
@@ -851,6 +832,10 @@ class learning_module(ABC):
       unpacked = json.loads(packed)
       self.ids = unpacked['IDs']
       self.n_participants = len(self.ids)
+      
+      self.participants = []
+      for ID in self.ids:
+         self.participants.append(real_participant(ID))
       return
 
    def load_backgrounds(self, path):
@@ -913,39 +898,14 @@ class learning_module(ABC):
       self.n_manipulations = len(manipulations)
       return
 
-
-   # This stuff will have to be replaced at some point
-   def _load_results(self, path):
-      f = open(path, 'r')
-      packed = f.read()
-      f.close()
-      unpacked = json.loads(packed)
- 
-      ids = unpacked['IDs']
-      results = np.asarray(unpacked['Results'], dtype=np.float64)
- 
-      try:
-         results = np.asarray(_match_ids(self.ids, ids, results), dtype = np.float64)
-      except IDMismatchError:
-         print("Cannot read data from file!")
-         print("IDs in file do not match IDs of participants in study")
-         return
-      return results
-
-   def load_results_initial(self, path):
-      """
-      Load the participants' results in a diagnostic test prior to taking
-      the course module
-      """
-      self.results_initial = self._load_results(path)
-      return
-
-   def load_results_final(self, path):
-      """
-      Load the participants' results on the final session of the course
-      module
-      """
-      self.results_final = self._load_results(path)
+   def load_results(self, folder_path):
+      self.results = np.zeros((self.n_participants, self.n_sessions))
+      for i in range(self.n_participants):
+         participant = self.participants[i]
+         participant.load_results(folder_path)
+         self.results[i,:] = participant.correct_onwards
+      self.results_initial = self.results[:,0]
+      self.results_final = self.results[:,self.n_sessions - 1]
       return
 
 
@@ -1142,12 +1102,11 @@ class real_learning_module(learning_module):
    digicomp_set : bool
    \tWhether anything has set digicomp_initial and digicomp_final
    """
-   def __init__(self, n_skills, n_sessions, id_path, background_path, results_initial_path, results_final_path, boundaries = None):
+   def __init__(self, n_skills, n_sessions, id_path, background_path, results_folder_path, boundaries = None):
       learning_module.__init__(self, n_skills, n_sessions, boundaries)
       self.load_ids(id_path)
       self.load_backgrounds(background_path)
-      self.load_results_initial(results_initial_path)
-      self.load_results_final(results_final_path)
+      self.load_results(results_folder_path)
       #Divide the participants into subgroups where the members are subject
       #to the same known backgrounds
       self.subgroups = _define_subgroups(self.n_participants, self.backgrounds, self.background_flags)
