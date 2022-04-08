@@ -1073,24 +1073,6 @@ class simulated_learning_module(learning_module):
          self.results_pre[i] = participant.correct_onwards[0]
          self.results_post[i] = participant.correct_onwards[self.n_sessions - 1]
       return
-   
-   """
-   def _calculate_results(self, digicomp_list):
-      comp_array = np.zeros((self.n_participants, self.n_skills))
-      for i in range(self.n_participants):
-         comp_array[i,:] = digicomp_list[i]
-   
-      flat_random = rd.random((self.n_participants, self.n_skills))
-      correct = flat_random < comp_array
-      results = np.sum(correct, axis = 1) / self.n_skills
-      return results
-      
-   def calculate_results_pre(self):
-      self.results_pre = self._calculate_results(self.digicomp_pre)
-
-   def calculate_results_post(self):
-      self.results_post = self._calculate_results(self.digicomp_post)
-   """
 
    ### Method for running simulation
    
@@ -1099,11 +1081,7 @@ class simulated_learning_module(learning_module):
       Simulate the participants taking their various versions of the course,
       increasing in digital competence as they do so.
       """
-
-
-      #self.calculate_results_pre()
       self.calculate_digicomp_post(self.manipulations, self.manipulation_flags)
-      #self.calculate_results_post()
       self.calculate_results()
       return
 
