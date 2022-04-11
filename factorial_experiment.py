@@ -4,10 +4,24 @@ Digitalisering. The project is a collaboration between
 Arbetsförmedlingen (AF) and Kungliga Tekniska Högskolan (KTH). The
 purpose of the project is to increase the digital competence - as
 defined at https://ec.europa.eu/jrc/en/digcomp - of people working at
-Arbetsförmedlingen, and by extension also job seekers. This shall be
+Arbetsförmedlingen, and by extension also job seekers. This will be
 done by learning modules at KTH using OLI-Torus.
 
---- About the module ---
+--- About the learning modules ---
+
+Each learning module is supposed to teach some broadly-defined area,
+such as IT security. This area is divided into a certain number of
+skills. When taking a learning module, the participant is each session
+given one question for each skill. Whatever answer they give they get
+detailed feedback, and they get to try over and over again until they
+get the answer right. From our point of view the ideal is that the
+participants should answer every question wrong on the first try on the
+first session, and immediately get the questions testing the same skill
+right on the subsequent sessions. This would mean that they did not
+already know any of what we wanted to teach them, but that they picked
+it up quickly and were able to recollect it afterwards.
+
+--- About this Python module ---
 
 This module can be used to analyse either real or simulated data. The
 latter is intended as a proof-of-concept, to ensure that the planned
