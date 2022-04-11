@@ -301,17 +301,21 @@ def _match_ids(reference_ids, ids, data):
 ### Digital competence effects
 # These are functions that change digital competence in some way. They
 # assume that digital competence is a real number above 0 and below 1,
-# corresponding to the probability of correctly answering a summative
-# question in the learning module.
+# corresponding to the probability of correctly answering a question in
+# the learning module.
 
 def improvement(digicomp_initial, factor):
    """
-   Represents an improvement which decreases the risk of incorrectly
-   answering a summative question by factor
+   Represents an effect which decreases the risk of incorrectly answering
+   a summative question by some factor
    """
    return 1 - factor * (1 - digicomp_initial)
 
 def deterioration(digicomp_initial, factor):
+   """
+   Represents an effect which increases the risk of incorrectly answering
+   a summative question by some factor
+   """
    return factor * digicomp_initial
 
 standard_transformations = {"large improvement": lambda digicomp_initial : improvement(digicomp_initial, 1/2),
@@ -562,19 +566,22 @@ class participant(ABC):
    \tThe number of sessions that the participant has participated in
    n_skills : int
    \tThe number of separate skills that the participant has been tested on
+   results_read : bool
+   \tWhether any results have been set for the participant, either by
+   \tactual data being read from a file or simulated data being calculated
+   
+   Attributes set by load_results or calculate_results
+   ---------------------------------------------------
    results : bool ndarray
    \tArray stating whether the first answer attempt was correct for each
    \tskill during each session. The first index denotes skill, the second
    \tdenotes session
-   results_read : bool
-   \tWhether any results have been set for the participant, either by
-   \tactual data being read from a file or simulated data being calculated
    last_wrong : int ndarray of length n_skills
    \tBy which session the participant last answered wrong on the first try
    \ton the questions testing each particular skill. Negative one should
    \tbe taken to mean that they got it right on the first try.
    correct_onwards : int ndarray of length n_sessions
-   \tBy which session, how many skills got correct answers from that
+   \tFor each session, how many skills got correct answers from that
    \tsession onwards
    """
    def __init__(self, ID):
@@ -596,7 +603,7 @@ class participant(ABC):
       """
       Evaluate the quality of the participants' results by looking at from
       which session onwards they consistently answered the questions on a
-      particular skill correctly.
+      particular skill correctly
       """
       def last_wrong_per_skill(skill_row):
          column = self.n_sessions - 1
@@ -684,7 +691,6 @@ class simulated_participant(participant):
       self.digicomp_set = False
       return
       
-   
    def set_digicomp(self, digicomp_initial, digicomp_final):
       self.digicomp_initial = digicomp_initial
       self.digicomp_final = digicomp_final
@@ -693,7 +699,8 @@ class simulated_participant(participant):
    
    def calculate_results(self, n_sessions, n_skills):
       """
-      Simulate results of a learning module
+      Simulate results of a learning module. This requires digital
+      competence to already have been set.
       """
       if self.digicomp_set:
          self.n_sessions = n_sessions
@@ -1162,17 +1169,6 @@ class study:
    \tThe boundaries defining what counts as good or poor results
    boundary_tests_run: bool
    \tWhether statistical tests using the boundaries have been run
-   manipulations : list of manipulation
-   \tA list of manipulations. This is initially empty, and needs to be set
-   \tusing either the set_manipulations or load_manipulations methods
-   manipulation_flags : dict of bool ndarrays
-   \tFlags stating which participants are subject to which manipulations.
-   \tInitially empty, and needs to be set using either set_manipulations
-   \tor load_manipulations
-   all_flags : dict of bool ndarrays
-   \tFlags stating which participants are subject
-   manipulation_groups : dict of lists of int
-   \tIndices of the members subject to each manipulation
    measured_results : dict
    \tDictionary containing the results of the statistical analysis
    plot_folder : str
