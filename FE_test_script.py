@@ -14,11 +14,24 @@ for alpha in range(1, 10):
    for beta in range(1, 10):
       logB_symmetry = logB_symmetry and fe.logB(alpha, beta) == fe.logB(beta, alpha)
 
-if logB_one_handling:
-   print('logB handles ones correctly')
-else:
+if not logB_one_handling:
    print('logB does not handle ones correctly!')
-if logB_symmetry:
-   print('logB is symmetric')
-else:
+if not logB_symmetry:
    print('logB is not symmetric!')
+if logB_one_handling and logB_symmetry:
+   print('logB passed tests!')
+   
+print('Testing methods of simulated_participant class...')
+n_sessions = 13
+n_skills = 7
+test_participant = fe.simulated_participant('Alice')
+test_participant.set_digicomp(0., 1.)
+test_participant.calculate_results(n_sessions, n_skills)
+always_fail = np.sum(test_participant.results[:,0]) == 0
+always_succeed = np.sum(test_participant.results[:,n_sessions-1]) == n_skills
+if not always_fail:
+   print('Participant is succeeding even when her digital competence is zero!')
+if not always_succeed:
+   print('Participant is failing even when her digital competence is one!')
+if always_fail and always_succeed:
+   print('simulated_participant passed tests!')
