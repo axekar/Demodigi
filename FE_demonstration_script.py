@@ -1,25 +1,27 @@
 """
-This is a script for testing the module demodigi, by running a
-simulated study with 1000 participants and three manipulations, two of
-which give a slight improvement and one of which does nothing. There
-are three background variables that affect the initial digital
-competence, the effect of the learning module, or both. Two of them are
-known, and one is unknown.
+This is a script for demonstrating how to use the module demodigi
 
-Setting print_results to True gives a verbose description of the
+The scripts simulates study with 1000 participants and three
+manipulations, two of which give a slight improvement and one of which
+does nothing. There are three background variables that affect the
+initial digital competence, the effect of the learning module, or both.
+Two of them are known, and one is unknown.
+
+There are a couple of toggle which are by default set to True:
+
+ - print_results gives a verbose description of the
 results of the study.
 
-Setting plot_results to True causes it to attempt to make plots in a
+ - plot_results causes the script to attempt to make plots in a
 folder named DD_plots, which has to be in the same directory as the
 script is run in.
 
-Setting save_results to True causes it to save json files with the
-simulated particpants' results in a folder named Simulated_results,
+ - save_results causes the script to save json files with the
+simulated participants' results in a folder named Simulated_results,
 which has to be in the same directory as the script is run in.
 
-setting load_results to True causes it to attempt to load the results
-that were saved by save_results. This is mostly to allow quickly
-testing that the loading and saving works.
+ - load_results causes the script to attempt to load the results
+that were saved by save_results.
 """
 
 import factorial_experiment as fe
