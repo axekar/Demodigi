@@ -16,7 +16,7 @@ ordinalised = fe.ordinalise(reverse_data)
 reverses = np.all(ordinalised == np.asarray(list(reversed(range(0, 5)))))
 
 if not stays_same:
-   print('Already ordinal data is reordered!')
+   print('Already ordered data is reordered!')
 if not reverses:
    print('Data in reverse order is not reversed')
 if stays_same and reverses:
@@ -52,4 +52,15 @@ if not always_succeed:
 if always_fail and always_succeed:
    print('simulated_participant passed tests!')
    
-
+print('Testing methods of simulated_learning_module class...')
+n_sessions = 13
+n_skills = 7
+n_participants = 127
+default_digicomp = 0
+no_skill_no_effect = fe.simulated_learning_module(n_skills, n_sessions, n_participants, 0.3, fe.standard_transformations['no effect'])
+no_skill_no_effect.run_simulation()
+all_fail = np.sum(no_skill_no_effect.results[:,0]) == 0
+if not all_fail:
+   print('Participants are succeeding even when their digital competence is zero!')
+if all_fail:
+   print('simulated_learning_module passed tests!')

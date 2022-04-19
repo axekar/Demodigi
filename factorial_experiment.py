@@ -766,10 +766,12 @@ class learning_module(ABC):
          self.ranking_by_session[:,i] = ordinalise(self.results[:,i])
          
       total_ranking = np.zeros(self.n_participants)
-      # I think this whole thing makes sense, but I'm kind of tired so I'll have to 
-      # think it through at some latter point
+      
       for i in range(self.n_sessions - 1):
-         total_ranking += self.ranking_by_session[:,-1-i] / (self.n_participants + 1)**i
+         # Unless you explicitly make this a float, the type of (self.n_participants + 1)**i
+         # suddenly changes once i is big enough. I do not know if this is a bug in numpy or
+         # a feature so clever I cannot understand it.
+         total_ranking += self.ranking_by_session[:,-1-i] / float((self.n_participants + 1)**i)
       self.ranking = ordinalise(total_ranking)
       return
    
