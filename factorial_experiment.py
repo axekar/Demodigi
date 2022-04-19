@@ -233,7 +233,7 @@ def _define_subgroups(n, backgrounds_or_manipulations, background_or_manipulatio
       groups[group_name] = np.asarray(groups[group_name])
    return groups
 
-def _ordinalise(ndarray):
+def ordinalise(ndarray):
    """
    Takes a 1-d ndarray and makes the data ordinal. That is to say, the
    elements will be turned into integers denoting the lowest, second
@@ -253,12 +253,12 @@ def _ordinalise(ndarray):
       j += 1
    return ordinal
    
-def _ordinalise_many(ndarrays):
+def ordinalise_many(ndarrays):
    """
    Takes a list of ndarrays and puts them on a common ordinal scale.
    """
    concatenated = np.concatenate(ndarrays)
-   ordinal_long = _ordinalise(concatenated)
+   ordinal_long = ordinalise(concatenated)
    ordinal = []
    cut = 0
    for ndarray in ndarrays:
@@ -598,7 +598,6 @@ class participant(ABC):
       self.correct_onwards = np.asarray([], dtype = np.int64)
       return
 
-   
    def _evaluate_results_according_to_last_wrong(self):
       """
       Evaluate the quality of the participants' results by looking at from
@@ -764,14 +763,14 @@ class learning_module(ABC):
    def _rank_participants(self):
       self.ranking_by_session = np.zeros((self.n_participants, self.n_sessions))
       for i in range(self.n_sessions):
-         self.ranking_by_session[:,i] = _ordinalise(self.results[:,i])
+         self.ranking_by_session[:,i] = ordinalise(self.results[:,i])
          
       total_ranking = np.zeros(self.n_participants)
       # I think this whole thing makes sense, but I'm kind of tired so I'll have to 
       # think it through at some latter point
       for i in range(self.n_sessions - 1):
          total_ranking += self.ranking_by_session[:,-1-i] / (self.n_participants + 1)**i
-      self.ranking = _ordinalise(total_ranking)
+      self.ranking = ordinalise(total_ranking)
       return
    
    ### Methods for setting manipulations
@@ -1032,7 +1031,6 @@ class simulated_learning_module(learning_module):
       # This cannot be calculated without a study object that specifies the
       # default effect of the learning modules and any manipulations
       self.digicomp_final = np.nan * np.zeros(self.n_participants)
-      
       return
    
    ### Methods for calculating digital competence

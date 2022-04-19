@@ -7,6 +7,22 @@ import numpy as np
 
 import factorial_experiment as fe
 
+print('Testing ordinalise...')
+already_ordinal = list(range(0, 5))
+ordinalised = fe.ordinalise(already_ordinal)
+stays_same = np.all(ordinalised == np.arange(0, 5))
+reverse_data = list(reversed(range(0, 5)))
+ordinalised = fe.ordinalise(reverse_data)
+reverses = np.all(ordinalised == np.asarray(list(reversed(range(0, 5)))))
+
+if not stays_same:
+   print('Already ordinal data is reordered!')
+if not reverses:
+   print('Data in reverse order is not reversed')
+if stays_same and reverses:
+   print('ordinalise passed tests!')
+
+
 print('Testing logB...')
 logB_one_handling = np.exp(fe.logB(1, 1)) == 1
 logB_symmetry = True
@@ -35,3 +51,5 @@ if not always_succeed:
    print('Participant is failing even when her digital competence is one!')
 if always_fail and always_succeed:
    print('simulated_participant passed tests!')
+   
+
