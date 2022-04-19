@@ -1,5 +1,6 @@
 """
-This is a script for demonstrating how to use the module demodigi
+This is a script for demonstrating how to use the module
+factorial_experiment.
 
 The scripts simulates study with 1000 participants and three
 manipulations, two of which give a slight improvement and one of which
