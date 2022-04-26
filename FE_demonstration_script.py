@@ -48,11 +48,11 @@ known_background_1 = fe.simulated_background("hates computers", fe.standard_tran
 known_background_2 = fe.simulated_background("office is bouncy castle", fe.standard_transformations["no effect"], fe.standard_transformations["slight deterioration"], 0.05)
 known_backgrounds = [known_background_1, known_background_2]
 
-# We introduce one learned background, which affects only the 
+# We introduce one discovered background, which affects only the 
 # the effectiveness of the intervention.
 
-learned_background = fe.simulated_background("kazoo band outside office", fe.standard_transformations["no effect"], fe.standard_transformations["slight deterioration"], 0.1)
-learned_backgrounds = [learned_background]
+discovered_background = fe.simulated_background("kazoo band outside office", fe.standard_transformations["no effect"], fe.standard_transformations["slight deterioration"], 0.1)
+discovered_backgrounds = [discovered_background]
 
 # We introduce one unknown background, which affects both initial skill
 # and the effectiveness of the intervention.
@@ -93,7 +93,7 @@ initial_digital_competence = 0.5
 # manipulations
 default_effect = fe.standard_transformations["large improvement"]
 
-testgroup = fe.simulated_learning_module(n_skills, n_sessions, n_participants, initial_digital_competence, default_effect, known_backgrounds = known_backgrounds, learned_backgrounds = learned_backgrounds, unknown_backgrounds = unknown_backgrounds, boundaries = bounds)
+testgroup = fe.simulated_learning_module(n_skills, n_sessions, n_participants, initial_digital_competence, default_effect, known_backgrounds = known_backgrounds, discovered_backgrounds = discovered_backgrounds, unknown_backgrounds = unknown_backgrounds, boundaries = bounds)
 testgroup.set_manipulations(manipulations)
 if print_results:
    testgroup.describe()

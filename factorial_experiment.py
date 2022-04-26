@@ -736,7 +736,7 @@ class learning_module(ABC):
 
       self.n_backgrounds = np.nan      
       self.known_backgrounds = []
-      self.learned_backgrounds = []
+      self.discovered_backgrounds = []
       self.unknown_backgrounds = []
 
       self.ids = []
@@ -830,7 +830,7 @@ class learning_module(ABC):
       jsonable_background_names = {}
       jsonable_background_flags = {}
       
-      for wording, background_list in [("learned", self.learned_backgrounds), ("known", self.known_backgrounds)]:
+      for wording, background_list in [("discovered", self.discovered_backgrounds), ("known", self.known_backgrounds)]:
          jsonable_background_names[wording] = []
          for background in background_list:
             jsonable_background_names[wording].append(background.name)
@@ -893,15 +893,15 @@ class learning_module(ABC):
       
       ids = unpacked['IDs']
       known_backgrounds = []
-      learned_backgrounds = []
+      discovered_backgrounds = []
       for name in unpacked['Backgrounds']['known']:
          known_backgrounds.append(real_background(name))
-      for name in unpacked['Backgrounds']['learned']:
-         learned_backgrounds.append(real_background(name))
+      for name in unpacked['Backgrounds']['discovered']:
+         discovered_backgrounds.append(real_background(name))
 
       background_flags = unpacked['Background flags']
       
-      for background in known_backgrounds + learned_backgrounds:
+      for background in known_backgrounds + discovered_backgrounds:
          try:
             background_flags[background.name] = np.asarray(_match_ids(self.ids, ids, background_flags[background.name]), dtype = np.bool)
          except IDMismatchError:
@@ -910,7 +910,7 @@ class learning_module(ABC):
             return
 
       self.known_backgrounds = known_backgrounds
-      self.learned_backgrounds = learned_backgrounds
+      self.discovered_backgrounds = discovered_backgrounds
       # We assume that this is only done in the absence of unknown backgrounds
       self.unknown_backgrounds = []
       self.backgrounds = self.known_backgrounds + self.unknown_backgrounds
@@ -980,9 +980,9 @@ class simulated_learning_module(learning_module):
    \tassumed to be known to the experimenters ahead of time. This means
    \tthat it is possible for them to divide the participants affected
    \tby these background variables evenly w.r.t. the manipulations
-   learned_backgrounds : list of simulated_background
+   discovered_backgrounds : list of simulated_background
    \tBackgrounds that affect some subset of participants, and which are
-   \tassumed to be learned by the experimenters in the course of the
+   \tassumed to be discovered by the experimenters in the course of the
    \tlearning module. This means that it is not possible for them to
    \tdivide the participants affected by these background variables
    \tevenly w.r.t. the manipulations
@@ -1008,7 +1008,7 @@ class simulated_learning_module(learning_module):
    digicomp_set : bool
    \tWhether anything has set digicomp_initial and digicomp_final
    """
-   def __init__(self, n_skills, n_sessions, n_participants, default_digicomp, default_effect, known_backgrounds = [], learned_backgrounds = [], unknown_backgrounds = [], boundaries = None):
+   def __init__(self, n_skills, n_sessions, n_participants, default_digicomp, default_effect, known_backgrounds = [], discovered_backgrounds = [], unknown_backgrounds = [], boundaries = None):
       """
       Parameters
       ----------
@@ -1021,7 +1021,7 @@ class simulated_learning_module(learning_module):
       -------------------
       known_backgrounds : list of background
       \tDescribed under attributes
-      learned_backgrounds : list of background
+      discovered_backgrounds : list of background
       \tDescribed under attributes
       unknown_backgrounds : list of background
       \tDescribed under attributes
@@ -1038,9 +1038,9 @@ class simulated_learning_module(learning_module):
       self.default_digicomp = default_digicomp
       self.default_effect = default_effect
       self.known_backgrounds = known_backgrounds
-      self.learned_backgrounds = learned_backgrounds
+      self.discovered_backgrounds = discovered_backgrounds
       self.unknown_backgrounds = unknown_backgrounds
-      self.backgrounds = self.known_backgrounds + self.learned_backgrounds + self.unknown_backgrounds
+      self.backgrounds = self.known_backgrounds + self.discovered_backgrounds + self.unknown_backgrounds
       self.n_backgrounds = len(self.backgrounds)
       self.background_flags = {}
       for background in self.backgrounds:
@@ -1115,7 +1115,7 @@ class simulated_learning_module(learning_module):
       """
       print("Description of the participants:\n")
       print("There {} {} participant{}".format(_is_are(self.n_participants), self.n_participants, _plural_ending(self.n_participants)))
-      for wording, background_list in [("known", self.known_backgrounds), ("learned", self.learned_backgrounds), ("unknown", self.unknown_backgrounds)]:
+      for wording, background_list in [("known", self.known_backgrounds), ("discovered", self.discovered_backgrounds), ("unknown", self.unknown_backgrounds)]:
          n_backgrounds = len(background_list)
          print("\nThere {} {} background{} {} to the experimenters".format(_is_are(n_backgrounds), n_backgrounds, _plural_ending(n_backgrounds), wording))
          for background in background_list:
@@ -1130,7 +1130,7 @@ class simulated_learning_module(learning_module):
             n_members = len(subgroup_members)
             print("{}'{}'".format(_indent(1), subgroup_name))
             print("{}Has {} member{}".format(_indent(2), n_members, _plural_ending(n_members)))
-            for wording, background_list in [("learned", self.learned_backgrounds), ("unknown", self.unknown_backgrounds)]:
+            for wording, background_list in [("discovered", self.discovered_backgrounds), ("unknown", self.unknown_backgrounds)]:
                print("{}Out of these, some may be affected by {} backgrounds:".format(_indent(2), wording))
                for background in background_list:
                   print("{}{}: {}".format(_indent(3), background.name, sum(self.background_flags[background.name][subgroup_members])))
@@ -1154,14 +1154,14 @@ class real_learning_module(learning_module):
    \tassumed to be known to the experimenters ahead of time. This means
    \tthat it is possible for them to divide the participants affected
    \tby these background variables evenly w.r.t. the manipulations
-   learned_backgrounds : list of real_background
+   discovered_backgrounds : list of real_background
    \tBackgrounds that affect some subset of participants, and which are
-   \tassumed to be learned by the experimenters in the course of the
+   \tassumed to be discovered by the experimenters in the course of the
    \tlearning module. This means that it is not possible for them to
    \tdivide the participants affected by these background variables
    \tevenly w.r.t. the manipulations
    backgrounds : list of real_background
-   \tList containing both the known and learned backgrounds
+   \tList containing both the known and discovered backgrounds
    background_flags : dict of bool ndarrays
    \tDictionary containing arrays stating which participants are
    \taffected by which backgrounds
@@ -1491,7 +1491,7 @@ class study:
       self.measured_results['quick tests'] = {}
       for manipulation in self.learning_module.manipulations:
          self.measured_results['quick tests'][manipulation.name] = self._compare_flagged(self.learning_module.manipulation_flags[manipulation.name], self.learning_module.results_final)
-      for background in self.learning_module.known_backgrounds + self.learning_module.learned_backgrounds:
+      for background in self.learning_module.known_backgrounds + self.learning_module.discovered_backgrounds:
          self.measured_results['quick tests'][background.name] = self._compare_flagged(self.learning_module.background_flags[background.name], self.learning_module.results_final)
          
       self.measured_results['quick tests']['total'] = {}
@@ -1506,7 +1506,7 @@ class study:
       self.measured_results['median tests']['total'] = self._median_test_total(self.learning_module)
       for manipulation in self.learning_module.manipulations:     
          self.measured_results['median tests'][manipulation.name] = self._median_test_background_or_manipulation(self.learning_module.manipulation_flags[manipulation.name], self.learning_module)
-      for background in self.learning_module.known_backgrounds + self.learning_module.learned_backgrounds:
+      for background in self.learning_module.known_backgrounds + self.learning_module.discovered_backgrounds:
          self.measured_results['median tests'][background.name] = self._median_test_background_or_manipulation(self.learning_module.background_flags[background.name], self.learning_module)
          
       if self.learning_module.boundaries != None:
@@ -1514,7 +1514,7 @@ class study:
          self.measured_results['boundary tests']['total'] = self._boundary_test_total(self.learning_module)
          for manipulation in self.learning_module.manipulations:
             self.measured_results['boundary tests'][manipulation.name] = self._boundary_test_background_or_manipulation(self.learning_module.manipulation_flags[manipulation.name], self.learning_module)
-         for background in self.learning_module.known_backgrounds + self.learning_module.learned_backgrounds:
+         for background in self.learning_module.known_backgrounds + self.learning_module.discovered_backgrounds:
             self.measured_results['boundary tests'][background.name] = self._boundary_test_background_or_manipulation(self.learning_module.background_flags[background.name], self.learning_module)
       return
 
@@ -1538,10 +1538,10 @@ class study:
             print("{}{}".format(_indent(1), background.name))
          print("Hence, the participants are split into {} subgroups\n".format(len(self.learning_module.subgroups)))
 
-      n_learned_backgrounds = len(self.learning_module.learned_backgrounds)
-      if n_learned_backgrounds > 0:
-         print("There {} {} learned background{}:".format(_is_are(n_learned_backgrounds), n_learned_backgrounds, _plural_ending(n_learned_backgrounds)))
-         for background in self.learning_module.learned_backgrounds:
+      n_discovered_backgrounds = len(self.learning_module.discovered_backgrounds)
+      if n_discovered_backgrounds > 0:
+         print("There {} {} discovered background{}:".format(_is_are(n_discovered_backgrounds), n_discovered_backgrounds, _plural_ending(n_discovered_backgrounds)))
+         for background in self.learning_module.discovered_backgrounds:
             print("{}{}\n".format(_indent(1), background.name))
          
       n_unknown_backgrounds = len(self.learning_module.unknown_backgrounds)
@@ -1615,7 +1615,7 @@ class study:
          print("{}Results of boundary tests:".format(_indent(1)))
          print_poor_to_high('total', self.measured_results['boundary tests']['total'], 1)
       
-      for variation, description in [(self.learning_module.manipulations, 'manipulation'), (self.learning_module.known_backgrounds + self.learning_module.learned_backgrounds, 'background')]:
+      for variation, description in [(self.learning_module.manipulations, 'manipulation'), (self.learning_module.known_backgrounds + self.learning_module.discovered_backgrounds, 'background')]:
          for choice in variation:
             results = self.measured_results['quick tests'][choice.name]
             print("\nResults for {} {}:".format(description, choice.name))
@@ -1730,7 +1730,7 @@ class study:
          print("This needs to be run in the same directory as a directory named '{}'".format(self.plot_folder))
          return
 
-      for variation, description in [(self.learning_module.manipulations, 'manipulation'), (self.learning_module.known_backgrounds + self.learning_module.learned_backgrounds, 'background')]:
+      for variation, description in [(self.learning_module.manipulations, 'manipulation'), (self.learning_module.known_backgrounds + self.learning_module.discovered_backgrounds, 'background')]:
          for choice in variation:
             plot_quality('mtest', self.measured_results['median tests'][choice.name]['after module'])
 
