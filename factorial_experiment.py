@@ -475,6 +475,30 @@ class simulated_CBV(CBV):
       self.PDF = PDF
       return
       
+class real_CBV(CBV):
+   """
+   See base class CBV for definition.
+   
+   This is used for real studies.
+
+   Attributes
+   ----------
+   name : str
+   \tDescription of the CBV
+   name_for_file : str
+   \tRendition of the name suitable for use in a file name
+   """
+   
+   def __init__(self, name):
+      """
+      Parameters
+      ----------
+      name : str
+      \tDescribed under attributes
+      """
+      CBV.__init__(self, name)
+      return
+
 class BBV(BV):
    """
    This represents a binary background variable. For example, whether the
