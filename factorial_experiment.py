@@ -1182,7 +1182,7 @@ class real_learning_module(learning_module):
       self.load_results(results_folder_path)
       #Divide the participants into subgroups where the members are subject
       #to the same known backgrounds
-      self.subgroups = _define_subgroups(self.n_participants, self.backgrounds, self.background_flags)
+      self.subgroups = _define_subgroups(self.n_participants, self.known_backgrounds, self.background_flags)
       return
 
 
