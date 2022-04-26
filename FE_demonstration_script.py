@@ -44,8 +44,12 @@ load_results = True
 # skill and the effectiveness of the intervention, and one which affects
 # only the effectiveness of the intervention.
 
-known_background = fe.simulated_background("hates computers", fe.standard_transformations["large deterioration"], fe.standard_transformations["slight deterioration"], 0.2)
-known_backgrounds = [known_background]
+known_background_1 = fe.simulated_background("hates computers", fe.standard_transformations["large deterioration"], fe.standard_transformations["slight deterioration"], 0.2)
+known_background_2 = fe.simulated_background("office is bouncy castle", fe.standard_transformations["no effect"], fe.standard_transformations["slight deterioration"], 0.05)
+known_backgrounds = [known_background_1, known_background_2]
+
+# We introduce one learned background, which affects only the 
+# the effectiveness of the intervention.
 
 learned_background = fe.simulated_background("kazoo band outside office", fe.standard_transformations["no effect"], fe.standard_transformations["slight deterioration"], 0.1)
 learned_backgrounds = [learned_background]
