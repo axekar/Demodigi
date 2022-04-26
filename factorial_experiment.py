@@ -422,16 +422,18 @@ class CBV(BV):
    This represents a continuous background variable. For example, the age
    of the participants.
    """
+   @abstractmethod
    def __init__(self, name):
       BV.__init__(self, name)
       return
-
+      
 class BBV(BV):
    """
    This represents a binary background variable. For example, whether the
    native language of the participants is the same as the language of the
    learning module.
    """
+   @abstractmethod
    def __init__(self, name):
       BV.__init__(self, name)
       return
