@@ -34,15 +34,14 @@ However, this number is not accessible to the experimentalists. All
 they see is the actual number of correct answers.
 
 The study is assumed to use a factorial design, so that the experiment-
-ers first identify some background variables - here referred to as 
-'backgrounds' - that are likely to affect the results - such as age or
-motivation - and split the participants into several smaller groups
-within which all members are affected the same. They then try out a
-certain number of changes in the course - here referred to as
-'manipulations'. To evaluate the effect of the manipulations the
-participant groups are further halved ortogonally, so that with n
-manipulations there are 2^n groups that each get some combination of
-manipulations.
+ers first identify some binary background variables - BBV - and split
+the participants into several smaller groups within which all members
+are affected the same. They then try out a certain number of changes in
+the course - here referred to as 'manipulations'. To evaluate the
+effect of the manipulations the participant groups are further halved
+ortogonally, so that with n manipulations each group affected
+identically by BBVs is split into 2^n subgroups that each get some
+combination of manipulations.
 
 Written by Alvin Gavel,
 
@@ -208,20 +207,20 @@ def _trim_comments(lines):
 
 ### Misc. stuff
 
-def _define_subgroups(n, backgrounds_or_manipulations, background_or_manipulation_flags):
+def _define_subgroups(n, BBVs_or_manipulations, BBV_or_manipulation_flags):
    """
-   Take a list of manipulations or backgrounds, together with a list of
+   Take a list of manipulations or BBVs, together with a list of
    boolean flags stating which participants are affected, and create
    arrays with the indices of those that are affected by the manipulation
-   or background in question.
+   or BBV in question.
    """
    groups = {}
    group_names = set([])
    for i in range(n):
       flags = []
-      for background_or_manipulation in backgrounds_or_manipulations:
-          if background_or_manipulation_flags[background_or_manipulation.name][i]:
-             flags.append(background_or_manipulation.name)
+      for BBV_or_manipulation in BBVs_or_manipulations:
+          if BBV_or_manipulation_flags[BBV_or_manipulation.name][i]:
+             flags.append(BBV_or_manipulation.name)
       group_name = ", ".join(flags)
       if group_name == "":
          group_name = "none"
@@ -335,8 +334,8 @@ class manipulation(ABC):
    This represents some change we make to the course, which we try out on
    a subset of the participants. This means that the participants will be
    divided into a control group and a test group, which will be as close
-   to a 50/50 split as possible. Where there are known backgrounds, the
-   subsets sharing the same backgrounds will also be split approximately
+   to a 50/50 split as possible. Where there are known BBVs, the
+   subsets sharing the same BBVs will also be split approximately
    in half.
    
    As a rule all manipulations are binary. That is, they are either done
@@ -405,7 +404,7 @@ class real_manipulation(manipulation):
       manipulation.__init__(self, name)
       return
 
-class background(ABC):
+class BBV(ABC):
    """
    This represents something that can be expected to affect the results of
    the participants in the study, but which cannot be directly controlled
@@ -419,35 +418,36 @@ class background(ABC):
       self.name_for_file = _trim_for_filename(self.name)
       return
       
-class simulated_background(background):
+class simulated_BBV(BBV):
    """
-   See base class background for definition.
+   See base class BBV for definition.
    
    This is used when simulating a study. It requires the user to define
-   transformations that describe how the background affects both the
+   transformations that describe how the BBV affects both the
    initial digital competence and the effect of the learning module.
    
-   Some backgrounds are assumed to be known and some are assumed to be
-   unknown. One goal of these simulations is to get an idea of how much
-   background variables may interfere with our results.
+   Some BBVs are assumed to be known ahead of time, some are discovered
+   during the course of the learning module, and some remain unknown. One
+   goal of these simulations is to get an idea of how much the unknown may
+   interfere with our results.
 
    Attributes
    ----------
    name : str
-   \tDescription of the background
+   \tDescription of the BBV
    name_for_file : str
    \tRendition of the name suitable for use in a file name
    pre_transformation : function float->float
    \tSome function ]0, 1[ -> ]0, 1[ that describes the effect that the
-   \tbackground has on the digital skills of the participants prior to the
+   \tBBV has on the digital skills of the participants prior to the
    \tstudy
    post_transformation : function float->float
    \tSome function ]0, 1[ -> ]0, 1[ that describes the effect that the
-   \tbackground has on the improvement of the digital skills of the
+   \tBBV has on the improvement of the digital skills of the
    \tparticipants during the course of the study
    fraction : float
    \tThe probability that a given participant is affected by the
-   \tbackground
+   \tBBV
    """
    
    def __init__(self, name, pre_transformation, post_transformation, fraction):
@@ -463,22 +463,22 @@ class simulated_background(background):
       fraction : float
       \tDescribed under attributes
       """
-      background.__init__(self, name)
+      BBV.__init__(self, name)
       self.pre_transformation = pre_transformation
       self.post_transformation = post_transformation
       self.fraction = fraction
       return
       
-class real_background(background):
+class real_BBV(BBV):
    """
-   See base class background for definition.
+   See base class BBV for definition.
    
    This is used for real studies.
 
    Attributes
    ----------
    name : str
-   \tDescription of the background
+   \tDescription of the BBV
    name_for_file : str
    \tRendition of the name suitable for use in a file name
    """
@@ -490,7 +490,7 @@ class real_background(background):
       name : str
       \tDescribed under attributes
       """
-      background.__init__(self, name)
+      BBV.__init__(self, name)
       return
       
 
@@ -519,7 +519,7 @@ class boundaries:
    \tThe fraction of correct answers above which participants are
    \tconsidered to have high digital competence
    minimum_quality_difference : float
-   \tThe difference in quality between two manipulations or backgrounds
+   \tThe difference in quality between two manipulations or BBVs
    \twhich we consider to be practically significant. This defaults to
    \tzero, meaning that any different is taken to be practically
    \tsignificant.
@@ -720,7 +720,7 @@ class learning_module(ABC):
    This represents one learning module in the project.
   
    The participants are divided into smaller groups, first according to
-   the known background variables and then according to the manipulations.
+   the known BBVs and then according to the manipulations.
    """
    def __init__(self, n_skills, n_sessions, boundaries):
       """
@@ -734,16 +734,16 @@ class learning_module(ABC):
       self.n_skills = n_skills
       self.n_sessions = n_sessions
 
-      self.n_backgrounds = np.nan      
-      self.known_backgrounds = []
-      self.discovered_backgrounds = []
-      self.unknown_backgrounds = []
+      self.n_BBVs = np.nan      
+      self.known_BBVs = []
+      self.discovered_BBVs = []
+      self.unknown_BBVs = []
 
       self.ids = []
       self.participants = []
       
-      self.backgrounds = []
-      self.background_flags = {}
+      self.BBVs = []
+      self.BBV_flags = {}
       
       self.n_manipulations = np.nan
       self.manipulations = {}
@@ -804,7 +804,7 @@ class learning_module(ABC):
       self.manipulations = manipulations
       self.n_manipulations = len(self.manipulations)
       self.manipulation_flags = self._set_manipulation_flags()
-      self.all_flags = {**self.manipulation_flags, **self.background_flags}
+      self.all_flags = {**self.manipulation_flags, **self.BBV_flags}
       self.manipulation_groups = _define_subgroups(self.n_participants, self.manipulations, self.manipulation_flags)
       return
          
@@ -821,22 +821,22 @@ class learning_module(ABC):
       f.close()
       return
 
-   def save_backgrounds(self, path):
+   def save_BBVs(self, path):
       """
-      Save a file naming the backgrounds affecting the participants and
+      Save a file naming the BBVs affecting the participants and
       listing boolean flags describing which participant is affected by which
-      background
+      BBV
       """
-      jsonable_background_names = {}
-      jsonable_background_flags = {}
+      jsonable_BBV_names = {}
+      jsonable_BBV_flags = {}
       
-      for wording, background_list in [("discovered", self.discovered_backgrounds), ("known", self.known_backgrounds)]:
-         jsonable_background_names[wording] = []
-         for background in background_list:
-            jsonable_background_names[wording].append(background.name)
-            jsonable_background_flags[background.name] = self.background_flags[background.name].tolist()
+      for wording, BBV_list in [("discovered", self.discovered_BBVs), ("known", self.known_BBVs)]:
+         jsonable_BBV_names[wording] = []
+         for BBV in BBV_list:
+            jsonable_BBV_names[wording].append(BBV.name)
+            jsonable_BBV_flags[BBV.name] = self.BBV_flags[BBV.name].tolist()
       f = open(path, 'w')
-      packed = json.dumps({'IDs':self.ids, 'Backgrounds': jsonable_background_names, 'Background flags':jsonable_background_flags})
+      packed = json.dumps({'IDs':self.ids, 'BBVs': jsonable_BBV_names, 'BBV flags':jsonable_BBV_flags})
       f.write(packed)
       f.close()
       return
@@ -881,9 +881,9 @@ class learning_module(ABC):
          self.participants.append(real_participant(ID))
       return
 
-   def load_backgrounds(self, path):
+   def load_BBVs(self, path):
       """
-      Read a file with backgrounds and the boolean flags describing which
+      Read a file with BBVs and the boolean flags describing which
       participants are affected.
       """
       f = open(path, 'r')
@@ -892,30 +892,30 @@ class learning_module(ABC):
       unpacked = json.loads(packed)
       
       ids = unpacked['IDs']
-      known_backgrounds = []
-      discovered_backgrounds = []
-      for name in unpacked['Backgrounds']['known']:
-         known_backgrounds.append(real_background(name))
-      for name in unpacked['Backgrounds']['discovered']:
-         discovered_backgrounds.append(real_background(name))
+      known_BBVs = []
+      discovered_BBVs = []
+      for name in unpacked['BBVs']['known']:
+         known_BBVs.append(real_BBV(name))
+      for name in unpacked['BBVs']['discovered']:
+         discovered_BBVs.append(real_BBV(name))
 
-      background_flags = unpacked['Background flags']
+      BBV_flags = unpacked['BBV flags']
       
-      for background in known_backgrounds + discovered_backgrounds:
+      for BBV in known_BBVs + discovered_BBVs:
          try:
-            background_flags[background.name] = np.asarray(_match_ids(self.ids, ids, background_flags[background.name]), dtype = np.bool)
+            BBV_flags[BBV.name] = np.asarray(_match_ids(self.ids, ids, BBV_flags[BBV.name]), dtype = np.bool)
          except IDMismatchError:
             print("Cannot read data from file!")
             print("IDs in file do not match IDs of participants in study")
             return
 
-      self.known_backgrounds = known_backgrounds
-      self.discovered_backgrounds = discovered_backgrounds
-      # We assume that this is only done in the absence of unknown backgrounds
-      self.unknown_backgrounds = []
-      self.backgrounds = self.known_backgrounds + self.unknown_backgrounds
-      self.background_flags = background_flags
-      self.n_backgrounds = len(known_backgrounds)
+      self.known_BBVs = known_BBVs
+      self.discovered_BBVs = discovered_BBVs
+      # We assume that this is only done in the absence of unknown BBVs
+      self.unknown_BBVs = []
+      self.BBVs = self.known_BBVs + self.unknown_BBVs
+      self.BBV_flags = BBV_flags
+      self.n_BBVs = len(known_BBVs)
       return
       
    def load_manipulations(self, path):
@@ -966,35 +966,35 @@ class simulated_learning_module(learning_module):
    
     - Initial distribution over digital competence
    
-    - Unknown backgrounds, if any, affecting the participants
+    - Unknown BBVs, if any, affecting the participants
   
    Attributes
    ----------
    n : int
    \tThe number of participants in the study
    default_digicomp : float
-   \tThe digital competence of participants affected by no background
+   \tThe digital competence of participants affected by no BBV
    \tvariables, prior to taking the learning module
-   known_backgrounds : list of simulated_background
-   \tBackgrounds that affect some subset of participants, and which are
+   known_BBVs : list of simulated_BBV
+   \tBBVs that affect some subset of participants, and which are
    \tassumed to be known to the experimenters ahead of time. This means
    \tthat it is possible for them to divide the participants affected
-   \tby these background variables evenly w.r.t. the manipulations
-   discovered_backgrounds : list of simulated_background
-   \tBackgrounds that affect some subset of participants, and which are
+   \tby these BBV variables evenly w.r.t. the manipulations
+   discovered_BBVs : list of simulated_BBV
+   \tBBVs that affect some subset of participants, and which are
    \tassumed to be discovered by the experimenters in the course of the
    \tlearning module. This means that it is not possible for them to
-   \tdivide the participants affected by these background variables
+   \tdivide the participants affected by these BBV variables
    \tevenly w.r.t. the manipulations
-   unknown_backgrounds : list of simulated_background
-   \tBackgrounds that affect some subset of participants, and which are
+   unknown_BBVs : list of simulated_BBV
+   \tBBVs that affect some subset of participants, and which are
    \tassumed to be unknown to the experimenters even after the learning
    \tmodule.
-   backgrounds : list of simulated_background
-   \tList containing both the known and unknown backgrounds
-   background_flags : dict of bool ndarrays
+   BBVs : list of simulated_BBV
+   \tList containing both the known and unknown BBVs
+   BBV_flags : dict of bool ndarrays
    \tDictionary containing arrays stating which participants are
-   \taffected by which backgrounds
+   \taffected by which BBVs
    subgroups : dict of int ndarrays
    \tDictionary containing the indices of the participants in each
    \tsubgroup
@@ -1008,7 +1008,7 @@ class simulated_learning_module(learning_module):
    digicomp_set : bool
    \tWhether anything has set digicomp_initial and digicomp_final
    """
-   def __init__(self, n_skills, n_sessions, n_participants, default_digicomp, default_effect, known_backgrounds = [], discovered_backgrounds = [], unknown_backgrounds = [], boundaries = None):
+   def __init__(self, n_skills, n_sessions, n_participants, default_digicomp, default_effect, known_BBVs = [], discovered_BBVs = [], unknown_BBVs = [], boundaries = None):
       """
       Parameters
       ----------
@@ -1019,11 +1019,11 @@ class simulated_learning_module(learning_module):
       
       Optional parameters
       -------------------
-      known_backgrounds : list of background
+      known_BBVs : list of BBV
       \tDescribed under attributes
-      discovered_backgrounds : list of background
+      discovered_BBVs : list of BBV
       \tDescribed under attributes
-      unknown_backgrounds : list of background
+      unknown_BBVs : list of BBV
       \tDescribed under attributes
       boundaries : boundaries
       \tDescribed under boundaries
@@ -1037,18 +1037,18 @@ class simulated_learning_module(learning_module):
 
       self.default_digicomp = default_digicomp
       self.default_effect = default_effect
-      self.known_backgrounds = known_backgrounds
-      self.discovered_backgrounds = discovered_backgrounds
-      self.unknown_backgrounds = unknown_backgrounds
-      self.backgrounds = self.known_backgrounds + self.discovered_backgrounds + self.unknown_backgrounds
-      self.n_backgrounds = len(self.backgrounds)
-      self.background_flags = {}
-      for background in self.backgrounds:
-         self.background_flags[background.name] = rd.random(self.n_participants) < background.fraction
+      self.known_BBVs = known_BBVs
+      self.discovered_BBVs = discovered_BBVs
+      self.unknown_BBVs = unknown_BBVs
+      self.BBVs = self.known_BBVs + self.discovered_BBVs + self.unknown_BBVs
+      self.n_BBVs = len(self.BBVs)
+      self.BBV_flags = {}
+      for BBV in self.BBVs:
+         self.BBV_flags[BBV.name] = rd.random(self.n_participants) < BBV.fraction
       
       #Divide the participants into subgroups where the members are subject
-      #to the same known backgrounds
-      self.subgroups = _define_subgroups(self.n_participants, self.known_backgrounds, self.background_flags)
+      #to the same known BBVs
+      self.subgroups = _define_subgroups(self.n_participants, self.known_BBVs, self.BBV_flags)
       self.digicomp_initial = self._calculate_digicomp_initial()
 
       # This cannot be calculated without a study object that specifies the
@@ -1061,11 +1061,11 @@ class simulated_learning_module(learning_module):
    def _calculate_digicomp_initial(self):
       """
       Calculate the digital competence prior to the start of the course,
-      using the default and adding the relevant background effects
+      using the default and adding the relevant BBV effects
       """
       digicomp_initial = np.ones(self.n_participants) * self.default_digicomp
-      for background in self.backgrounds:
-          digicomp_initial[self.background_flags[background.name]] = background.pre_transformation(digicomp_initial[self.background_flags[background.name]])
+      for BBV in self.BBVs:
+          digicomp_initial[self.BBV_flags[BBV.name]] = BBV.pre_transformation(digicomp_initial[self.BBV_flags[BBV.name]])
       return digicomp_initial
       
    def calculate_digicomp_final(self, manipulations = [], manipulation_flags = []):
@@ -1078,8 +1078,8 @@ class simulated_learning_module(learning_module):
       
       for manipulation in manipulations:
          self.digicomp_final[manipulation_flags[manipulation.name]] = manipulation.transformation(self.digicomp_final[manipulation_flags[manipulation.name]])
-      for background in self.backgrounds:
-         self.digicomp_final[self.background_flags[background.name]] = background.post_transformation(self.digicomp_final[self.background_flags[background.name]])
+      for BBV in self.BBVs:
+         self.digicomp_final[self.BBV_flags[BBV.name]] = BBV.post_transformation(self.digicomp_final[self.BBV_flags[BBV.name]])
       return
       
    ### Methods for calculating results based on digital competence
@@ -1115,25 +1115,25 @@ class simulated_learning_module(learning_module):
       """
       print("Description of the participants:\n")
       print("There {} {} participant{}".format(_is_are(self.n_participants), self.n_participants, _plural_ending(self.n_participants)))
-      for wording, background_list in [("known", self.known_backgrounds), ("discovered", self.discovered_backgrounds), ("unknown", self.unknown_backgrounds)]:
-         n_backgrounds = len(background_list)
-         print("\nThere {} {} background{} {} to the experimenters".format(_is_are(n_backgrounds), n_backgrounds, _plural_ending(n_backgrounds), wording))
-         for background in background_list:
-            n_affected = np.sum(self.background_flags[background.name])
-            print("{}Background: {}".format(_indent(1), background.name))
+      for wording, BBV_list in [("known", self.known_BBVs), ("discovered", self.discovered_BBVs), ("unknown", self.unknown_BBVs)]:
+         n_BBVs = len(BBV_list)
+         print("\nThere {} {} BBV{} {} to the experimenters".format(_is_are(n_BBVs), n_BBVs, _plural_ending(n_BBVs), wording))
+         for BBV in BBV_list:
+            n_affected = np.sum(self.BBV_flags[BBV.name])
+            print("{}BBV: {}".format(_indent(1), BBV.name))
             print("{}Affects {} participant{}".format(_indent(2), n_affected, _plural_ending(n_affected)))
             print("{}Which makes up {:.2f} of total".format(_indent(2), n_affected / self.n_participants))
       
-      if len(self.known_backgrounds) > 0:
-         print("\nThe known backgrounds require splitting the group into the following subgroups")
+      if len(self.known_BBVs) > 0:
+         print("\nThe known BBVs require splitting the group into the following subgroups")
          for subgroup_name, subgroup_members in self.subgroups.items():
             n_members = len(subgroup_members)
             print("{}'{}'".format(_indent(1), subgroup_name))
             print("{}Has {} member{}".format(_indent(2), n_members, _plural_ending(n_members)))
-            for wording, background_list in [("discovered", self.discovered_backgrounds), ("unknown", self.unknown_backgrounds)]:
-               print("{}Out of these, some may be affected by {} backgrounds:".format(_indent(2), wording))
-               for background in background_list:
-                  print("{}{}: {}".format(_indent(3), background.name, sum(self.background_flags[background.name][subgroup_members])))
+            for wording, BBV_list in [("discovered", self.discovered_BBVs), ("unknown", self.unknown_BBVs)]:
+               print("{}Out of these, some may be affected by {} BBVs:".format(_indent(2), wording))
+               for BBV in BBV_list:
+                  print("{}{}: {}".format(_indent(3), BBV.name, sum(self.BBV_flags[BBV.name][subgroup_members])))
       print("\n")
       return
 
@@ -1142,29 +1142,29 @@ class real_learning_module(learning_module):
    """
    See base class learning_module for definition.
    
-   This needs to read three files of participant IDs, backgrounds and
+   This needs to read three files of participant IDs, BBVs and
    digital competence.
    
    Attributes
    ----------
    n : int
    \tThe number of participants in the study
-   known_backgrounds : list of real_background
-   \tBackgrounds that affect some subset of participants, and which are
+   known_BBVs : list of real_BBV
+   \tBBVs that affect some subset of participants, and which are
    \tassumed to be known to the experimenters ahead of time. This means
    \tthat it is possible for them to divide the participants affected
-   \tby these background variables evenly w.r.t. the manipulations
-   discovered_backgrounds : list of real_background
-   \tBackgrounds that affect some subset of participants, and which are
+   \tby these BBV variables evenly w.r.t. the manipulations
+   discovered_BBVs : list of real_BBV
+   \tBBVs that affect some subset of participants, and which are
    \tassumed to be discovered by the experimenters in the course of the
    \tlearning module. This means that it is not possible for them to
-   \tdivide the participants affected by these background variables
+   \tdivide the participants affected by these BBV variables
    \tevenly w.r.t. the manipulations
-   backgrounds : list of real_background
-   \tList containing both the known and discovered backgrounds
-   background_flags : dict of bool ndarrays
+   BBVs : list of real_BBV
+   \tList containing both the known and discovered BBVs
+   BBV_flags : dict of bool ndarrays
    \tDictionary containing arrays stating which participants are
-   \taffected by which backgrounds
+   \taffected by which BBVs
    subgroups : dict of int ndarrays
    \tDictionary containing the indices of the participants in each
    \tsubgroup
@@ -1175,14 +1175,14 @@ class real_learning_module(learning_module):
    digicomp_set : bool
    \tWhether anything has set digicomp_initial and digicomp_final
    """
-   def __init__(self, n_skills, n_sessions, id_path, background_path, results_folder_path, boundaries = None):
+   def __init__(self, n_skills, n_sessions, id_path, BBV_path, results_folder_path, boundaries = None):
       learning_module.__init__(self, n_skills, n_sessions, boundaries)
       self.load_ids(id_path)
-      self.load_backgrounds(background_path)
+      self.load_BBVs(BBV_path)
       self.load_results(results_folder_path)
       #Divide the participants into subgroups where the members are subject
-      #to the same known backgrounds
-      self.subgroups = _define_subgroups(self.n_participants, self.known_backgrounds, self.background_flags)
+      #to the same known BBVs
+      self.subgroups = _define_subgroups(self.n_participants, self.known_BBVs, self.BBV_flags)
       return
 
 
@@ -1389,9 +1389,9 @@ class study:
       """
       return self._boundary_tests(learning_module.results_initial, learning_module.results_final)
 
-   def _boundary_test_background_or_manipulation(self, flags, learning_module):
+   def _boundary_test_BBV_or_manipulation(self, flags, learning_module):
       """
-      Runs boundary tests with respect to some background or manipulation.
+      Runs boundary tests with respect to some BBV or manipulation.
       """
       treatment_group_initial = learning_module.results_initial[flags]
       control_group_initial = learning_module.results_initial[np.invert(flags)]
@@ -1460,7 +1460,7 @@ class study:
       self._fill_dictionary_with_qk_and_dk(median_tests['after module'], 0.1) 
       return median_tests
       
-   def _median_test_background_or_manipulation(self, flags, learning_module):
+   def _median_test_BBV_or_manipulation(self, flags, learning_module):
       """
       This tests how likely it seems to be that a participant in either the
       control or treatment group does better than the median for the control
@@ -1491,8 +1491,8 @@ class study:
       self.measured_results['quick tests'] = {}
       for manipulation in self.learning_module.manipulations:
          self.measured_results['quick tests'][manipulation.name] = self._compare_flagged(self.learning_module.manipulation_flags[manipulation.name], self.learning_module.results_final)
-      for background in self.learning_module.known_backgrounds + self.learning_module.discovered_backgrounds:
-         self.measured_results['quick tests'][background.name] = self._compare_flagged(self.learning_module.background_flags[background.name], self.learning_module.results_final)
+      for BBV in self.learning_module.known_BBVs + self.learning_module.discovered_BBVs:
+         self.measured_results['quick tests'][BBV.name] = self._compare_flagged(self.learning_module.BBV_flags[BBV.name], self.learning_module.results_final)
          
       self.measured_results['quick tests']['total'] = {}
       self.measured_results['quick tests']['total']['pre-course median'] = np.median(self.learning_module.results_initial)
@@ -1505,17 +1505,17 @@ class study:
       self.measured_results['median tests'] = {}
       self.measured_results['median tests']['total'] = self._median_test_total(self.learning_module)
       for manipulation in self.learning_module.manipulations:     
-         self.measured_results['median tests'][manipulation.name] = self._median_test_background_or_manipulation(self.learning_module.manipulation_flags[manipulation.name], self.learning_module)
-      for background in self.learning_module.known_backgrounds + self.learning_module.discovered_backgrounds:
-         self.measured_results['median tests'][background.name] = self._median_test_background_or_manipulation(self.learning_module.background_flags[background.name], self.learning_module)
+         self.measured_results['median tests'][manipulation.name] = self._median_test_BBV_or_manipulation(self.learning_module.manipulation_flags[manipulation.name], self.learning_module)
+      for BBV in self.learning_module.known_BBVs + self.learning_module.discovered_BBVs:
+         self.measured_results['median tests'][BBV.name] = self._median_test_BBV_or_manipulation(self.learning_module.BBV_flags[BBV.name], self.learning_module)
          
       if self.learning_module.boundaries != None:
          self.measured_results['boundary tests'] = {}
          self.measured_results['boundary tests']['total'] = self._boundary_test_total(self.learning_module)
          for manipulation in self.learning_module.manipulations:
-            self.measured_results['boundary tests'][manipulation.name] = self._boundary_test_background_or_manipulation(self.learning_module.manipulation_flags[manipulation.name], self.learning_module)
-         for background in self.learning_module.known_backgrounds + self.learning_module.discovered_backgrounds:
-            self.measured_results['boundary tests'][background.name] = self._boundary_test_background_or_manipulation(self.learning_module.background_flags[background.name], self.learning_module)
+            self.measured_results['boundary tests'][manipulation.name] = self._boundary_test_BBV_or_manipulation(self.learning_module.manipulation_flags[manipulation.name], self.learning_module)
+         for BBV in self.learning_module.known_BBVs + self.learning_module.discovered_BBVs:
+            self.measured_results['boundary tests'][BBV.name] = self._boundary_test_BBV_or_manipulation(self.learning_module.BBV_flags[BBV.name], self.learning_module)
       return
 
    ### Functions for giving print output
@@ -1531,24 +1531,24 @@ class study:
       for manipulation in self.learning_module.manipulations:
          print("{}{}".format(_indent(1), manipulation.name))
          
-      n_backgrounds = len(self.learning_module.known_backgrounds)
-      if n_backgrounds > 0:
-         print("\nThere {} {} known background{}:".format(_is_are(n_backgrounds), n_backgrounds, _plural_ending(n_backgrounds)))
-         for background in self.learning_module.known_backgrounds:
-            print("{}{}".format(_indent(1), background.name))
+      n_BBVs = len(self.learning_module.known_BBVs)
+      if n_BBVs > 0:
+         print("\nThere {} {} known BBV{}:".format(_is_are(n_BBVs), n_BBVs, _plural_ending(n_BBVs)))
+         for BBV in self.learning_module.known_BBVs:
+            print("{}{}".format(_indent(1), BBV.name))
          print("Hence, the participants are split into {} subgroups\n".format(len(self.learning_module.subgroups)))
 
-      n_discovered_backgrounds = len(self.learning_module.discovered_backgrounds)
-      if n_discovered_backgrounds > 0:
-         print("There {} {} discovered background{}:".format(_is_are(n_discovered_backgrounds), n_discovered_backgrounds, _plural_ending(n_discovered_backgrounds)))
-         for background in self.learning_module.discovered_backgrounds:
-            print("{}{}\n".format(_indent(1), background.name))
+      n_discovered_BBVs = len(self.learning_module.discovered_BBVs)
+      if n_discovered_BBVs > 0:
+         print("There {} {} discovered BBV{}:".format(_is_are(n_discovered_BBVs), n_discovered_BBVs, _plural_ending(n_discovered_BBVs)))
+         for BBV in self.learning_module.discovered_BBVs:
+            print("{}{}\n".format(_indent(1), BBV.name))
          
-      n_unknown_backgrounds = len(self.learning_module.unknown_backgrounds)
-      if n_unknown_backgrounds > 0:
-         print("There {} {} unknown background{}:".format(_is_are(n_unknown_backgrounds), n_unknown_backgrounds, _plural_ending(n_unknown_backgrounds)))
-         for background in self.learning_module.unknown_backgrounds:
-            print("{}{}".format(_indent(1), background.name))
+      n_unknown_BBVs = len(self.learning_module.unknown_BBVs)
+      if n_unknown_BBVs > 0:
+         print("There {} {} unknown BBV{}:".format(_is_are(n_unknown_BBVs), n_unknown_BBVs, _plural_ending(n_unknown_BBVs)))
+         for BBV in self.learning_module.unknown_BBVs:
+            print("{}{}".format(_indent(1), BBV.name))
          print("This may affect the study\n")
             
       print("Group membership:")
@@ -1615,7 +1615,7 @@ class study:
          print("{}Results of boundary tests:".format(_indent(1)))
          print_poor_to_high('total', self.measured_results['boundary tests']['total'], 1)
       
-      for variation, description in [(self.learning_module.manipulations, 'manipulation'), (self.learning_module.known_backgrounds + self.learning_module.discovered_backgrounds, 'background')]:
+      for variation, description in [(self.learning_module.manipulations, 'manipulation'), (self.learning_module.known_BBVs + self.learning_module.discovered_BBVs, 'BBV')]:
          for choice in variation:
             results = self.measured_results['quick tests'][choice.name]
             print("\nResults for {} {}:".format(description, choice.name))
@@ -1730,7 +1730,7 @@ class study:
          print("This needs to be run in the same directory as a directory named '{}'".format(self.plot_folder))
          return
 
-      for variation, description in [(self.learning_module.manipulations, 'manipulation'), (self.learning_module.known_backgrounds + self.learning_module.discovered_backgrounds, 'background')]:
+      for variation, description in [(self.learning_module.manipulations, 'manipulation'), (self.learning_module.known_BBVs + self.learning_module.discovered_BBVs, 'BBV')]:
          for choice in variation:
             plot_quality('mtest', self.measured_results['median tests'][choice.name]['after module'])
 
@@ -1743,7 +1743,7 @@ class minimal_size_experiment:
    This is intended to run multiple simulations of studies that are
    identical except that the number of participants varies
    """
-   def __init__(self, name, default_digicomp, default_effect, n_skills, manipulations, known_backgrounds, n_min, n_max, n_steps = 10, iterations = 10):
+   def __init__(self, name, default_digicomp, default_effect, n_skills, manipulations, known_BBVs, n_min, n_max, n_steps = 10, iterations = 10):
       """
       Parameters
       ----------
@@ -1755,15 +1755,15 @@ class minimal_size_experiment:
       self.default_effect = default_effect
       self.n_skills = n_skills
       self.manipulations = manipulations
-      self.known_backgrounds = known_backgrounds
+      self.known_BBVs = known_BBVs
       self.n_min = n_min
       self.n_max = n_max
       self.n_steps = n_steps
       self.iterations = iterations
       self.ns = np.linspace(self.n_min, self.n_max, num = self.n_steps, endpoint = True, dtype = np.int64)
       self.median_pDpos = {'total':[]}
-      for manipulation_or_background in self.manipulations + self.known_backgrounds:
-         self.median_pDpos[manipulation_or_background.name] = []     
+      for manipulation_or_BBV in self.manipulations + self.known_BBVs:
+         self.median_pDpos[manipulation_or_BBV.name] = []     
       self.plot_folder = ''
       return
       
@@ -1773,7 +1773,7 @@ class minimal_size_experiment:
          for key in self.median_pDpos.keys():
             pDpos[key] = []
          for i in range(self.iterations):
-            part = simulated_learning_module(self.n_skills, n, self.default_effect, default_digicomp = self.default_digicomp, known_backgrounds = self.known_backgrounds, unknown_backgrounds = [], boundaries = None)
+            part = simulated_learning_module(self.n_skills, n, self.default_effect, default_digicomp = self.default_digicomp, known_BBVs = self.known_BBVs, unknown_BBVs = [], boundaries = None)
             part.set_manipulations(self.manipulations)            
             part.run_simulation()
             simulated_study = study('Group size {}, simulation {}'.format(n, i), part)

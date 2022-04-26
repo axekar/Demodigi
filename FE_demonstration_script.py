@@ -4,7 +4,7 @@ factorial_experiment.
 
 The scripts simulates study with 1000 participants and three
 manipulations, two of which give a slight improvement and one of which
-does nothing. There are three background variables that affect the
+does nothing. There are three BBVs that affect the
 initial digital competence, the effect of the learning module, or both.
 Two of them are known, and one is unknown.
 
@@ -27,6 +27,7 @@ that were saved by save_results.
 
 import factorial_experiment as fe
 
+
 # Prints verbose output describing the simulated study
 print_results = True
 
@@ -43,27 +44,27 @@ save_results = True
 load_results = True
 
 
-# We introduce two known backgrounds, one which affects both initial
-# skill and the effectiveness of the intervention, and one which affects
-# only the effectiveness of the intervention.
+# We introduce two known BBVs, one which affects both initial skill and
+# the effectiveness of the intervention, and one which affects only the
+# effectiveness of the intervention.
 
-known_background_1 = fe.simulated_background("hates computers", fe.standard_transformations["large deterioration"], fe.standard_transformations["slight deterioration"], 0.2)
-known_background_2 = fe.simulated_background("office is bouncy castle", fe.standard_transformations["no effect"], fe.standard_transformations["slight deterioration"], 0.05)
-known_backgrounds = [known_background_1, known_background_2]
+known_BBV_1 = fe.simulated_BBV("hates computers", fe.standard_transformations["large deterioration"], fe.standard_transformations["slight deterioration"], 0.2)
+known_BBV_2 = fe.simulated_BBV("office is bouncy castle", fe.standard_transformations["no effect"], fe.standard_transformations["slight deterioration"], 0.05)
+known_BBVs = [known_BBV_1, known_BBV_2]
 
 
-# We introduce one discovered background, which affects only the 
+# We introduce one discovered BBV, which affects only the 
 # the effectiveness of the intervention.
 
-discovered_background = fe.simulated_background("kazoo band outside office", fe.standard_transformations["no effect"], fe.standard_transformations["slight deterioration"], 0.1)
-discovered_backgrounds = [discovered_background]
+discovered_BBV = fe.simulated_BBV("kazoo band outside office", fe.standard_transformations["no effect"], fe.standard_transformations["slight deterioration"], 0.1)
+discovered_BBVs = [discovered_BBV]
 
 
-# We introduce one unknown background, which affects both initial skill
+# We introduce one unknown BBV, which affects both initial skill
 # and the effectiveness of the intervention.
 
-unknown_background_1 = fe.simulated_background("secretly a ghost", fe.standard_transformations["moderate deterioration"], fe.standard_transformations["slight deterioration"], 0.1)
-unknown_backgrounds = [unknown_background_1]
+unknown_BBV_1 = fe.simulated_BBV("secretly a ghost", fe.standard_transformations["moderate deterioration"], fe.standard_transformations["slight deterioration"], 0.1)
+unknown_BBVs = [unknown_BBV_1]
 
 
 # Define three manipulations, two of which have a slight effect and one
@@ -98,14 +99,14 @@ initial_digital_competence = 0.5
 # manipulations
 default_effect = fe.standard_transformations["large improvement"]
 
-demo_group = fe.simulated_learning_module(n_skills, n_sessions, n_participants, initial_digital_competence, default_effect, known_backgrounds = known_backgrounds, discovered_backgrounds = discovered_backgrounds, unknown_backgrounds = unknown_backgrounds, boundaries = bounds)
+demo_group = fe.simulated_learning_module(n_skills, n_sessions, n_participants, initial_digital_competence, default_effect, known_BBVs = known_BBVs, discovered_BBVs = discovered_BBVs, unknown_BBVs = unknown_BBVs, boundaries = bounds)
 demo_group.set_manipulations(manipulations)
 if print_results:
    demo_group.describe()
 demo_group.run_simulation()
 if save_results:
    demo_group.save_ids('simulated_participants.json')
-   demo_group.save_backgrounds('simulated_backgrounds.json')
+   demo_group.save_BBVs('simulated_BBVs.json')
    demo_group.save_manipulations('simulated_manipulations.json')
    demo_group.save_results('Simulated_results')
 
@@ -129,7 +130,7 @@ if plot_results:
 
 if load_results:
    print('Loading saved data...')
-   loaded_learning_module = fe.real_learning_module(n_skills, n_sessions, 'simulated_participants.json', 'simulated_backgrounds.json', 'Simulated_results', boundaries = bounds)
+   loaded_learning_module = fe.real_learning_module(n_skills, n_sessions, 'simulated_participants.json', 'simulated_BBVs.json', 'Simulated_results', boundaries = bounds)
    loaded_learning_module.load_manipulations('simulated_manipulations.json')
    loaded_study = fe.study('Demonstration of loading', loaded_learning_module)
    loaded_study.do_tests()
