@@ -427,6 +427,54 @@ class CBV(BV):
       BV.__init__(self, name)
       return
       
+class simulated_CBV(CBV):
+   """
+   See base class CBV for definition.
+   
+   This is used when simulating a study. It requires the user to define
+   transformations that describe how the CBV affects both the
+   initial digital competence and the effect of the learning module.
+   
+   Attributes
+   ----------
+   name : str
+   \tDescription of the BBV
+   name_for_file : str
+   \tRendition of the name suitable for use in a file name
+   pre_transformation : function (float ndarray, float) -> float ndarray
+   \tFunction that describes the effect that the BBV has on the digital
+   \tskills of a participants with a given value of the CBV, prior to
+   \ttaking the learning module.
+   post_transformation : function (float ndarray, float) -> float ndarray
+   \tFunction that describes the effect that the BBV has on the digital
+   \tskills of a participants with a given value of the CBV, after taking
+   \tthe learning module.
+   PDF : function int -> float ndarray
+   \tFunction that given a number of participants gives assigns values
+   \tof the CBV to those participants. For example, if the CBV represents
+   \tage this could take random samples from the statistical distribution
+   \tof age in Sweden, truncated at 18 and with some kind of drop-off at
+   \tretirement age.
+   """
+   def __init__(self, name, pre_transformation, post_transformation, PDF):
+      """
+      Parameters
+      ----------
+      name : str
+      \tDescribed under attributes
+      pre_transformation : function (float, float) -> float
+      \tDescribed under attributes
+      post_transformation : function (float, float) -> float
+      \tDescribed under attributes
+      PDF : function int -> float ndarray
+      \tDescribed under attributes
+      """
+      CBV.__init__(self, name)
+      self.pre_transformation = pre_transformation
+      self.post_transformation = post_transformation
+      self.PDF = PDF
+      return
+      
 class BBV(BV):
    """
    This represents a binary background variable. For example, whether the
@@ -457,11 +505,11 @@ class simulated_BBV(BBV):
    \tDescription of the BBV
    name_for_file : str
    \tRendition of the name suitable for use in a file name
-   pre_transformation : function float->float
+   pre_transformation : function float -> float
    \tSome function ]0, 1[ -> ]0, 1[ that describes the effect that the
    \tBBV has on the digital skills of the participants prior to the
    \tstudy
-   post_transformation : function float->float
+   post_transformation : function float -> float
    \tSome function ]0, 1[ -> ]0, 1[ that describes the effect that the
    \tBBV has on the improvement of the digital skills of the
    \tparticipants during the course of the study
@@ -476,9 +524,9 @@ class simulated_BBV(BBV):
       ----------
       name : str
       \tDescribed under attributes
-      pre_transformation : function float->float
+      pre_transformation : function float -> float
       \tDescribed under attributes
-      post_transformation : function float->float
+      post_transformation : function float -> float
       \tDescribed under attributes
       fraction : float
       \tDescribed under attributes
@@ -512,12 +560,6 @@ class real_BBV(BBV):
       """
       BBV.__init__(self, name)
       return
-      
-class CBV(ABC):
-   """
-   
-   """
-
 
 class boundaries:
    """

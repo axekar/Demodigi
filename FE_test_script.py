@@ -4,6 +4,7 @@ actually works as intended.
 """
 
 import numpy as np
+import numpy.random as rd
 
 import factorial_experiment as fe
 
@@ -14,7 +15,6 @@ stays_same = np.all(ordinalised == np.arange(0, 5))
 reverse_data = list(reversed(range(0, 5)))
 ordinalised = fe.ordinalise(reverse_data)
 reverses = np.all(ordinalised == np.asarray(list(reversed(range(0, 5)))))
-
 if not stays_same:
    print('Already ordered data is reordered!')
 if not reverses:
@@ -22,14 +22,12 @@ if not reverses:
 if stays_same and reverses:
    print('ordinalise passed tests!')
 
-
 print('Testing logB...')
 logB_one_handling = np.exp(fe.logB(1, 1)) == 1
 logB_symmetry = True
 for alpha in range(1, 10):
    for beta in range(1, 10):
       logB_symmetry = logB_symmetry and fe.logB(alpha, beta) == fe.logB(beta, alpha)
-
 if not logB_one_handling:
    print('logB does not handle ones correctly!')
 if not logB_symmetry:
@@ -64,3 +62,20 @@ if not all_fail:
    print('Participants are succeeding even when their digital competence is zero!')
 if all_fail:
    print('simulated_learning_module passed tests!')
+   
+print('Testing methods of simulated_CBV class...')
+null_transformation = lambda digicomp, cbv_value : digicomp
+flat_PDF = lambda n : rd.uniform(low=18, high=65, size=n)
+test_CBV = fe.simulated_CBV('test', null_transformation, null_transformation, flat_PDF)
+n_participants = 100
+random_digicomp = rd.uniform(low=0.0, high=1.0, size=n_participants)
+pre_transform = test_CBV.pre_transformation(random_digicomp, test_CBV.PDF(n_participants))
+post_transform = test_CBV.post_transformation(random_digicomp, test_CBV.PDF(n_participants))
+pre_transform_does_nothing = np.all(random_digicomp == pre_transform)
+post_transform_does_nothing = np.all(random_digicomp == post_transform)
+if not pre_transform_does_nothing:
+   print('Null pre-transform still changes digital competence!')
+if not post_transform_does_nothing:
+   print('Null post-transform still changes digital competence!')
+if pre_transform_does_nothing and post_transform_does_nothing:
+   print('simulated_CBV passed tests!')
