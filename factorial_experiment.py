@@ -1542,7 +1542,7 @@ class study:
       if n_learned_backgrounds > 0:
          print("There {} {} learned background{}:".format(_is_are(n_learned_backgrounds), n_learned_backgrounds, _plural_ending(n_learned_backgrounds)))
          for background in self.learning_module.learned_backgrounds:
-            print("{}{}".format(_indent(1), background.name))
+            print("{}{}\n".format(_indent(1), background.name))
          
       n_unknown_backgrounds = len(self.learning_module.unknown_backgrounds)
       if n_unknown_backgrounds > 0:
