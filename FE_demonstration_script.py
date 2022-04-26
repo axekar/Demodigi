@@ -26,7 +26,7 @@ that were saved by save_results.
 """
 
 import factorial_experiment as fe
-
+import numpy.random as rd
 
 # Prints verbose output describing the simulated study
 print_results = True
@@ -67,6 +67,13 @@ unknown_BBV_1 = fe.simulated_BBV("secretly a ghost", fe.standard_transformations
 unknown_BBVs = [unknown_BBV_1]
 
 
+# We introduce one CBV, which has no effect whatsoever
+
+null_transformation = lambda digicomp, CBV_value : digicomp
+CBV = fe.simulated_CBV("height", null_transformation, null_transformation, lambda n : rd.normal(loc=175., scale=8.0, size=n))
+CBVs = [CBV]
+
+
 # Define three manipulations, two of which have a slight effect and one
 # of which does nothing.
 
@@ -99,7 +106,7 @@ initial_digital_competence = 0.5
 # manipulations
 default_effect = fe.standard_transformations["large improvement"]
 
-demo_group = fe.simulated_learning_module(n_skills, n_sessions, n_participants, initial_digital_competence, default_effect, known_BBVs = known_BBVs, discovered_BBVs = discovered_BBVs, unknown_BBVs = unknown_BBVs, boundaries = bounds)
+demo_group = fe.simulated_learning_module(n_skills, n_sessions, n_participants, initial_digital_competence, default_effect, known_BBVs = known_BBVs, discovered_BBVs = discovered_BBVs, unknown_BBVs = unknown_BBVs, CBVs = CBVs, boundaries = bounds)
 demo_group.set_manipulations(manipulations)
 if print_results:
    demo_group.describe()

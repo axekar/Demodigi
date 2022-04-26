@@ -441,14 +441,16 @@ class simulated_CBV(CBV):
    \tDescription of the BBV
    name_for_file : str
    \tRendition of the name suitable for use in a file name
-   pre_transformation : function (float ndarray, float) -> float ndarray
+   pre_transformation : function (float, float) -> float
    \tFunction that describes the effect that the BBV has on the digital
    \tskills of a participants with a given value of the CBV, prior to
    \ttaking the learning module.
-   post_transformation : function (float ndarray, float) -> float ndarray
+   \tNB: This must on ndarrays as well as individual floats
+   post_transformation : function (float, float) -> float ndarray
    \tFunction that describes the effect that the BBV has on the digital
    \tskills of a participants with a given value of the CBV, after taking
    \tthe learning module.
+   \tNB: This must on ndarrays as well as individual floats
    PDF : function int -> float ndarray
    \tFunction that given a number of participants gives assigns values
    \tof the CBV to those participants. For example, if the CBV represents
@@ -836,6 +838,10 @@ class learning_module(ABC):
       self.BBVs = []
       self.BBV_flags = {}
       
+      self.n_CBVs = np.nan     
+      self.CBVs = []
+      self.CBV_values = {}
+      
       self.n_manipulations = np.nan
       self.manipulations = {}
       self.manipulation_flags = {}
@@ -912,11 +918,27 @@ class learning_module(ABC):
       f.close()
       return
 
+   def save_CBVs(self, path):
+      """
+      Save a file naming the CBVs affecting the participants and listing the
+      values of the CBVs for each participant.
+      """
+      jsonable_CBV_names = {}
+      jsonable_CBV_values = {}
+      
+      for CBV in self.CBVs:
+         jsonable_CBV_names.append(CBV.name)
+         jsonable_CBV_flags = self.CBV_values[CBV.name].tolist()
+      f = open(path, 'w')
+      packed = json.dumps({'IDs':self.ids, 'CBVs': jsonable_CBV_names, 'CBV values':jsonable_CBV_values})
+      f.write(packed)
+      f.close()
+      return
+
    def save_BBVs(self, path):
       """
-      Save a file naming the BBVs affecting the participants and
-      listing boolean flags describing which participant is affected by which
-      BBV
+      Save a file naming the BBVs affecting the participants and listing
+      boolean flags describing which participant is affected by which BBV
       """
       jsonable_BBV_names = {}
       jsonable_BBV_flags = {}
@@ -972,10 +994,37 @@ class learning_module(ABC):
          self.participants.append(real_participant(ID))
       return
 
+   def load_CBVs(self, path):
+      """
+      Read a file with CBVs and the values for each participant
+      """
+      f = open(path, 'r')
+      packed = f.read()
+      f.close()
+      unpacked = json.loads(packed)
+      
+      ids = unpacked['IDs']
+      CBVs = []
+      for name in unpacked['CBVs']:
+         CBVs.append(real_CBV(name))
+      CBV_values = unpacked['CBV values']
+      
+      for CBV in CBVs:
+         try:
+            CBV_values[CBV.name] = np.asarray(_match_ids(self.ids, ids, CBV_values[CBV.name]), dtype = np.bool)
+         except IDMismatchError:
+            print("Cannot read data from file!")
+            print("IDs in file do not match IDs of participants in study")
+            return
+      self.CBVs = CBVs
+      self.CBV_values = CBV_values
+      self.n_CBVs = len(CBVs)
+      return
+      
    def load_BBVs(self, path):
       """
       Read a file with BBVs and the boolean flags describing which
-      participants are affected.
+      participants are affected
       """
       f = open(path, 'r')
       packed = f.read()
@@ -1086,6 +1135,11 @@ class simulated_learning_module(learning_module):
    BBV_flags : dict of bool ndarrays
    \tDictionary containing arrays stating which participants are
    \taffected by which BBVs
+   CBVs : list of simulated_CBV
+   \tDictionary containing all CBVs
+   CBV_values : dict of float ndarrays
+   \tDictionary containing arrays stating the values of the CBVs for each
+   \tparticipant
    subgroups : dict of int ndarrays
    \tDictionary containing the indices of the participants in each
    \tsubgroup
@@ -1099,7 +1153,7 @@ class simulated_learning_module(learning_module):
    digicomp_set : bool
    \tWhether anything has set digicomp_initial and digicomp_final
    """
-   def __init__(self, n_skills, n_sessions, n_participants, default_digicomp, default_effect, known_BBVs = [], discovered_BBVs = [], unknown_BBVs = [], boundaries = None):
+   def __init__(self, n_skills, n_sessions, n_participants, default_digicomp, default_effect, known_BBVs = [], discovered_BBVs = [], unknown_BBVs = [], CBVs = [], boundaries = None):
       """
       Parameters
       ----------
@@ -1115,6 +1169,8 @@ class simulated_learning_module(learning_module):
       discovered_BBVs : list of BBV
       \tDescribed under attributes
       unknown_BBVs : list of BBV
+      \tDescribed under attributes
+      CBVs : list of CBV
       \tDescribed under attributes
       boundaries : boundaries
       \tDescribed under boundaries
@@ -1137,6 +1193,11 @@ class simulated_learning_module(learning_module):
       for BBV in self.BBVs:
          self.BBV_flags[BBV.name] = rd.random(self.n_participants) < BBV.fraction
       
+      self.CBVs = CBVs
+      self.CBV_values = {}
+      for CBV in self.CBVs:
+         self.CBV_values[CBV.name] = CBV.PDF(self.n_participants)
+      
       #Divide the participants into subgroups where the members are subject
       #to the same known BBVs
       self.subgroups = _define_subgroups(self.n_participants, self.known_BBVs, self.BBV_flags)
@@ -1157,8 +1218,11 @@ class simulated_learning_module(learning_module):
       digicomp_initial = np.ones(self.n_participants) * self.default_digicomp
       for BBV in self.BBVs:
           digicomp_initial[self.BBV_flags[BBV.name]] = BBV.pre_transformation(digicomp_initial[self.BBV_flags[BBV.name]])
+      for CBV in self.CBVs:
+          digicomp_initial = CBV.pre_transformation(digicomp_initial, self.CBV_values[CBV.name])
       return digicomp_initial
       
+   # Note to self: there is an inconsistency between initial and final: one returns a value and the other does a side effect!
    def calculate_digicomp_final(self, manipulations = [], manipulation_flags = []):
       """
       Calculates the digital competence after finishing the course. To do
@@ -1171,6 +1235,8 @@ class simulated_learning_module(learning_module):
          self.digicomp_final[manipulation_flags[manipulation.name]] = manipulation.transformation(self.digicomp_final[manipulation_flags[manipulation.name]])
       for BBV in self.BBVs:
          self.digicomp_final[self.BBV_flags[BBV.name]] = BBV.post_transformation(self.digicomp_final[self.BBV_flags[BBV.name]])
+      for CBV in self.CBVs:
+         self.digicomp_final = CBV.post_transformation(self.digicomp_final, self.CBV_values[CBV.name])
       return
       
    ### Methods for calculating results based on digital competence
@@ -1273,7 +1339,7 @@ class real_learning_module(learning_module):
       self.load_results(results_folder_path)
       #Divide the participants into subgroups where the members are subject
       #to the same known BBVs
-      self.subgroups = _define_subgroups(self.n_participants, self.known_BBVs, self.BBV_flags)
+      self.subgroups = _define_subgroups(self.n_participants, self.known_BBVs, self.BBV_flags) # Note to self: Is this really correct?!
       return
 
 
