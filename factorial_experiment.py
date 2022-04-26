@@ -34,14 +34,15 @@ However, this number is not accessible to the experimentalists. All
 they see is the actual number of correct answers.
 
 The study is assumed to use a factorial design, so that the experiment-
-ers first identify some binary background variables - BBV - and split
-the participants into several smaller groups within which all members
-are affected the same. They then try out a certain number of changes in
-the course - here referred to as 'manipulations'. To evaluate the
-effect of the manipulations the participant groups are further halved
-ortogonally, so that with n manipulations each group affected
-identically by BBVs is split into 2^n subgroups that each get some
-combination of manipulations.
+ers first identify some binary background variables (BBV) - such as 
+whether the participant's native language is the same as the language
+of the learning module - and split the participants into several
+smaller groups within which all members are affected the same. They
+then try out a certain number of changes in the course - here referred
+to as 'manipulations'. To evaluate the effect of the manipulations the
+participant groups are further halved ortogonally, so that with 
+n manipulations each group affected identically by BBVs is split into
+2^n subgroups that each get some combination of manipulations.
 
 Written by Alvin Gavel,
 
@@ -404,18 +405,27 @@ class real_manipulation(manipulation):
       manipulation.__init__(self, name)
       return
 
-class BBV(ABC):
+class BV(ABC):
    """
-   This represents something that can be expected to affect the results of
-   the participants in the study, but which cannot be directly controlled
-   by the experimenters. For example, it is possible that the results can
-   be affected by whether the participants are native speakers of the
-   language that the course is given in.
+   This represents a background variable. That is, something that can be
+   expected to affect the results of the participants in the study, but
+   which cannot be directly controlled by the experimenters.
    """
    @abstractmethod
    def __init__(self, name):
       self.name = name
       self.name_for_file = _trim_for_filename(self.name)
+      return
+
+class BBV(BV):
+   """
+   This represents a binary background variable. For example, whether the
+   native language of the participants is the same as the language of the
+   learning module.
+   """
+   @abstractmethod
+   def __init__(self, name):
+      BV.__init__(self, name)
       return
       
 class simulated_BBV(BBV):
@@ -493,6 +503,11 @@ class real_BBV(BBV):
       BBV.__init__(self, name)
       return
       
+class CBV(ABC):
+   """
+   
+   """
+
 
 class boundaries:
    """
