@@ -44,10 +44,11 @@ load_results = True
 # skill and the effectiveness of the intervention, and one which affects
 # only the effectiveness of the intervention.
 
-known_background_1 = fe.simulated_background("hates computers", fe.standard_transformations["large deterioration"], fe.standard_transformations["slight deterioration"], 0.2)
-known_background_2 = fe.simulated_background("kazoo band outside office", fe.standard_transformations["no effect"], fe.standard_transformations["slight deterioration"], 0.1)
-known_backgrounds = [known_background_1, known_background_2]
+known_background = fe.simulated_background("hates computers", fe.standard_transformations["large deterioration"], fe.standard_transformations["slight deterioration"], 0.2)
+known_backgrounds = [known_background]
 
+learned_background = fe.simulated_background("kazoo band outside office", fe.standard_transformations["no effect"], fe.standard_transformations["slight deterioration"], 0.1)
+learned_backgrounds = [learned_background]
 
 # We introduce one unknown background, which affects both initial skill
 # and the effectiveness of the intervention.
@@ -88,7 +89,7 @@ initial_digital_competence = 0.5
 # manipulations
 default_effect = fe.standard_transformations["large improvement"]
 
-testgroup = fe.simulated_learning_module(n_skills, n_sessions, n_participants, initial_digital_competence, default_effect, known_backgrounds = known_backgrounds, unknown_backgrounds = unknown_backgrounds, boundaries = bounds)
+testgroup = fe.simulated_learning_module(n_skills, n_sessions, n_participants, initial_digital_competence, default_effect, known_backgrounds = known_backgrounds, learned_backgrounds = learned_backgrounds, unknown_backgrounds = unknown_backgrounds, boundaries = bounds)
 testgroup.set_manipulations(manipulations)
 if print_results:
    testgroup.describe()
