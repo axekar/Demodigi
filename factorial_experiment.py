@@ -1223,7 +1223,6 @@ class simulated_learning_module(learning_module):
           digicomp_initial = CBV.pre_transformation(digicomp_initial, self.CBV_values[CBV.name])
       return digicomp_initial
       
-   # Note to self: there is an inconsistency between initial and final: one returns a value and the other does a side effect!
    def calculate_digicomp_final(self, manipulations = [], manipulation_flags = []):
       """
       Calculates the digital competence after finishing the course. To do
@@ -1694,10 +1693,11 @@ class study:
       print("We are testing {} manipulation{}:".format(self.learning_module.n_manipulations, _plural_ending(self.learning_module.n_manipulations)))
       for manipulation in self.learning_module.manipulations:
          print("{}{}".format(_indent(1), manipulation.name))
+      print("")
          
       n_BBVs = len(self.learning_module.known_BBVs)
       if n_BBVs > 0:
-         print("\nThere {} {} known BBV{}:".format(_is_are(n_BBVs), n_BBVs, _plural_ending(n_BBVs)))
+         print("There {} {} known BBV{}:".format(_is_are(n_BBVs), n_BBVs, _plural_ending(n_BBVs)))
          for BBV in self.learning_module.known_BBVs:
             print("{}{}".format(_indent(1), BBV.name))
          print("Hence, the participants are split into {} subgroups\n".format(len(self.learning_module.subgroups)))
@@ -1714,7 +1714,13 @@ class study:
          for BBV in self.learning_module.unknown_BBVs:
             print("{}{}".format(_indent(1), BBV.name))
          print("This may affect the study\n")
-            
+         
+      if self.learning_module.n_CBV > 0:
+         print("There {} {} CBV{}:".format(_is_are(self.learning_module.n_CBV), self.learning_module.n_CBV, _plural_ending(self.learning_module.n_CBV)))
+         for CBV in self.learning_module.CBVs:
+            print("{}{}".format(_indent(1), CBV.name))
+         print("")
+         
       print("Group membership:")
       for subgroup_name, subgroup_members in self.learning_module.subgroups.items():
          n_members = len(subgroup_members)
