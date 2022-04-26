@@ -1188,7 +1188,7 @@ class simulated_learning_module(learning_module):
       self.discovered_BBVs = discovered_BBVs
       self.unknown_BBVs = unknown_BBVs
       self.BBVs = self.known_BBVs + self.discovered_BBVs + self.unknown_BBVs
-      self.n_BBVs = len(self.BBVs)
+      self.n_BBV = len(self.BBVs)
       self.BBV_flags = {}
       for BBV in self.BBVs:
          self.BBV_flags[BBV.name] = rd.random(self.n_participants) < BBV.fraction
@@ -1197,6 +1197,7 @@ class simulated_learning_module(learning_module):
       self.CBV_values = {}
       for CBV in self.CBVs:
          self.CBV_values[CBV.name] = CBV.PDF(self.n_participants)
+      self.n_CBV = len(self.CBVs)
       
       #Divide the participants into subgroups where the members are subject
       #to the same known BBVs
@@ -1273,8 +1274,7 @@ class simulated_learning_module(learning_module):
       print("Description of the participants:\n")
       print("There {} {} participant{}".format(_is_are(self.n_participants), self.n_participants, _plural_ending(self.n_participants)))
       for wording, BBV_list in [("known", self.known_BBVs), ("discovered", self.discovered_BBVs), ("unknown", self.unknown_BBVs)]:
-         n_BBVs = len(BBV_list)
-         print("\nThere {} {} BBV{} {} to the experimenters".format(_is_are(n_BBVs), n_BBVs, _plural_ending(n_BBVs), wording))
+         print("\nThere {} {} BBV{} {} to the experimenters".format(_is_are(self.n_BBV), self.n_BBV, _plural_ending(self.n_BBV), wording))
          for BBV in BBV_list:
             n_affected = np.sum(self.BBV_flags[BBV.name])
             print("{}BBV: {}".format(_indent(1), BBV.name))
@@ -1291,6 +1291,13 @@ class simulated_learning_module(learning_module):
                print("{}Out of these, some may be affected by {} BBVs:".format(_indent(2), wording))
                for BBV in BBV_list:
                   print("{}{}: {}".format(_indent(3), BBV.name, sum(self.BBV_flags[BBV.name][subgroup_members])))
+      if self.n_CBV > 0:
+         print("\nThere {} {} CBV{}".format(_is_are(self.n_CBV), self.n_CBV, _plural_ending(self.n_CBV)))
+         for CBV in self.CBVs:
+            print("{}CBV: {}".format(_indent(1), CBV.name))
+            print("{}Median: {:.2f}".format(_indent(1), np.median(self.CBV_values[CBV.name])))
+            print("{}Mean: {:.2f}".format(_indent(1), np.mean(self.CBV_values[CBV.name])))
+            print("{}Range: {:.2f}-{:.2f}".format(_indent(1), min(self.CBV_values[CBV.name]), max(self.CBV_values[CBV.name])))
       print("\n")
       return
 
