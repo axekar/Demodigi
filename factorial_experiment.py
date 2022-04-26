@@ -736,6 +736,7 @@ class learning_module(ABC):
 
       self.n_backgrounds = np.nan      
       self.known_backgrounds = []
+      self.learned_backgrounds = []
       self.unknown_backgrounds = []
 
       self.ids = []
@@ -826,13 +827,16 @@ class learning_module(ABC):
       listing boolean flags describing which participant is affected by which
       background
       """
-      jsonable_background_names = []
+      jsonable_background_names = {}
       jsonable_background_flags = {}
-      for background in self.known_backgrounds:
-         jsonable_background_names.append(background.name)
-         jsonable_background_flags[background.name] = self.background_flags[background.name].tolist()
+      
+      for wording, background_list in [("learned", self.learned_backgrounds), ("known", self.known_backgrounds)]:
+         jsonable_background_names[wording] = []
+         for background in background_list:
+            jsonable_background_names[wording].append(background.name)
+            jsonable_background_flags[background.name] = self.background_flags[background.name].tolist()
       f = open(path, 'w')
-      packed = json.dumps({'IDs':self.ids, 'Known backgrounds': jsonable_background_names, 'Background flags':jsonable_background_flags})
+      packed = json.dumps({'IDs':self.ids, 'Backgrounds': jsonable_background_names, 'Background flags':jsonable_background_flags})
       f.write(packed)
       f.close()
       return
@@ -889,11 +893,15 @@ class learning_module(ABC):
       
       ids = unpacked['IDs']
       known_backgrounds = []
-      for name in unpacked['Known backgrounds']:
+      learned_backgrounds = []
+      for name in unpacked['Backgrounds']['known']:
          known_backgrounds.append(real_background(name))
+      for name in unpacked['Backgrounds']['learned']:
+         learned_backgrounds.append(real_background(name))
+
       background_flags = unpacked['Background flags']
       
-      for background in known_backgrounds:
+      for background in known_backgrounds + learned_backgrounds:
          try:
             background_flags[background.name] = np.asarray(_match_ids(self.ids, ids, background_flags[background.name]), dtype = np.bool)
          except IDMismatchError:
@@ -902,6 +910,7 @@ class learning_module(ABC):
             return
 
       self.known_backgrounds = known_backgrounds
+      self.learned_backgrounds = learned_backgrounds
       # We assume that this is only done in the absence of unknown backgrounds
       self.unknown_backgrounds = []
       self.backgrounds = self.known_backgrounds + self.unknown_backgrounds
@@ -968,10 +977,19 @@ class simulated_learning_module(learning_module):
    \tvariables, prior to taking the learning module
    known_backgrounds : list of simulated_background
    \tBackgrounds that affect some subset of participants, and which are
-   \tassumed to be known to the experimenters
+   \tassumed to be known to the experimenters ahead of time. This means
+   \tthat it is possible for them to divide the participants affected
+   \tby these background variables evenly w.r.t. the manipulations
+   learned_backgrounds : list of simulated_background
+   \tBackgrounds that affect some subset of participants, and which are
+   \tassumed to be learned by the experimenters in the course of the
+   \tlearning module. This means that it is not possible for them to
+   \tdivide the participants affected by these background variables
+   \tevenly w.r.t. the manipulations
    unknown_backgrounds : list of simulated_background
    \tBackgrounds that affect some subset of participants, and which are
-   \tnot known to the experimenters
+   \tassumed to be unknown to the experimenters even after the learning
+   \tmodule.
    backgrounds : list of simulated_background
    \tList containing both the known and unknown backgrounds
    background_flags : dict of bool ndarrays
@@ -990,7 +1008,7 @@ class simulated_learning_module(learning_module):
    digicomp_set : bool
    \tWhether anything has set digicomp_initial and digicomp_final
    """
-   def __init__(self, n_skills, n_sessions, n_participants, default_digicomp, default_effect, known_backgrounds = [], unknown_backgrounds = [], boundaries = None):
+   def __init__(self, n_skills, n_sessions, n_participants, default_digicomp, default_effect, known_backgrounds = [], learned_backgrounds = [], unknown_backgrounds = [], boundaries = None):
       """
       Parameters
       ----------
@@ -1002,6 +1020,8 @@ class simulated_learning_module(learning_module):
       Optional parameters
       -------------------
       known_backgrounds : list of background
+      \tDescribed under attributes
+      learned_backgrounds : list of background
       \tDescribed under attributes
       unknown_backgrounds : list of background
       \tDescribed under attributes
@@ -1018,8 +1038,9 @@ class simulated_learning_module(learning_module):
       self.default_digicomp = default_digicomp
       self.default_effect = default_effect
       self.known_backgrounds = known_backgrounds
+      self.learned_backgrounds = learned_backgrounds
       self.unknown_backgrounds = unknown_backgrounds
-      self.backgrounds = self.known_backgrounds + self.unknown_backgrounds
+      self.backgrounds = self.known_backgrounds + self.learned_backgrounds + self.unknown_backgrounds
       self.n_backgrounds = len(self.backgrounds)
       self.background_flags = {}
       for background in self.backgrounds:
@@ -1094,10 +1115,10 @@ class simulated_learning_module(learning_module):
       """
       print("Description of the participants:\n")
       print("There {} {} participant{}".format(_is_are(self.n_participants), self.n_participants, _plural_ending(self.n_participants)))
-      for wording, background_dict in [("known", self.known_backgrounds), ("unknown", self.unknown_backgrounds)]:
-         n_backgrounds = len(background_dict)
+      for wording, background_list in [("known", self.known_backgrounds), ("learned", self.learned_backgrounds), ("unknown", self.unknown_backgrounds)]:
+         n_backgrounds = len(background_list)
          print("\nThere {} {} background{} {} to the experimenters".format(_is_are(n_backgrounds), n_backgrounds, _plural_ending(n_backgrounds), wording))
-         for background in background_dict:
+         for background in background_list:
             n_affected = np.sum(self.background_flags[background.name])
             print("{}Background: {}".format(_indent(1), background.name))
             print("{}Affects {} participant{}".format(_indent(2), n_affected, _plural_ending(n_affected)))
@@ -1109,9 +1130,10 @@ class simulated_learning_module(learning_module):
             n_members = len(subgroup_members)
             print("{}'{}'".format(_indent(1), subgroup_name))
             print("{}Has {} member{}".format(_indent(2), n_members, _plural_ending(n_members)))
-            print("{}Out of these, some may be affected by unknown backgrounds:".format(_indent(2)))
-            for background in self.unknown_backgrounds:
-               print("{}{}: {}".format(_indent(3), background.name, sum(self.background_flags[background.name][subgroup_members])))
+            for wording, background_list in [("learned", self.learned_backgrounds), ("unknown", self.unknown_backgrounds)]:
+               print("{}Out of these, some may be affected by {} backgrounds:".format(_indent(2), wording))
+               for background in background_list:
+                  print("{}{}: {}".format(_indent(3), background.name, sum(self.background_flags[background.name][subgroup_members])))
       print("\n")
       return
 
@@ -1128,8 +1150,18 @@ class real_learning_module(learning_module):
    n : int
    \tThe number of participants in the study
    known_backgrounds : list of real_background
+   \tBackgrounds that affect some subset of participants, and which are
+   \tassumed to be known to the experimenters ahead of time. This means
+   \tthat it is possible for them to divide the participants affected
+   \tby these background variables evenly w.r.t. the manipulations
+   learned_backgrounds : list of real_background
+   \tBackgrounds that affect some subset of participants, and which are
+   \tassumed to be learned by the experimenters in the course of the
+   \tlearning module. This means that it is not possible for them to
+   \tdivide the participants affected by these background variables
+   \tevenly w.r.t. the manipulations
    backgrounds : list of real_background
-   \tList containing both the known and unknown backgrounds
+   \tList containing both the known and learned backgrounds
    background_flags : dict of bool ndarrays
    \tDictionary containing arrays stating which participants are
    \taffected by which backgrounds
