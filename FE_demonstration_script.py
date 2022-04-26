@@ -4,9 +4,10 @@ factorial_experiment.
 
 The scripts simulates study with 1000 participants and three
 manipulations, two of which give a slight improvement and one of which
-does nothing. There are three BBVs that affect the
-initial digital competence, the effect of the learning module, or both.
-Two of them are known, and one is unknown.
+does nothing. There are four BBVs that affect the initial digital
+competence, the effect of the learning module, or both. Two of them are
+known, one is discovered and one is unknown. There is one CBV, that
+currently does nothing to digital competence.
 
 There are a couple of toggle which are by default set to True:
 
@@ -53,15 +54,15 @@ known_BBV_2 = fe.simulated_BBV("office is bouncy castle", fe.standard_transforma
 known_BBVs = [known_BBV_1, known_BBV_2]
 
 
-# We introduce one discovered BBV, which affects only the 
-# the effectiveness of the intervention.
+# We introduce one discovered BBV, which affects only the effectiveness
+# of the intervention.
 
 discovered_BBV = fe.simulated_BBV("kazoo band outside office", fe.standard_transformations["no effect"], fe.standard_transformations["slight deterioration"], 0.1)
 discovered_BBVs = [discovered_BBV]
 
 
-# We introduce one unknown BBV, which affects both initial skill
-# and the effectiveness of the intervention.
+# We introduce one unknown BBV, which affects both initial skill and
+# the effectiveness of the intervention.
 
 unknown_BBV_1 = fe.simulated_BBV("secretly a ghost", fe.standard_transformations["moderate deterioration"], fe.standard_transformations["slight deterioration"], 0.1)
 unknown_BBVs = [unknown_BBV_1]
