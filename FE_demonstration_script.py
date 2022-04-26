@@ -93,22 +93,22 @@ initial_digital_competence = 0.5
 # manipulations
 default_effect = fe.standard_transformations["large improvement"]
 
-testgroup = fe.simulated_learning_module(n_skills, n_sessions, n_participants, initial_digital_competence, default_effect, known_backgrounds = known_backgrounds, discovered_backgrounds = discovered_backgrounds, unknown_backgrounds = unknown_backgrounds, boundaries = bounds)
-testgroup.set_manipulations(manipulations)
+demo_group = fe.simulated_learning_module(n_skills, n_sessions, n_participants, initial_digital_competence, default_effect, known_backgrounds = known_backgrounds, discovered_backgrounds = discovered_backgrounds, unknown_backgrounds = unknown_backgrounds, boundaries = bounds)
+demo_group.set_manipulations(manipulations)
 if print_results:
-   testgroup.describe()
-testgroup.run_simulation()
+   demo_group.describe()
+demo_group.run_simulation()
 if save_results:
-   testgroup.save_ids('simulated_participants.json')
-   testgroup.save_backgrounds('simulated_backgrounds.json')
-   testgroup.save_manipulations('simulated_manipulations.json')
-   testgroup.save_results('Simulated_results')
+   demo_group.save_ids('simulated_participants.json')
+   demo_group.save_backgrounds('simulated_backgrounds.json')
+   demo_group.save_manipulations('simulated_manipulations.json')
+   demo_group.save_results('Simulated_results')
 
 
 # Everything is put together into a study, which is then run and the
 # desired output is displayed
 
-trial_study = fe.study('test', testgroup)
+trial_study = fe.study('Demonstration', demo_group)
 if print_results:
    trial_study.describe()
 trial_study.do_tests()
@@ -126,7 +126,7 @@ if load_results:
    print('Loading saved data...')
    loaded_learning_module = fe.real_learning_module(n_skills, n_sessions, 'simulated_participants.json', 'simulated_backgrounds.json', 'Simulated_results', boundaries = bounds)
    loaded_learning_module.load_manipulations('simulated_manipulations.json')
-   loaded_study = fe.study('test of loading', loaded_learning_module)
+   loaded_study = fe.study('Demonstration of loading', loaded_learning_module)
    loaded_study.do_tests()
    if print_results:
       loaded_study.summarise_results()
