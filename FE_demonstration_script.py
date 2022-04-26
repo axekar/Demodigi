@@ -30,11 +30,14 @@ import factorial_experiment as fe
 # Prints verbose output describing the simulated study
 print_results = True
 
+
 # Makes plots describing the simulated study
 plot_results = True
 
+
 # Output three files containing flags and results for the participants
 save_results = True
+
 
 # Test that loading the results works
 load_results = True
@@ -48,11 +51,13 @@ known_background_1 = fe.simulated_background("hates computers", fe.standard_tran
 known_background_2 = fe.simulated_background("office is bouncy castle", fe.standard_transformations["no effect"], fe.standard_transformations["slight deterioration"], 0.05)
 known_backgrounds = [known_background_1, known_background_2]
 
+
 # We introduce one discovered background, which affects only the 
 # the effectiveness of the intervention.
 
 discovered_background = fe.simulated_background("kazoo band outside office", fe.standard_transformations["no effect"], fe.standard_transformations["slight deterioration"], 0.1)
 discovered_backgrounds = [discovered_background]
+
 
 # We introduce one unknown background, which affects both initial skill
 # and the effectiveness of the intervention.
