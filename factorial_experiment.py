@@ -1491,7 +1491,7 @@ class study:
       self.measured_results['quick tests'] = {}
       for manipulation in self.learning_module.manipulations:
          self.measured_results['quick tests'][manipulation.name] = self._compare_flagged(self.learning_module.manipulation_flags[manipulation.name], self.learning_module.results_final)
-      for background in self.learning_module.known_backgrounds:
+      for background in self.learning_module.known_backgrounds + self.learning_module.learned_backgrounds:
          self.measured_results['quick tests'][background.name] = self._compare_flagged(self.learning_module.background_flags[background.name], self.learning_module.results_final)
          
       self.measured_results['quick tests']['total'] = {}
@@ -1506,7 +1506,7 @@ class study:
       self.measured_results['median tests']['total'] = self._median_test_total(self.learning_module)
       for manipulation in self.learning_module.manipulations:     
          self.measured_results['median tests'][manipulation.name] = self._median_test_background_or_manipulation(self.learning_module.manipulation_flags[manipulation.name], self.learning_module)
-      for background in self.learning_module.known_backgrounds:
+      for background in self.learning_module.known_backgrounds + self.learning_module.learned_backgrounds:
          self.measured_results['median tests'][background.name] = self._median_test_background_or_manipulation(self.learning_module.background_flags[background.name], self.learning_module)
          
       if self.learning_module.boundaries != None:
@@ -1514,7 +1514,7 @@ class study:
          self.measured_results['boundary tests']['total'] = self._boundary_test_total(self.learning_module)
          for manipulation in self.learning_module.manipulations:
             self.measured_results['boundary tests'][manipulation.name] = self._boundary_test_background_or_manipulation(self.learning_module.manipulation_flags[manipulation.name], self.learning_module)
-         for background in self.learning_module.known_backgrounds:
+         for background in self.learning_module.known_backgrounds + self.learning_module.learned_backgrounds:
             self.measured_results['boundary tests'][background.name] = self._boundary_test_background_or_manipulation(self.learning_module.background_flags[background.name], self.learning_module)
       return
 
@@ -1538,6 +1538,12 @@ class study:
             print("{}{}".format(_indent(1), background.name))
          print("Hence, the participants are split into {} subgroups\n".format(len(self.learning_module.subgroups)))
 
+      n_learned_backgrounds = len(self.learning_module.learned_backgrounds)
+      if n_learned_backgrounds > 0:
+         print("There {} {} learned background{}:".format(_is_are(n_learned_backgrounds), n_learned_backgrounds, _plural_ending(n_learned_backgrounds)))
+         for background in self.learning_module.learned_backgrounds:
+            print("{}{}".format(_indent(1), background.name))
+         
       n_unknown_backgrounds = len(self.learning_module.unknown_backgrounds)
       if n_unknown_backgrounds > 0:
          print("There {} {} unknown background{}:".format(_is_are(n_unknown_backgrounds), n_unknown_backgrounds, _plural_ending(n_unknown_backgrounds)))
@@ -1609,7 +1615,7 @@ class study:
          print("{}Results of boundary tests:".format(_indent(1)))
          print_poor_to_high('total', self.measured_results['boundary tests']['total'], 1)
       
-      for variation, description in [(self.learning_module.manipulations, 'manipulation'), (self.learning_module.known_backgrounds, 'background')]:
+      for variation, description in [(self.learning_module.manipulations, 'manipulation'), (self.learning_module.known_backgrounds + self.learning_module.learned_backgrounds, 'background')]:
          for choice in variation:
             results = self.measured_results['quick tests'][choice.name]
             print("\nResults for {} {}:".format(description, choice.name))
