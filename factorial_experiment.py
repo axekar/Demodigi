@@ -1730,7 +1730,7 @@ class study:
          print("This needs to be run in the same directory as a directory named '{}'".format(self.plot_folder))
          return
 
-      for variation, description in [(self.learning_module.manipulations, 'manipulation'), (self.learning_module.known_backgrounds, 'background')]:
+      for variation, description in [(self.learning_module.manipulations, 'manipulation'), (self.learning_module.known_backgrounds + self.learning_module.learned_backgrounds, 'background')]:
          for choice in variation:
             plot_quality('mtest', self.measured_results['median tests'][choice.name]['after module'])
 
