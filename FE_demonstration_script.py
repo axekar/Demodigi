@@ -68,11 +68,15 @@ unknown_BBV_1 = fe.simulated_BBV("secretly a ghost", fe.standard_transformations
 unknown_BBVs = [unknown_BBV_1]
 
 
-# We introduce one CBV, which has no effect whatsoever
+# We introduce two CBV, one of which has no effect whatsoever and one
+# which has a slight effect on initial digital competence
 
 null_transformation = lambda digicomp, CBV_value : digicomp
-CBV = fe.simulated_CBV("height", null_transformation, null_transformation, lambda n : rd.normal(loc=175., scale=8.0, size=n))
-CBVs = [CBV]
+CBV_1 = fe.simulated_CBV("height", null_transformation, null_transformation, lambda n : rd.normal(loc=175., scale=8.0, size=n))
+
+karmic_improvement = lambda digicomp, karma_points: improvement(digicomp_initial, 0.99 ** karma_points)
+CBV_2 = fe.simulated_CBV("good karma", null_transformation, null_transformation, lambda n : rd.uniform(low = 0.0 high = 10.0, size=n))
+CBVs = [CBV_1, CBV_2]
 
 
 # Define three manipulations, two of which have a slight effect and one
