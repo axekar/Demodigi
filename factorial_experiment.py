@@ -1913,7 +1913,7 @@ class minimal_size_experiment:
    This is intended to run multiple simulations of studies that are
    identical except that the number of participants varies
    """
-   def __init__(self, name, default_digicomp, default_effect, n_skills, manipulations, known_BBVs, n_min, n_max, n_steps = 10, iterations = 10):
+   def __init__(self, name, default_digicomp, default_effect, n_skills, n_sessions, manipulations, known_BBVs, n_min, n_max, n_steps = 10, iterations = 10):
       """
       Parameters
       ----------
@@ -1924,6 +1924,7 @@ class minimal_size_experiment:
       self.default_digicomp = default_digicomp
       self.default_effect = default_effect
       self.n_skills = n_skills
+      self.n_sessions = n_sessions
       self.manipulations = manipulations
       self.known_BBVs = known_BBVs
       self.n_min = n_min
@@ -1938,15 +1939,15 @@ class minimal_size_experiment:
       return
       
    def run(self):
-      for n in self.ns:
+      for n_participants in self.ns:
          pDpos = {}
          for key in self.median_pDpos.keys():
             pDpos[key] = []
          for i in range(self.iterations):
-            part = simulated_learning_module(self.n_skills, n, self.default_effect, default_digicomp = self.default_digicomp, known_BBVs = self.known_BBVs, unknown_BBVs = [], boundaries = None)
+            part = simulated_learning_module(self.n_skills, self.n_sessions, n_participants, self.default_digicomp, self.default_effect, known_BBVs = self.known_BBVs)
             part.set_manipulations(self.manipulations)            
             part.run_simulation()
-            simulated_study = study('Group size {}, simulation {}'.format(n, i), part)
+            simulated_study = study('Group size {}, simulation {}'.format(n_participants, i), part)
             simulated_study.do_tests()
             pDpos['total'].append(simulated_study.measured_results['median tests']['total']['after module']['probability that treatment group does better than control group'])
             for key in pDpos.keys():
