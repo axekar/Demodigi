@@ -69,7 +69,8 @@ unknown_BBVs = [unknown_BBV_1]
 
 
 # We introduce two CBV, one of which has no effect whatsoever and one
-# which has a slight effect on initial digital competence
+# which has a slight effect on initial digital competence, which is
+# randomly larger for some participants
 
 null_transformation = lambda digicomp, CBV_value : digicomp
 CBV_1 = fe.simulated_CBV("height", null_transformation, null_transformation, lambda n : rd.normal(loc=175., scale=8.0, size=n))
