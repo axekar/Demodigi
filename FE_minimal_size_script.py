@@ -30,7 +30,7 @@ motivated = fe.simulated_background("low motivation", fe.standard_transformation
 QBL_PQBL = fe.simulated_manipulation("Pure Question-based Learning", fe.standard_transformations["minimal improvement"])
 goals = fe.simulated_manipulation("Goal setting", fe.standard_transformations["minimal improvement"])
 
-minimum = fe.minimal_size_experiment('Minimum', 0.5, fe.standard_transformations["minimal improvement"], 40, [QBL_PQBL, goals], [age, gender, motivated], 10, 200, n_steps = 190, iterations = 100)
+minimum = fe.minimal_size_experiment('Minimum', 0.5, fe.standard_transformations["minimal improvement"], 30, [QBL_PQBL, goals], [age, gender, motivated], 10, 200, n_steps = 190, iterations = 100)
 minimum.run()
 if plot_results:
    minimum.plot_folder = 'DD_plots'
