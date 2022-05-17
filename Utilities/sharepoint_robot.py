@@ -35,6 +35,7 @@ https://github.com/Alvin-Gavel/Demodigi
 import selenium as sl
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import NoSuchElementException
 
 import numpy as np
 import csv
@@ -128,13 +129,21 @@ class clicker:
       self.connection.stop_driver()
       return
       
-   def read_sharepoint_lists(self):
+   def verify_sharepoint_lists(self):
       """
-      Read lists that have already been constructed on SharePoint, so that
-      they can be compared to a list on file to verify that the SharePoint
-      lists are correct.
+      Verify that participants have correctly been written to SharePoint
       """
-      pass
+      self.connection.start_driver()
+      correct = []
+      for participant in self.participants:
+         correct.append(self.connection.check_id_pwd_list(participant))
+      self.connection.stop_driver()
+      if sum(correct) == 0:
+         for participant, correctness in zip(self.participants, correct):
+            if not correctness:
+               print('Problems with list for {}'.format(participant.name))
+      else:
+         print('All participants seem to have correct lists')
       return
 
 
@@ -191,6 +200,26 @@ class SharepointConnection(object):
    def go_to_start(self):
       self.go_to_page(self.start_page_path)
       return
+
+   def check_id_pwd_list(self, participant):
+      """
+      Verify that an already existing list for a participant has been written
+      correctly.
+      """
+      print('Began work at {}'.format(datetime.now().strftime('%X')))
+      self.go_to_start()
+      try:
+         sleep(5)
+         list_button = self.driver.find_element(By.XPATH, "//*[text()='Konto-info för {}']".format(participant.name))
+         list_button.click()
+         sleep(5)
+         self.driver.find_element(By.XPATH, "//*[text()='{}']".format(participant.username))
+         self.driver.find_element(By.XPATH, "//*[text()='{}']".format(participant.password))
+         verified = True
+      except NoSuchElementException:
+         verified = False
+      print('Completed work at {}'.format(datetime.now().strftime('%X')))
+      return verified
 
    def make_id_pwd_list(self, participant, real_data):
       """
