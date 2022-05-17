@@ -16,4 +16,4 @@ The current contents of the repository are:
 
 `BE_test_script.py`: Script intended as a test of the module `behavioural_experiment`, by running some functions and plotting the results.
 
-`Utilities`: Directory containing written to solve specific technical problems of no scientific interest.
+`Utilities`: Directory containing code written to solve specific technical problems of no scientific interest.
