@@ -4,6 +4,7 @@ The current contents of this directory are:
 
 `README.md`: This text
 
+`employees.py`: A module for figuring out the organisational positions of the employees at AF
+
 `sharepoint_robot.py`: A module for creating SharePoint pages to share passwords with participants in the project
 
-`employees.py`: A module for figuring out the organisational positions of the employees at AF
