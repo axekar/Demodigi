@@ -35,7 +35,7 @@ class participant:
    """
    def __init__(self, ID):
       self.ID = ID
-      self.results = {}
+      self.correct_first_try = {}
       return
    
 class learning_module:
@@ -67,21 +67,29 @@ class learning_module:
       self.results_read = True
       return
    
-   def read_participant_results(self, participant):
+   def _read_participant_results(self, participant):
       """
-      Find out, for each question, how many tries the participant needed to 
-      answer it correctly.
+      Find out, for each question, whether the participant got it right on
+      the first try
       """
       if not self.results_read:
          print('No results to read!')
          return
       correct_participant = self.full_results[self.full_results['Student ID'] == participant.ID]
       for question in self.questions:
-         correct_question = correct_participant[correct_participant['Activity Title'] == question]
          try:
-            index_first_correct = correct_question["Correct?"].eq(True).idxmax()
-            n_tries = correct_question["Attempt Number"][index_first_correct]
-         except ValueError:
-            n_tries = np.inf
-         participant.results[question] = n_tries
+            correct_question = correct_participant[correct_participant['Activity Title'] == question]
+            got_it = correct_question["Correct?"][correct_question["Attempt Number"] == 1].to_numpy()[0]
+         except IndexError:
+            got_it = False
+         participant.correct_first_try[question] = got_it
+      return
+      
+   def read_participants_results(self):
+      """
+      Find out, for each question, whether the participants got it right on
+      the first try
+      """
+      for participant in self.participants:
+         self._read_participant_results(participant)
       return
