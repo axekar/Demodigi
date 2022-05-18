@@ -19,8 +19,26 @@ https://github.com/Alvin-Gavel/Demodigi
 """
 
 import pandas as pd
-
-
-def open_oli_results(filepath):
-   df = pd.read_csv(filepath, sep='\t')
-   return df
+   
+class learning_module:
+   """
+   This represents one learning module in the project.
+  
+   Attributes
+   ----------
+   questions : list of string
+   \tA list of the questions given in the learning module, as identified
+   \tin the "Activity Title" column in the output from OLI-Torus
+   questions : list of string
+   \tA list of the people taking the learning module, as identified in the
+   \t"Student ID" column in the output from OLI-Torus
+   """
+   def __init__(self, questions, participants):
+      self.questions = questions
+      self.participants = participants
+      self.full_results = None
+      return
+      
+   def import_oli_results(self, filepath):
+      self.full_results = pd.read_csv(filepath, sep='\t')
+      return
