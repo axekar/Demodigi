@@ -21,21 +21,10 @@ https://github.com/Alvin-Gavel/Demodigi
 
 import numpy as np
 import pandas as pd
-   
-class participant:
-   """
-   This represents a single person taking a learning module.
-   
-   Attributes
-   ----------
-   ID : string
-   \tSome unique identifier of the participant. For privacy reasons, this
-   \tis unlikely to be their actual name.
-   """
-   def __init__(self, ID):
-      self.ID = ID
-      self.correct_first_try = {}
-      return
+
+# Not used yet, but will become necessary later
+import json
+import matplotlib.pyplot as plt
    
 class skill:
    """
@@ -53,6 +42,23 @@ class skill:
       self.name = name
       return
    
+class participant:
+   """
+   This represents a single person taking a learning module.
+   
+   Attributes
+   ----------
+   ID : string
+   \tSome unique identifier of the participant. For privacy reasons, this
+   \tis unlikely to be their actual name.
+   correct_first_try : dict
+   \tInitially empty dictionary stating for each question in a learning
+   \tmodule whether the participant answered correctly on the first try.
+   """
+   def __init__(self, ID):
+      self.ID = ID
+      self.correct_first_try = {}
+      return
 
 class learning_module:
    """
@@ -60,18 +66,22 @@ class learning_module:
   
    Attributes
    ----------
-   questions : list of string
-   \tA list of the questions given in the learning module, as identified
-   \tin the "Activity Title" column in the output from OLI-Torus
+   skills : list of skill
+   \tA list of the skills that the learning module aims to teach
+   n_sessions : int
+   \tThe number of sessions in the learning module. The assumption is that
+   \tin each session each skill will be tested once
    participants : list of participant
    \tA list of the people taking the learning module, as identified in the
    \t"Student ID" column in the output from OLI-Torus
+   full_results : pandas dataframe
+   \tThe results from the learning module as output by OLI-Torus
    """
-   def __init__(self, questions, participants):
-      self.questions = questions
+   def __init__(self, skills, n_sessions, participants):
+      self.skills = skills
+      self.n_sessions = n_sessions
       self.participants = participants
       self.full_results = None
-      self.results_read = False
       return
       
    def import_oli_results(self, filepath):
@@ -90,13 +100,13 @@ class learning_module:
       """
       participant.correct_first_try = {}
       correct_participant = self.full_results[self.full_results['Student ID'] == participant.ID]
-      for question in self.questions:
+      for skill in self.skills:
          try:
-            correct_question = correct_participant[correct_participant['Activity Title'] == question]
-            got_it = correct_question["Correct?"][correct_question["Attempt Number"] == 1].to_numpy()[0]
+            correct_skill = correct_participant[correct_participant['Activity Title'] == skill.name]
+            got_it = correct_skill["Correct?"][correct_skill["Attempt Number"] == 1].to_numpy()[0]
          except IndexError:
             got_it = False
-         participant.correct_first_try[question] = got_it
+         participant.correct_first_try[skill.name] = got_it
       return
       
    def read_participants_results(self):
@@ -104,10 +114,11 @@ class learning_module:
       Find out, for each question, whether the participants got it right on
       the first try.
       """
-      if not self.results_read:
-         print('No results to read!')
+      # If you simply test "[...] == None" Pandas will complain that
+      # dataframes have ambiguous equality
+      if type(self.full_results) == type(None):
+         print('No results have been read!')
          return
-
       for participant in self.participants:
          self._read_participant_results(participant)
       return
