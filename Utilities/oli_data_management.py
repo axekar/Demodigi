@@ -69,12 +69,10 @@ class learning_module:
    
    def _read_participant_results(self, participant):
       """
-      Find out, for each question, whether the participant got it right on
-      the first try
+      Find out, for each question, whether a specific participant got it
+      right on the first try
       """
-      if not self.results_read:
-         print('No results to read!')
-         return
+      participant.correct_first_try = {}
       correct_participant = self.full_results[self.full_results['Student ID'] == participant.ID]
       for question in self.questions:
          try:
@@ -90,6 +88,10 @@ class learning_module:
       Find out, for each question, whether the participants got it right on
       the first try
       """
+      if not self.results_read:
+         print('No results to read!')
+         return
+
       for participant in self.participants:
          self._read_participant_results(participant)
       return
