@@ -74,7 +74,7 @@ class learning_module:
    participants : list of participant
    \tA list of the people taking the learning module, as identified in the
    \t"Student ID" column in the output from OLI-Torus
-   full_results : pandas dataframe
+   full_results : pandas DataFrame
    \tThe results from the learning module as output by OLI-Torus
    """
    def __init__(self, skills, n_sessions, participants):
@@ -108,7 +108,7 @@ class learning_module:
             got_it = correct_skill["Correct?"][correct_skill["Attempt Number"] == 1].to_numpy()[0]
          except IndexError:
             got_it = False
-         participant.correct_first_try[skill.name][0] = got_it #This is a temporary solution until we know if multiple sessions come within one or many tsv files
+         participant.correct_first_try.loc[0, skill.name] = got_it #This is a temporary solution until we know if multiple sessions come within one or many tsv files
       return
       
    def read_participants_results(self):
