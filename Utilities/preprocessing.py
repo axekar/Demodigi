@@ -9,11 +9,10 @@ done by learning modules at KTH using OLI-Torus.
 
 --- About this Python module ---
 
-This module is intended to read the tsv-files that come out of OLI-
-Torus, and transform them into json files that contain only the
-information used by the factorial_experiment module. It is mostly
-intended as a proof-of-concept. I intend to eventually work the
-contents into the factorial_experiment module.
+This module is intended to do preprocessing of data our data - for
+example that coming out of OLI-Torus - so that it can be used by the
+factorial_experiment module. While doing so it should also output a
+directory tree with plots of data that we believe is of interest.
 
 Written by Alvin Gavel,
 
