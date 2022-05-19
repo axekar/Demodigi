@@ -6,7 +6,7 @@ The current contents of this directory are:
 
 `employees.py`: A module for figuring out the organisational positions of the employees at AF
 
-`oli_data_management.py`: A module for handling the data that comes out of OLI-Torus
+`preprocessing.py`: A module for handling the data that comes out of OLI-Torus, changing it into a format suitable for the factorial_experiment one level further up
 
 `sharepoint_robot.py`: A module for creating SharePoint pages to share passwords with participants in the project
 
