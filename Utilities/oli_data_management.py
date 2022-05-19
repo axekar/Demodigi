@@ -10,7 +10,7 @@ done by learning modules at KTH using OLI-Torus.
 --- About this Python module ---
 
 This module is intended to read the tsv-files that come out of OLI-
-TORUS, and transform them into json files that contain only the
+Torus, and transform them into json files that contain only the
 information used by the factorial_experiment module. It is mostly
 intended as a proof-of-concept. I intend to eventually work the
 contents into the factorial_experiment module.
@@ -43,6 +43,12 @@ class skill:
    This represents a specific skill that the learning module is intended
    to teach. The skill is assumed to be tested once per session of the
    module.
+   
+   Attributes
+   ----------
+   name : string
+   \tSome name of the skill, which is used to identify questions testing
+   \tthat skill in the data output by OLI-Torus
    """
    def __init__(self, name):
       self.name = name
@@ -81,7 +87,7 @@ class learning_module:
    def _read_participant_results(self, participant):
       """
       Find out, for each question, whether a specific participant got it
-      right on the first try
+      right on the first try.
       """
       participant.correct_first_try = {}
       correct_participant = self.full_results[self.full_results['Student ID'] == participant.ID]
@@ -97,7 +103,7 @@ class learning_module:
    def read_participants_results(self):
       """
       Find out, for each question, whether the participants got it right on
-      the first try
+      the first try.
       """
       if not self.results_read:
          print('No results to read!')
