@@ -57,7 +57,7 @@ class participant:
    """
    def __init__(self, ID):
       self.ID = ID
-      self.correct_first_try = {}
+      self.correct_first_try = pd.DataFrame()
       return
 
 class learning_module:
@@ -98,7 +98,9 @@ class learning_module:
       Find out, for each question, whether a specific participant got it
       right on the first try.
       """
-      participant.correct_first_try = {}
+      for skill in self.skills:
+         participant.correct_first_try[skill.name] = np.nan * np.zeros(self.n_sessions)
+      
       correct_participant = self.full_results[self.full_results['Student ID'] == participant.ID]
       for skill in self.skills:
          try:
@@ -106,7 +108,7 @@ class learning_module:
             got_it = correct_skill["Correct?"][correct_skill["Attempt Number"] == 1].to_numpy()[0]
          except IndexError:
             got_it = False
-         participant.correct_first_try[skill.name] = got_it
+         participant.correct_first_try[skill.name][0] = got_it #This is a temporary solution until we know if multiple sessions come within one or many tsv files
       return
       
    def read_participants_results(self):
@@ -115,7 +117,7 @@ class learning_module:
       the first try.
       """
       # If you simply test "[...] == None" Pandas will complain that
-      # dataframes have ambiguous equality
+      # dataframes have ambiguous equality.
       if type(self.full_results) == type(None):
          print('No results have been read!')
          return
