@@ -38,6 +38,17 @@ class participant:
       self.correct_first_try = {}
       return
    
+class skill:
+   """
+   This represents a specific skill that the learning module is intended
+   to teach. The skill is assumed to be tested once per session of the
+   module.
+   """
+   def __init__(self, name):
+      self.name = name
+      return
+   
+
 class learning_module:
    """
    This represents one learning module in the project.
