@@ -15,7 +15,6 @@ factorial_experiment module. While doing so it should also output a
 directory tree with plots of data that we believe is of interest.
 
 Written by Alvin Gavel,
-
 https://github.com/Alvin-Gavel/Demodigi
 """
 
@@ -123,4 +122,13 @@ class learning_module:
          return
       for participant in self.participants:
          self._read_participant_results(participant)
+      return
+      
+   def export_results(self):
+      """
+      This method will need to be implemented. It should export the results
+      in the form of a json file, which can be read by the
+      factorial_experiment module.
+      """
+      pass
       return
