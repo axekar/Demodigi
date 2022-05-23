@@ -124,6 +124,19 @@ class learning_module:
          self._read_participant_results(participant)
       return
       
+   def flag_participants(self):
+      """
+      Divide the participants into the three categories:
+       1. Finished learning module
+       2. Started doing learning module
+       3. Signed up for learning module but has not yet answered a single
+          question
+      This is partly for our internal bookkeeping, but also so that we can
+      send out reminders to participants who have yet to finish the module.
+      """
+      pass
+      return
+      
    def export_results(self):
       """
       This method will need to be implemented. It should export the results
