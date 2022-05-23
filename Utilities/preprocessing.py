@@ -55,7 +55,7 @@ class participant:
    \tmodule whether the participant answered correctly on the first try.
    """
    def __init__(self, ID):
-      self.ID = str(ID)
+      self.ID = ID
       self.correct_first_try = pd.DataFrame()
       return
 
@@ -154,7 +154,6 @@ class learning_module:
             except IndexError:
                got_it = False
             participant.correct_first_try.loc[session, skill.name] = got_it
-      print(n_answers)
       self.flags.loc[participant.ID, 'started'] = True # Note that this is assumed by default, we cannot test it yet
       self.flags.loc[participant.ID, 'answered once'] = n_answers > 0
       self.flags.loc[participant.ID, 'finished'] = n_answers == self.n_sessions * self.n_skills
