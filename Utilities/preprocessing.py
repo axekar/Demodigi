@@ -55,7 +55,7 @@ class participant:
    \tmodule whether the participant answered correctly on the first try.
    """
    def __init__(self, ID):
-      self.ID = ID
+      self.ID = str(ID)
       self.correct_first_try = pd.DataFrame()
       return
 
@@ -67,10 +67,12 @@ class learning_module:
    ----------
    skills : list of skill
    \tA list of the skills that the learning module aims to teach
+   n_skills : int
+   \tThe number of skills in the learning module
    n_sessions : int
    \tThe number of sessions in the learning module. The assumption is that
    \tin each session each skill will be tested once
-   participants : list of participant or None
+   participants : dict of participant or None
    \tA list of the people taking the learning module, as identified in the
    \t"Student ID" column in the output from OLI-Torus. If None is given,
    \tthe participants must be read from 
@@ -82,16 +84,28 @@ class learning_module:
    \tWhether a list of participants has been provided, either when 
    \tinstantiating the learning_module or afterwards from the
    \tfull_results
+   flags : pandas DataFrame
+   \tFlags that note whether each participant has:
+   \t1. Started the learning module (we cannot currently test this, so always set to true)
+   \t2. Answered at least one question
+   \t3. Finished the learning module
    """
    def __init__(self, skills, n_sessions, participants = None):
       self.skills = skills
+      self.n_skills = len(self.skills)
       self.n_sessions = n_sessions
       self.participants = participants
+      if participants == None:
+         self.participants_read = False
+         self.n_participants = np.nan
+      else:
+         self.participants_read = True
+         self.n_participants = len(participants)
+      self.flags = pd.DataFrame()
       self.full_results = None
       self.results_read = False
-      self.participants_read = False
       return
-      
+
    def list_participants(self):
       for participant in self.participants:
          print(participant.ID)
@@ -105,17 +119,19 @@ class learning_module:
          print("Must read a file of results first!")
       else:
          inferred_participant_IDs = set(self.full_results['Student ID'])
-         self.participants = []
+         self.participants = {}
          for ID in inferred_participant_IDs:
-            self.participants.append(participant(ID))
+            self.participants[ID] = participant(ID)
+      self.n_participants = len(self.participants)
       return
-      
+
    def import_oli_results(self, filepath):
       """
       Import a file with the raw statistics directly out of OLI-Torus, in the
       tab-separated values format.
       """
-      self.full_results = pd.read_csv(filepath, sep='\t')
+      raw = pd.read_csv(filepath, sep='\t')
+      self.full_results = raw.astype({"Student ID": str}) # This sometimes gets interpreted as int
       self.results_read = True
       return
    
@@ -128,14 +144,20 @@ class learning_module:
          participant.correct_first_try[skill.name] = np.nan * np.zeros(self.n_sessions)
       
       correct_participant = self.full_results[self.full_results['Student ID'] == participant.ID]
+      n_answers = 0
       for skill in self.skills:
          for session in range(self.n_sessions):
             try:
                correct_skill = correct_participant[correct_participant['Activity Title'] == "{}_Q{}".format(skill.name, session + 1)]
                got_it = correct_skill["Correct?"][correct_skill["Attempt Number"] == 1].to_numpy()[0]
+               n_answers += 1
             except IndexError:
                got_it = False
             participant.correct_first_try.loc[session, skill.name] = got_it
+      print(n_answers)
+      self.flags.loc[participant.ID, 'started'] = True # Note that this is assumed by default, we cannot test it yet
+      self.flags.loc[participant.ID, 'answered once'] = n_answers > 0
+      self.flags.loc[participant.ID, 'finished'] = n_answers == self.n_sessions * self.n_skills
       return
       
    def read_participants_results(self):
@@ -148,21 +170,8 @@ class learning_module:
       if type(self.full_results) == type(None):
          print('No results have been read!')
          return
-      for participant in self.participants:
+      for participant in self.participants.values():
          self._read_participant_results(participant)
-      return
-      
-   def flag_participants(self):
-      """
-      Divide the participants into the three categories:
-       1. Finished learning module
-       2. Started doing learning module
-       3. Signed up for learning module but has not yet answered a single
-          question
-      This is partly for our internal bookkeeping, but also so that we can
-      send out reminders to participants who have yet to finish the module.
-      """
-      pass
       return
       
    def export_results(self):
