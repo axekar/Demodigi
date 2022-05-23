@@ -70,17 +70,44 @@ class learning_module:
    n_sessions : int
    \tThe number of sessions in the learning module. The assumption is that
    \tin each session each skill will be tested once
-   participants : list of participant
+   participants : list of participant or None
    \tA list of the people taking the learning module, as identified in the
-   \t"Student ID" column in the output from OLI-Torus
+   \t"Student ID" column in the output from OLI-Torus. If None is given,
+   \tthe participants must be read from 
    full_results : pandas DataFrame
    \tThe results from the learning module as output by OLI-Torus
+   results_read : bool
+   \tWhether results have been read from a file
+   participants_input : bool
+   \tWhether a list of participants has been provided, either when 
+   \tinstantiating the learning_module or afterwards from the
+   \tfull_results
    """
-   def __init__(self, skills, n_sessions, participants):
+   def __init__(self, skills, n_sessions, participants = None):
       self.skills = skills
       self.n_sessions = n_sessions
       self.participants = participants
       self.full_results = None
+      self.results_read = False
+      self.participants_read = False
+      return
+      
+   def list_participants(self):
+      for participant in self.participants:
+         print(participant.ID)
+      return
+      
+   def infer_participants_from_full_results(self):
+      """
+      Figure out who the participants are from a file of results.
+      """
+      if not self.results_read:
+         print("Must read a file of results first!")
+      else:
+         inferred_participant_IDs = set(self.full_results['Student ID'])
+         self.participants = []
+         for ID in inferred_participant_IDs:
+            self.participants.append(participant(ID))
       return
       
    def import_oli_results(self, filepath):
@@ -102,12 +129,13 @@ class learning_module:
       
       correct_participant = self.full_results[self.full_results['Student ID'] == participant.ID]
       for skill in self.skills:
-         try:
-            correct_skill = correct_participant[correct_participant['Activity Title'] == skill.name]
-            got_it = correct_skill["Correct?"][correct_skill["Attempt Number"] == 1].to_numpy()[0]
-         except IndexError:
-            got_it = False
-         participant.correct_first_try.loc[0, skill.name] = got_it #This is a temporary solution until we know if multiple sessions come within one or many tsv files
+         for session in range(self.n_sessions):
+            try:
+               correct_skill = correct_participant[correct_participant['Activity Title'] == "{}_Q{}".format(skill.name, session + 1)]
+               got_it = correct_skill["Correct?"][correct_skill["Attempt Number"] == 1].to_numpy()[0]
+            except IndexError:
+               got_it = False
+            participant.correct_first_try.loc[session, skill.name] = got_it
       return
       
    def read_participants_results(self):
