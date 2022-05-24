@@ -113,7 +113,7 @@ class participant:
                dates_when_something_happened[date] += 1
       accumulated = 0
       accumulated_by_date = {}
-      for date in dates_when_something_happened.keys():
+      for date in sorted(dates_when_something_happened.keys()):
          accumulated += dates_when_something_happened[date]
          accumulated_by_date[date] = accumulated
       self.accumulated_by_date = accumulated_by_date
@@ -135,7 +135,7 @@ class participant:
          folder_path += '/'
       plt.clf()
       plt.tight_layout()
-      plt.plot(self.answered.index, self.answered.sum(1), label = 'Besvarade')
+      plt.plot(self.answered.index, self.answered.sum(1), label = 'Besvarade frågor')
       plt.plot(self.answered.index, self.correct_first_try.sum(1), label = 'Rätt på första försöket')
       plt.legend()
       plt.xlim(1, self.n_sessions())
@@ -150,7 +150,14 @@ class participant:
       """
       if folder_path[-1] != '/':
          folder_path += '/'
-      pass
+      plt.clf()
+      plt.tight_layout()
+      
+      # This is probably a misuse of dict, but it will do as a temp. solution
+      plt.plot(self.accumulated_by_date.keys(), self.accumulated_by_date.values(), 'o-', label = 'Besvarade frågor')
+      plt.legend()
+      plt.ylim(0, self.n_sessions() * self.n_skills())
+      plt.savefig('{}{}_resultat_över_tid.png'.format(folder_path, self.ID))
       return
          
 class learning_module:
@@ -238,6 +245,7 @@ class learning_module:
    def plot_results(self, folder_path):
       for participant in self.participants.values():
          participant.plot_results_by_session(folder_path)
+         participant.plot_results_by_time(folder_path)
       return
 
    ### Functions for inputting and outputting results
