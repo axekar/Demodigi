@@ -107,6 +107,8 @@ class participant:
       showing both which number of skills they have answered, and for what
       number they answered correctly on the first try.
       """
+      if folder_path[-1] != '/':
+         folder_path += '/'
       plt.clf()
       plt.tight_layout()
       plt.plot(self.answered.index, self.answered.sum(1), label = 'Besvarade')
@@ -115,10 +117,18 @@ class participant:
       plt.xlim(1, self.n_sessions())
       plt.ylim(0, self.n_skills())
       plt.xticks(range(1, self.n_sessions()))
-      plt.savefig('{}/{}_resultat_per_session.png'.format(folder_path, self.ID))
+      plt.savefig('{}{}_resultat_per_session.png'.format(folder_path, self.ID))
       return
 
-
+   def plot_results_by_time(self, folder_path):
+      """
+      This plots the number of answers given as a function of time.
+      """
+      if folder_path[-1] != '/':
+         folder_path += '/'
+      pass
+      return
+         
 class learning_module:
    """
    This represents one learning module in the project.
@@ -227,9 +237,9 @@ class learning_module:
       skill_names = []
       for skill in self.skills:
          skill_names.append(skill.name)
-      participant.answered = pd.DataFrame(columns = skill_names, index = range(1, self.n_sessions + 1))
+      participant.answered = pd.DataFrame(columns = skill_names, index = range(1, self.n_sessions + 1), dtype = bool)
       participant.answer_date = pd.DataFrame(columns = skill_names, index = range(1, self.n_sessions + 1))
-      participant.correct_first_try = pd.DataFrame(columns = skill_names, index = range(1, self.n_sessions + 1))
+      participant.correct_first_try = pd.DataFrame(columns = skill_names, index = range(1, self.n_sessions + 1), dtype = bool)
       correct_participant = self.full_results[self.full_results['Student ID'] == participant.ID]
       n_answers = 0
       for skill in self.skills:
