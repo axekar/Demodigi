@@ -101,18 +101,21 @@ class participant:
    def n_skills(self):
       return self.correct_first_try.shape[1]
 
-   def plot_fraction_answered_by_session(self, folder_path):
+   def plot_results_by_session(self, folder_path):
       """
-      This plots what fraction of the skills the participant has answered the
-      module questions for, as a function of the session.
+      This plots the results for the participant as a function of session,
+      showing both which number of skills they have answered, and for what
+      number they answered correctly on the first try.
       """
       plt.clf()
       plt.tight_layout()
-      plt.plot(self.answered.index, self.answered.sum(1), c = 'k')
+      plt.plot(self.answered.index, self.answered.sum(1), label = 'Besvarade')
+      plt.plot(self.answered.index, self.correct_first_try.sum(1), label = 'Rätt på första försöket')
+      plt.legend()
       plt.xlim(1, self.n_sessions())
       plt.ylim(0, self.n_skills())
       plt.xticks(range(1, self.n_sessions()))
-      plt.savefig('{}/{}_has_answered_by_session.png'.format(folder_path, self.ID))
+      plt.savefig('{}/{}_resultat_per_session.png'.format(folder_path, self.ID))
       return
 
 
@@ -198,7 +201,10 @@ class learning_module:
             print('   {}: {}'.format(ID, status_string))
       return
       
-
+   def plot_results(self, folder_path):
+      for participant in self.participants.values():
+         participant.plot_results_by_session(folder_path)
+      return
 
    ### Functions for inputting and outputting results
 
