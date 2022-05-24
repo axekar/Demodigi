@@ -22,6 +22,7 @@ import numpy as np
 import pandas as pd
 import json
 import matplotlib.pyplot as plt
+
 import datetime
 
 # This is the format that I have inferred that OLI-Torus uses for dates
@@ -59,15 +60,18 @@ class participant:
    ID : string
    \tSome unique identifier of the participant. For privacy reasons, this
    \tis unlikely to be their actual name.
-   answered : pandas DataFrame
+   answered : pandas bool DataFrame
    \tInitially empty DataFrame stating for each question in a learning
    \tmodule whether the participant has given any answer
-   answer_dates : pandas DataFrame
+   answer_dates : pandas datetime DataFrame
    \tInitially empty DataFrame stating for each question in a learning
    \tmodule when the participant gave their first answer
-   correct_first_try : pandas DataFrame
+   correct_first_try : pandas bool DataFrame
    \tInitially empty DataFrame stating for each question in a learning
    \tmodule whether the participant answered correctly on the first try.
+   accumulated_by_date : pandas int DataFrame
+   \tInitially empty DataFrame given the number of questions answered as
+   \ta function of time.
    """
    def __init__(self, ID):
       """
@@ -77,9 +81,10 @@ class participant:
       \tDescribed under attributes
       """
       self.ID = ID
-      self.answered = pd.DataFrame()
-      self.answer_date = pd.DataFrame()
-      self.correct_first_try = pd.DataFrame()
+      self.answered = pd.DataFrame(dtype = bool)
+      self.answer_date = pd.DataFrame(dtype = 'datetime64[s]')
+      self.correct_first_try = pd.DataFrame(dtype = bool)
+      self.accumulated_by_date = pd.DataFrame(dtype = int)
       return
 
    def export_results(self, folder_path):
@@ -96,6 +101,22 @@ class participant:
       packed = json.dumps({'ID':self.ID, 'Number of sessions':self.n_sessions(), 'Number of skills tested':self.n_skills(), 'Results':np.array(self.correct_first_try.to_numpy().tolist(), dtype=bool).tolist()})
       f.write(packed)
       f.close()
+      return
+
+   def _cumulative_answers_by_date(self):
+      dates_when_something_happened = {}
+      for date in self.answer_date.values.flatten():
+         if not np.isnan(date):
+            if not (date in dates_when_something_happened.keys()):
+               dates_when_something_happened[date] = 1
+            else:
+               dates_when_something_happened[date] += 1
+      accumulated = 0
+      accumulated_by_date = {}
+      for date in dates_when_something_happened.keys():
+         accumulated += dates_when_something_happened[date]
+         accumulated_by_date[date] = accumulated
+      self.accumulated_by_date = accumulated_by_date
       return
 
    def n_sessions(self):
@@ -241,7 +262,7 @@ class learning_module:
       for skill in self.skills:
          skill_names.append(skill.name)
       participant.answered = pd.DataFrame(columns = skill_names, index = range(1, self.n_sessions + 1), dtype = bool)
-      participant.answer_date = pd.DataFrame(columns = skill_names, index = range(1, self.n_sessions + 1), dtype = 'datetime64[m]')
+      participant.answer_date = pd.DataFrame(columns = skill_names, index = range(1, self.n_sessions + 1), dtype = 'datetime64[s]')
       participant.correct_first_try = pd.DataFrame(columns = skill_names, index = range(1, self.n_sessions + 1), dtype = bool)
       correct_participant = self.full_results[self.full_results['Student ID'] == participant.ID]
       n_answers = 0
@@ -262,6 +283,7 @@ class learning_module:
             participant.answered.loc[session, skill.name] = has_answered
             participant.correct_first_try.loc[session, skill.name] = correct
             participant.answer_date.loc[session, skill.name] = first_try_date
+      participant._cumulative_answers_by_date()
       self.flags.loc[participant.ID, 'started'] = True # Note that this is assumed by default, we cannot test it yet
       self.flags.loc[participant.ID, 'answered once'] = n_answers > 0
       self.flags.loc[participant.ID, 'finished'] = n_answers == self.n_sessions * self.n_skills
