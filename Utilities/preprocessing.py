@@ -50,13 +50,31 @@ class participant:
    ID : string
    \tSome unique identifier of the participant. For privacy reasons, this
    \tis unlikely to be their actual name.
-   correct_first_try : dict
-   \tInitially empty dictionary stating for each question in a learning
+   correct_first_try : pandas DataFrame
+   \tInitially empty DataFrame stating for each question in a learning
    \tmodule whether the participant answered correctly on the first try.
    """
    def __init__(self, ID):
       self.ID = ID
       self.correct_first_try = pd.DataFrame()
+      self.n_sessions = self.correct_first_try.shape[0]
+      self.n_skills = self.correct_first_try.shape[1]
+      return
+
+   def export_results(self, folder_path):
+      """
+      This method will need to be implemented. It should export the results
+      in the form of a json file, which can be read by the
+      factorial_experiment module.
+      """
+      if folder_path[-1] != '/':
+         folder_path += '/'
+      f = open(folder_path + self.ID + '.json', 'w')
+      # Here we do a weird thing because json can handle Python's built-in
+      # bool type but not numpy's bool_ type.
+      packed = json.dumps({'ID':self.ID, 'Number of sessions':self.n_sessions, 'Number of skills tested':self.n_skills, 'Results':np.array(self.correct_first_try.to_numpy().tolist(), dtype=bool).tolist()})
+      f.write(packed)
+      f.close()
       return
 
 class learning_module:
@@ -141,7 +159,7 @@ class learning_module:
       right on the first try.
       """
       for skill in self.skills:
-         participant.correct_first_try[skill.name] = np.nan * np.zeros(self.n_sessions)
+         participant.correct_first_try[skill.name] = np.nan * np.zeros(self.n_sessions, dtype = bool)
       
       correct_participant = self.full_results[self.full_results['Student ID'] == participant.ID]
       n_answers = 0
@@ -172,12 +190,11 @@ class learning_module:
       for participant in self.participants.values():
          self._read_participant_results(participant)
       return
-      
-   def export_results(self):
-      """
-      This method will need to be implemented. It should export the results
-      in the form of a json file, which can be read by the
-      factorial_experiment module.
-      """
-      pass
+
+   def export_results(self, folder_path):
+      if not self.results_read:
+         print('There are no results to save!')
+      else:
+         for participant in self.participants.values():
+            participant.export_results(folder_path)
       return
