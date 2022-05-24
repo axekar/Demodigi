@@ -20,11 +20,14 @@ https://github.com/Alvin-Gavel/Demodigi
 
 import numpy as np
 import pandas as pd
-
-# Not used yet, but will become necessary later
 import json
 import matplotlib.pyplot as plt
-   
+import datetime
+
+# This is the format that I have inferred that OLI-Torus uses for dates
+_date_format = "%B %d, %Y at %I:%M %p UTC"
+
+
 class skill:
    """
    This represents a specific skill that the learning module is intended
@@ -238,7 +241,7 @@ class learning_module:
       for skill in self.skills:
          skill_names.append(skill.name)
       participant.answered = pd.DataFrame(columns = skill_names, index = range(1, self.n_sessions + 1), dtype = bool)
-      participant.answer_date = pd.DataFrame(columns = skill_names, index = range(1, self.n_sessions + 1))
+      participant.answer_date = pd.DataFrame(columns = skill_names, index = range(1, self.n_sessions + 1), dtype = 'datetime64[m]')
       participant.correct_first_try = pd.DataFrame(columns = skill_names, index = range(1, self.n_sessions + 1), dtype = bool)
       correct_participant = self.full_results[self.full_results['Student ID'] == participant.ID]
       n_answers = 0
@@ -247,7 +250,8 @@ class learning_module:
             try:
                correct_skill = correct_participant[correct_participant['Activity Title'] == "{}_Q{}".format(skill.name, session)]
                first_try_index = correct_skill["Attempt Number"] == 1
-               first_try_date = correct_skill["Date Created"][first_try_index].to_numpy()[0]
+               first_try_date_string = correct_skill["Date Created"][first_try_index].to_numpy()[0]
+               first_try_date = datetime.datetime.strptime(first_try_date_string, _date_format)
                has_answered = True
                correct = correct_skill["Correct?"][first_try_index].to_numpy()[0]
                n_answers += 1
