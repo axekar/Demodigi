@@ -56,16 +56,15 @@ class participant:
    ID : string
    \tSome unique identifier of the participant. For privacy reasons, this
    \tis unlikely to be their actual name.
+   answered : pandas DataFrame
+   \tInitially empty DataFrame stating for each question in a learning
+   \tmodule whether the participant has given any answer
+   answer_dates : pandas DataFrame
+   \tInitially empty DataFrame stating for each question in a learning
+   \tmodule when the participant gave their first answer
    correct_first_try : pandas DataFrame
    \tInitially empty DataFrame stating for each question in a learning
    \tmodule whether the participant answered correctly on the first try.
-   answer_dates : pandas DataFrame
-   \tInitially empty DataFrame stating for each question in a learning
-   \tmodule when the participant first gave an answer
-   n_sessions : int
-   \tThe number of sessions in the learning module
-   n_skills : int
-   \tThe number of skills tested by the learning module
    """
    def __init__(self, ID):
       """
@@ -75,10 +74,9 @@ class participant:
       \tDescribed under attributes
       """
       self.ID = ID
-      self.correct_first_try = pd.DataFrame()
+      self.answered = pd.DataFrame()
       self.answer_date = pd.DataFrame()
-      self.n_sessions = self.correct_first_try.shape[0]
-      self.n_skills = self.correct_first_try.shape[1]
+      self.correct_first_try = pd.DataFrame()
       return
 
    def export_results(self, folder_path):
@@ -92,9 +90,29 @@ class participant:
       f = open(folder_path + self.ID + '.json', 'w')
       # Here we do a weird thing because json can handle Python's built-in
       # bool type but not numpy's bool_ type.
-      packed = json.dumps({'ID':self.ID, 'Number of sessions':self.n_sessions, 'Number of skills tested':self.n_skills, 'Results':np.array(self.correct_first_try.to_numpy().tolist(), dtype=bool).tolist()})
+      packed = json.dumps({'ID':self.ID, 'Number of sessions':self.n_sessions(), 'Number of skills tested':self.n_skills(), 'Results':np.array(self.correct_first_try.to_numpy().tolist(), dtype=bool).tolist()})
       f.write(packed)
       f.close()
+      return
+
+   def n_sessions(self):
+      return self.correct_first_try.shape[0]
+
+   def n_skills(self):
+      return self.correct_first_try.shape[1]
+
+   def plot_fraction_answered_by_session(self, folder_path):
+      """
+      This plots what fraction of the skills the participant has answered the
+      module questions for, as a function of the session.
+      """
+      plt.clf()
+      plt.tight_layout()
+      plt.plot(self.answered.index, self.answered.sum(1), c = 'k')
+      plt.xlim(1, self.n_sessions())
+      plt.ylim(0, self.n_skills())
+      plt.xticks(range(1, self.n_sessions()))
+      plt.savefig('{}/{}_has_answered_by_session.png'.format(folder_path, self.ID))
       return
 
 
@@ -203,22 +221,26 @@ class learning_module:
       skill_names = []
       for skill in self.skills:
          skill_names.append(skill.name)
-      participant.correct_first_try = pd.DataFrame(columns = skill_names)
-      participant.answer_date = pd.DataFrame(columns = skill_names)
+      participant.answered = pd.DataFrame(columns = skill_names, index = range(1, self.n_sessions + 1))
+      participant.answer_date = pd.DataFrame(columns = skill_names, index = range(1, self.n_sessions + 1))
+      participant.correct_first_try = pd.DataFrame(columns = skill_names, index = range(1, self.n_sessions + 1))
       correct_participant = self.full_results[self.full_results['Student ID'] == participant.ID]
       n_answers = 0
       for skill in self.skills:
-         for session in range(self.n_sessions):
+         for session in range(1, self.n_sessions + 1):
             try:
-               correct_skill = correct_participant[correct_participant['Activity Title'] == "{}_Q{}".format(skill.name, session + 1)]
+               correct_skill = correct_participant[correct_participant['Activity Title'] == "{}_Q{}".format(skill.name, session)]
                first_try_index = correct_skill["Attempt Number"] == 1
                first_try_date = correct_skill["Date Created"][first_try_index].to_numpy()[0]
-               got_it = correct_skill["Correct?"][first_try_index].to_numpy()[0]
+               has_answered = True
+               correct = correct_skill["Correct?"][first_try_index].to_numpy()[0]
                n_answers += 1
             except IndexError:
-               got_it = False
+               has_answered = False
+               correct = False
                first_try_date = None
-            participant.correct_first_try.loc[session, skill.name] = got_it
+            participant.answered.loc[session, skill.name] = has_answered
+            participant.correct_first_try.loc[session, skill.name] = correct
             participant.answer_date.loc[session, skill.name] = first_try_date
       self.flags.loc[participant.ID, 'started'] = True # Note that this is assumed by default, we cannot test it yet
       self.flags.loc[participant.ID, 'answered once'] = n_answers > 0
