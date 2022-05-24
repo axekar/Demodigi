@@ -59,6 +59,9 @@ class participant:
    correct_first_try : pandas DataFrame
    \tInitially empty DataFrame stating for each question in a learning
    \tmodule whether the participant answered correctly on the first try.
+   answer_dates : pandas DataFrame
+   \tInitially empty DataFrame stating for each question in a learning
+   \tmodule when the participant first gave an answer
    n_sessions : int
    \tThe number of sessions in the learning module
    n_skills : int
@@ -73,6 +76,7 @@ class participant:
       """
       self.ID = ID
       self.correct_first_try = pd.DataFrame()
+      self.answer_date = pd.DataFrame()
       self.n_sessions = self.correct_first_try.shape[0]
       self.n_skills = self.correct_first_try.shape[1]
       return
@@ -124,9 +128,6 @@ class learning_module:
    \t1. Started the learning module (we cannot currently test this, so always set to true)
    \t2. Answered at least one question
    \t3. Finished the learning module
-   development_over_time : pandas DataFrame
-   \tDataframe describing the dates at which additional data have come in.
-   \tThis is used when plotting the results as a function of time.
    """
    def __init__(self, skills, n_sessions, participants = None):
       """
@@ -154,7 +155,7 @@ class learning_module:
       self.flags = pd.DataFrame()
       self.full_results = None
       self.results_read = False
-      self.development_over_time = pd.DataFrame()
+      self.answers_by_time = pd.DataFrame()
       return
 
    ### Functions for inspecting data
@@ -198,20 +199,27 @@ class learning_module:
       Find out, for each question, whether a specific participant got it
       right on the first try.
       """
+      # This is not neat, and I will probably rewrite it at some point
+      skill_names = []
       for skill in self.skills:
-         participant.correct_first_try[skill.name] = np.nan * np.zeros(self.n_sessions, dtype = bool)
-      
+         skill_names.append(skill.name)
+      participant.correct_first_try = pd.DataFrame(columns = skill_names)
+      participant.answer_date = pd.DataFrame(columns = skill_names)
       correct_participant = self.full_results[self.full_results['Student ID'] == participant.ID]
       n_answers = 0
       for skill in self.skills:
          for session in range(self.n_sessions):
             try:
                correct_skill = correct_participant[correct_participant['Activity Title'] == "{}_Q{}".format(skill.name, session + 1)]
-               got_it = correct_skill["Correct?"][correct_skill["Attempt Number"] == 1].to_numpy()[0]
+               first_try_index = correct_skill["Attempt Number"] == 1
+               first_try_date = correct_skill["Date Created"][first_try_index].to_numpy()[0]
+               got_it = correct_skill["Correct?"][first_try_index].to_numpy()[0]
                n_answers += 1
             except IndexError:
                got_it = False
+               first_try_date = None
             participant.correct_first_try.loc[session, skill.name] = got_it
+            participant.answer_date.loc[session, skill.name] = first_try_date
       self.flags.loc[participant.ID, 'started'] = True # Note that this is assumed by default, we cannot test it yet
       self.flags.loc[participant.ID, 'answered once'] = n_answers > 0
       self.flags.loc[participant.ID, 'finished'] = n_answers == self.n_sessions * self.n_skills
