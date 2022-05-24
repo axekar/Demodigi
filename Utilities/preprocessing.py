@@ -69,9 +69,9 @@ class participant:
    correct_first_try : pandas bool DataFrame
    \tInitially empty DataFrame stating for each question in a learning
    \tmodule whether the participant answered correctly on the first try.
-   accumulated_by_date : pandas int DataFrame
-   \tInitially empty DataFrame given the number of questions answered as
-   \ta function of time.
+   accumulated_by_date : dict
+   \tInitially empty dict given the number of questions answered as a
+   \tfunction of time.
    """
    def __init__(self, ID):
       """
@@ -84,7 +84,7 @@ class participant:
       self.answered = pd.DataFrame(dtype = bool)
       self.answer_date = pd.DataFrame(dtype = 'datetime64[s]')
       self.correct_first_try = pd.DataFrame(dtype = bool)
-      self.accumulated_by_date = pd.DataFrame(dtype = int)
+      self.accumulated_by_date = {}
       return
 
    def export_results(self, folder_path):
@@ -151,12 +151,13 @@ class participant:
       if folder_path[-1] != '/':
          folder_path += '/'
       plt.clf()
-      plt.tight_layout()
-      
+     
       # This is probably a misuse of dict, but it will do as a temp. solution
       plt.plot(self.accumulated_by_date.keys(), self.accumulated_by_date.values(), 'o-', label = 'Besvarade frågor')
       plt.legend()
       plt.ylim(0, self.n_sessions() * self.n_skills())
+      plt.xticks(rotation = 90)
+      plt.tight_layout()
       plt.savefig('{}{}_resultat_över_tid.png'.format(folder_path, self.ID))
       return
          
@@ -190,6 +191,9 @@ class learning_module:
    \t1. Started the learning module (we cannot currently test this, so always set to true)
    \t2. Answered at least one question
    \t3. Finished the learning module
+   accumulated_by_date : dict
+   \tInitially empty dict given the number of questions answered as a
+   \tfunction of time.
    """
    def __init__(self, skills, n_sessions, participants = None):
       """
@@ -218,6 +222,7 @@ class learning_module:
       self.full_results = None
       self.results_read = False
       self.answers_by_time = pd.DataFrame()
+      self.accumulated_by_date = {}
       return
 
    ### Functions for inspecting data
@@ -242,13 +247,30 @@ class learning_module:
             print('   {}: {}'.format(ID, status_string))
       return
       
-   def plot_results(self, folder_path):
+   def plot_individual_results(self, folder_path):
       for participant in self.participants.values():
          participant.plot_results_by_session(folder_path)
          participant.plot_results_by_time(folder_path)
       return
 
-   ### Functions for inputting and outputting results
+   def plot_results_by_time(self, folder_path):
+      """
+      This plots the number of answers given as a function of time.
+      """
+      if folder_path[-1] != '/':
+         folder_path += '/'
+      plt.clf()
+     
+      # This is probably a misuse of dict, but it will do as a temp. solution
+      plt.plot(self.accumulated_by_date.keys(), self.accumulated_by_date.values(), '-', label = 'Besvarade frågor')
+      plt.legend()
+      plt.ylim(0, self.n_sessions * self.n_skills * self.n_participants)
+      plt.xticks(rotation = 90)
+      plt.tight_layout()
+      plt.savefig('{}Resultat_över_tid.png'.format(folder_path))
+      return
+
+   ### Functions for handling data regarding individual participants
 
    def import_oli_results(self, filepath):
       """
@@ -309,6 +331,7 @@ class learning_module:
          return
       for participant in self.participants.values():
          self._read_participant_results(participant)
+      self.accumulated_by_date = self._cumulative_answers_by_date(self.participants.values())
       return
 
    def export_results(self, folder_path):
@@ -333,3 +356,22 @@ class learning_module:
       self.n_participants = len(self.participants)
       self.participants_input = True
       return
+      
+
+   ### Functions for handling data regarding groups of participants
+   def _cumulative_answers_by_date(self, participants):
+      dates_when_something_happened = {}
+      for participant in participants:
+         for date in participant.answer_date.values.flatten():
+            if not np.isnan(date):
+               if not (date in dates_when_something_happened.keys()):
+                  dates_when_something_happened[date] = 1
+               else:
+                  dates_when_something_happened[date] += 1
+      accumulated = 0
+      accumulated_by_date = {}
+      for date in sorted(dates_when_something_happened.keys()):
+         accumulated += dates_when_something_happened[date]
+         accumulated_by_date[date] = accumulated
+      return accumulated_by_date
+   
