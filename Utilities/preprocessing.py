@@ -115,10 +115,10 @@ class learning_module:
       self.n_sessions = n_sessions
       self.participants = participants
       if participants == None:
-         self.participants_read = False
+         self.participants_input = False
          self.n_participants = np.nan
       else:
-         self.participants_read = True
+         self.participants_input = True
          self.n_participants = len(participants)
       self.flags = pd.DataFrame()
       self.full_results = None
@@ -128,7 +128,7 @@ class learning_module:
    ### Functions for inspecting data
 
    def describe_participants(self):
-      if self.participants == None:
+      if not self.participants_input:
          print('No participants have been read!')
       else:
          print('Participants in study are:')
@@ -219,4 +219,5 @@ class learning_module:
          for ID in inferred_participant_IDs:
             self.participants[ID] = participant(ID)
       self.n_participants = len(self.participants)
+      self.participants_input = True
       return
