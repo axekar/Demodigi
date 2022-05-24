@@ -77,6 +77,7 @@ class participant:
       f.close()
       return
 
+
 class learning_module:
    """
    This represents one learning module in the project.
@@ -124,24 +125,31 @@ class learning_module:
       self.results_read = False
       return
 
-   def list_participants(self):
-      for participant in self.participants:
-         print(participant.ID)
+   ### Functions for inspecting data
+
+   def describe_participants(self):
+      if self.participants == None:
+         print('No participants have been read!')
+      else:
+         print('Participants in study are:')
+         for ID, participant in sorted(self.participants.items()):
+            if self.results_read:
+               if self.flags.loc[ID, 'finished']:
+                  status_string = 'Has finished module'
+               elif self.flags.loc[ID, 'answered once']:
+                  status_string = 'Has started work'
+               elif self.flags.loc[ID, 'started']:
+                  status_string = 'Has signed up'
+               else:
+                  status_string = 'Has not signed up'
+            else:
+               status_string = 'No results known'
+            print('   {}: {}'.format(ID, status_string))
       return
       
-   def infer_participants_from_full_results(self):
-      """
-      Figure out who the participants are from a file of results.
-      """
-      if not self.results_read:
-         print("Must read a file of results first!")
-      else:
-         inferred_participant_IDs = set(self.full_results['Student ID'])
-         self.participants = {}
-         for ID in inferred_participant_IDs:
-            self.participants[ID] = participant(ID)
-      self.n_participants = len(self.participants)
-      return
+
+
+   ### Functions for inputting and outputting results
 
    def import_oli_results(self, filepath):
       """
@@ -197,4 +205,18 @@ class learning_module:
       else:
          for participant in self.participants.values():
             participant.export_results(folder_path)
+      return
+      
+   def infer_participants_from_full_results(self):
+      """
+      Figure out who the participants are from a file of results.
+      """
+      if not self.results_read:
+         print("Must read a file of results first!")
+      else:
+         inferred_participant_IDs = set(self.full_results['Student ID'])
+         self.participants = {}
+         for ID in inferred_participant_IDs:
+            self.participants[ID] = participant(ID)
+      self.n_participants = len(self.participants)
       return
