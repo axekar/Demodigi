@@ -38,6 +38,12 @@ class skill:
    \tthat skill in the data output by OLI-Torus
    """
    def __init__(self, name):
+      """
+      Parameters
+      ----------
+      name : string
+      \tDescribed under attributes
+      """
       self.name = name
       return
    
@@ -53,8 +59,18 @@ class participant:
    correct_first_try : pandas DataFrame
    \tInitially empty DataFrame stating for each question in a learning
    \tmodule whether the participant answered correctly on the first try.
+   n_sessions : int
+   \tThe number of sessions in the learning module
+   n_skills : int
+   \tThe number of skills tested by the learning module
    """
    def __init__(self, ID):
+      """
+      Parameters
+      ----------
+      ID : string
+      \tDescribed under attributes
+      """
       self.ID = ID
       self.correct_first_try = pd.DataFrame()
       self.n_sessions = self.correct_first_try.shape[0]
@@ -108,8 +124,23 @@ class learning_module:
    \t1. Started the learning module (we cannot currently test this, so always set to true)
    \t2. Answered at least one question
    \t3. Finished the learning module
+   development_over_time : pandas DataFrame
+   \tDataframe describing the dates at which additional data have come in.
+   \tThis is used when plotting the results as a function of time.
    """
    def __init__(self, skills, n_sessions, participants = None):
+      """
+      Parameters
+      ----------
+      skills : list of skill
+      \tDescribed under attributes
+      n_sessions : int
+      \tDescribed under attributes
+      
+      Optional parameters
+      -------------------
+      participants : dict of participant or None
+      """
       self.skills = skills
       self.n_skills = len(self.skills)
       self.n_sessions = n_sessions
@@ -123,6 +154,7 @@ class learning_module:
       self.flags = pd.DataFrame()
       self.full_results = None
       self.results_read = False
+      self.development_over_time = pd.DataFrame()
       return
 
    ### Functions for inspecting data
