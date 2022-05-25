@@ -270,6 +270,15 @@ class learning_module:
       plt.savefig('{}Resultat_över_tid.png'.format(folder_path))
       return
 
+   def plot_results(self, folder_path):
+      """
+      This plots everything that can be plotted
+      """
+      self.plot_individual_results(folder_path)
+      self.plot_results_by_time(folder_path)
+      return
+
+
    ### Functions for handling data regarding individual participants
 
    def import_oli_results(self, filepath):
