@@ -173,11 +173,11 @@ class learning_module:
    \tThe number of skills in the learning module
    n_sessions : int
    \tThe number of sessions in the learning module. The assumption is that
-   \tin each session each skill will be tested once
+   \tin each session each skill will be tested once.
    participants : dict of participant or None
    \tA list of the people taking the learning module, as identified in the
    \t"Student ID" column in the output from OLI-Torus. If None is given,
-   \tthe participants must be read from 
+   \tthe participants must be inferred from the OLI-Torus output.
    full_results : pandas DataFrame
    \tThe results from the learning module as output by OLI-Torus
    results_read : bool
