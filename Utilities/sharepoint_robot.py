@@ -245,7 +245,7 @@ class SharepointConnection(object):
       sleep(2)
       create_button = self.driver.find_element(By.CSS_SELECTOR, "[aria-label=Create]")
       create_button.click()
-      sleep(10)
+      sleep(20)
       
       # Make columns in the new page
       column_button = self.driver.find_element(By.XPATH, "//*[text()='Add column']")
