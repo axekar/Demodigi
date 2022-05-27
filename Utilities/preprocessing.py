@@ -255,6 +255,9 @@ class learning_module:
       return
       
    def plot_individual_results(self, folder_path):
+      """
+      Plot the results for each individual participant.
+      """
       for participant in self.participants.values():
          participant.plot_results_by_session(folder_path)
          participant.plot_results_by_time(folder_path)
@@ -393,6 +396,10 @@ class learning_module:
       return
 
    def export_results(self, folder_path):
+      """
+      Export the results for each individual participant in a format which is
+      legible to the factorial_experiment module.
+      """
       if not self.results_read:
          print('There are no results to save!')
       else:
