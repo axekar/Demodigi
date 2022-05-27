@@ -84,6 +84,8 @@ class participant:
       self.answered = pd.DataFrame(dtype = bool)
       self.answer_date = pd.DataFrame(dtype = 'datetime64[s]')
       self.correct_first_try = pd.DataFrame(dtype = bool)
+      # I would *like* to implement this one as a DataFrame, but it turns
+      # out that Pandas does not accept datetime64 objects.
       self.accumulated_by_date = {}
       return
 
@@ -156,8 +158,8 @@ class participant:
          folder_path += '/'
       plt.clf()
      
-      # This is probably a misuse of dict, but it will do as a temp. solution
-      plt.plot(self.accumulated_by_date.keys(), self.accumulated_by_date.values(), 'o-', label = 'Besvarade frågor')
+      sorted_dates_accumulated = list(zip(*sorted(zip(self.accumulated_by_date.keys(), self.accumulated_by_date.values()))))
+      plt.plot(sorted_dates_accumulated[0], sorted_dates_accumulated[1], 'o-', label = 'Besvarade frågor')
       plt.legend()
       plt.ylim(0, self.n_sessions() * self.n_skills())
       plt.xticks(rotation = 90)
@@ -271,8 +273,8 @@ class learning_module:
          folder_path += '/'
       plt.clf()
      
-      # This is probably a misuse of dict, but it will do as a temp. solution
-      plt.plot(self.accumulated_by_date.keys(), self.accumulated_by_date.values(), '-', label = 'Besvarade frågor')
+      sorted_dates_accumulated = list(zip(*sorted(zip(self.accumulated_by_date.keys(), self.accumulated_by_date.values()))))
+      plt.plot(sorted_dates_accumulated[0], sorted_dates_accumulated[1], '-', label = 'Besvarade frågor')
       plt.legend()
       plt.ylim(0, self.n_sessions * self.n_skills * self.n_participants)
       plt.xticks(rotation = 90)
