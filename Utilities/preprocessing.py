@@ -148,6 +148,10 @@ class participant:
       """
       This plots the number of answers given as a function of time.
       """
+      # Avoid plotting if there is nothing to plot.
+      if self.accumulated_by_date == {}:
+         return
+      
       if folder_path[-1] != '/':
          folder_path += '/'
       plt.clf()
@@ -337,11 +341,11 @@ class learning_module:
       Find out, for each question, whether a specific participant got it
       right on the first try.
       """
-      # This is not neat, and I will probably rewrite it at some point
       if not self.n_sessions_input:
          print('Inferring number of sessions from OLI-Torus output')
          self.infer_n_sessions_from_full_results()
       
+      # This is not neat, and I will probably rewrite it at some point
       skill_names = []
       for skill in self.skills:
          skill_names.append(skill.name)
