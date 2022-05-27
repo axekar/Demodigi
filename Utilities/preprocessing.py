@@ -161,18 +161,21 @@ class learning_module:
    \tThe number of sessions in the learning module. The assumption is that
    \tin each session each skill will be tested once. If nan is given, the
    \tnumber of sessions must be inferred from the OLI-Torus output.
+   n_sessions_input : bool
+   \tWhether a number of sessions has been supplied
    participants : dict of participant or None
    \tA list of the people taking the learning module, as identified in the
    \t"Student ID" column in the output from OLI-Torus. If None is given,
    \tthe participants must be inferred from the OLI-Torus output.
+   participants_input : bool
+   \tWhether a list of participants has been provided, either when 
+   \tinstantiating the learning_module or afterwards from the
+   n_participants : int
+   \tThe number of participants
    full_results : pandas DataFrame
    \tThe results from the learning module as output by OLI-Torus
    results_read : bool
    \tWhether results have been read from a file
-   participants_input : bool
-   \tWhether a list of participants has been provided, either when 
-   \tinstantiating the learning_module or afterwards from the
-   \tfull_results
    flags : pandas DataFrame
    \tFlags that note whether each participant has:
    \t1. Started the learning module (we cannot currently test this, so always set to true)
@@ -210,13 +213,16 @@ class learning_module:
       self.flags = pd.DataFrame()
       self.full_results = None
       self.results_read = False
-      self.answers_by_time = pd.DataFrame()
       self.accumulated_by_date = {}
       return
 
    ### Functions for inspecting data
 
    def describe_participants(self):
+      """
+      Give a short summary of who the participants are and how far they have
+      gotten in the course.
+      """
       if not self.participants_input:
          print('No participants have been read!')
       else:
@@ -329,7 +335,6 @@ class learning_module:
       if not self.n_sessions_input:
          print('Inferring number of sessions from OLI-Torus output')
          self.infer_n_sessions_from_full_results()
-      
 
       participant.answered = pd.DataFrame(columns = self.skills, index = range(1, self.n_sessions + 1), dtype = bool)
       participant.answer_date = pd.DataFrame(columns = self.skills, index = range(1, self.n_sessions + 1), dtype = 'datetime64[s]')
