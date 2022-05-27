@@ -173,7 +173,8 @@ class learning_module:
    \tThe number of skills in the learning module
    n_sessions : int
    \tThe number of sessions in the learning module. The assumption is that
-   \tin each session each skill will be tested once.
+   \tin each session each skill will be tested once. If nan is given, the
+   \tnumber of sessions must be inferred from the OLI-Torus output.
    participants : dict of participant or None
    \tA list of the people taking the learning module, as identified in the
    \t"Student ID" column in the output from OLI-Torus. If None is given,
@@ -195,24 +196,26 @@ class learning_module:
    \tInitially empty dict given the number of questions answered as a
    \tfunction of time.
    """
-   def __init__(self, skills, n_sessions, participants = None):
+   def __init__(self, skills, n_sessions = np.nan, participants = None):
       """
       Parameters
       ----------
       skills : list of skill
       \tDescribed under attributes
-      n_sessions : int
-      \tDescribed under attributes
       
       Optional parameters
       -------------------
+      n_sessions : int
+      \tDescribed under attributes
       participants : dict of participant or None
+      \tDescribed under attributes
       """
       self.skills = skills
       self.n_skills = len(self.skills)
       self.n_sessions = n_sessions
+      self.n_sessions_input = np.isfinite(self.n_sessions)
       self.participants = participants
-      if participants == None:
+      if self.participants == None:
          self.participants_input = False
          self.n_participants = np.nan
       else:
@@ -290,13 +293,55 @@ class learning_module:
       self.full_results = raw.astype({"Student ID": str}) # This sometimes gets interpreted as int
       self.results_read = True
       return
-   
+      
+   def infer_participants_from_full_results(self):
+      """
+      Figure out who the participants are from a file of results.
+      """
+      if not self.results_read:
+         print("Must read a file of results first!")
+      else:
+         inferred_participant_IDs = set(self.full_results['Student ID'])
+         self.participants = {}
+         for ID in inferred_participant_IDs:
+            self.participants[ID] = participant(ID)
+      self.n_participants = len(self.participants)
+      self.participants_input = True
+      return
+      
+         
+   def infer_n_sessions_from_full_results(self, verbose = False):
+      """
+      Figure out how many sessions there are from a file of results.
+      """
+      if not self.results_read:
+         print("Must read a file of results first!")
+      else:
+         n_sessions = {}
+         for skill in self.skills:
+            n_sessions[skill.name] = 1
+            activities = self.full_results['Activity Title'].to_numpy()
+            while "{}_Q{}".format(skill.name, n_sessions[skill.name]) in activities:
+               n_sessions[skill.name] += 1
+      if verbose:
+         print('Number of sessions registered:')
+         for skill_name, n in n_sessions.items():
+            print('{}: {}'.format(skill_name, n))
+               
+      self.n_sessions = max(n_sessions.values())
+      self.n_sessions_input = True
+      return
+      
    def _read_participant_results(self, participant):
       """
       Find out, for each question, whether a specific participant got it
       right on the first try.
       """
       # This is not neat, and I will probably rewrite it at some point
+      if not self.n_sessions_input:
+         print('Inferring number of sessions from OLI-Torus output')
+         self.infer_n_sessions_from_full_results()
+      
       skill_names = []
       for skill in self.skills:
          skill_names.append(skill.name)
@@ -350,21 +395,7 @@ class learning_module:
          for participant in self.participants.values():
             participant.export_results(folder_path)
       return
-      
-   def infer_participants_from_full_results(self):
-      """
-      Figure out who the participants are from a file of results.
-      """
-      if not self.results_read:
-         print("Must read a file of results first!")
-      else:
-         inferred_participant_IDs = set(self.full_results['Student ID'])
-         self.participants = {}
-         for ID in inferred_participant_IDs:
-            self.participants[ID] = participant(ID)
-      self.n_participants = len(self.participants)
-      self.participants_input = True
-      return
+
       
 
    ### Functions for handling data regarding groups of participants
