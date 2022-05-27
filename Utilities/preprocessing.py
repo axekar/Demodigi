@@ -25,6 +25,8 @@ import matplotlib.pyplot as plt
 
 import datetime
 
+plt.style.use('tableau-colorblind10')
+
 # This is the format that I have inferred that OLI-Torus uses for dates
 _date_format = "%B %d, %Y at %I:%M %p UTC"
 
