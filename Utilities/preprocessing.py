@@ -31,28 +31,6 @@ plt.style.use('tableau-colorblind10')
 _date_format = "%B %d, %Y at %I:%M %p UTC"
 
 
-class skill:
-   """
-   This represents a specific skill that the learning module is intended
-   to teach. The skill is assumed to be tested once per session of the
-   module.
-   
-   Attributes
-   ----------
-   name : string
-   \tSome name of the skill, which is used to identify questions testing
-   \tthat skill in the data output by OLI-Torus
-   """
-   def __init__(self, name):
-      """
-      Parameters
-      ----------
-      name : string
-      \tDescribed under attributes
-      """
-      self.name = name
-      return
-   
 class participant:
    """
    This represents a single person taking a learning module.
@@ -175,7 +153,7 @@ class learning_module:
   
    Attributes
    ----------
-   skills : list of skill
+   skills : list of str
    \tA list of the skills that the learning module aims to teach
    n_skills : int
    \tThe number of skills in the learning module
@@ -208,7 +186,7 @@ class learning_module:
       """
       Parameters
       ----------
-      skills : list of skill
+      skills : list of str
       \tDescribed under attributes
       
       Optional parameters
@@ -330,10 +308,10 @@ class learning_module:
       else:
          n_sessions = {}
          for skill in self.skills:
-            n_sessions[skill.name] = 1
+            n_sessions[skill] = 1
             activities = self.full_results['Activity Title'].to_numpy()
-            while "{}_Q{}".format(skill.name, n_sessions[skill.name]) in activities:
-               n_sessions[skill.name] += 1
+            while "{}_Q{}".format(skill, n_sessions[skill]) in activities:
+               n_sessions[skill] += 1
       if verbose:
          print('Number of sessions registered:')
          for skill_name, n in n_sessions.items():
@@ -352,19 +330,16 @@ class learning_module:
          print('Inferring number of sessions from OLI-Torus output')
          self.infer_n_sessions_from_full_results()
       
-      # This is not neat, and I will probably rewrite it at some point
-      skill_names = []
-      for skill in self.skills:
-         skill_names.append(skill.name)
-      participant.answered = pd.DataFrame(columns = skill_names, index = range(1, self.n_sessions + 1), dtype = bool)
-      participant.answer_date = pd.DataFrame(columns = skill_names, index = range(1, self.n_sessions + 1), dtype = 'datetime64[s]')
-      participant.correct_first_try = pd.DataFrame(columns = skill_names, index = range(1, self.n_sessions + 1), dtype = bool)
+
+      participant.answered = pd.DataFrame(columns = self.skills, index = range(1, self.n_sessions + 1), dtype = bool)
+      participant.answer_date = pd.DataFrame(columns = self.skills, index = range(1, self.n_sessions + 1), dtype = 'datetime64[s]')
+      participant.correct_first_try = pd.DataFrame(columns = self.skills, index = range(1, self.n_sessions + 1), dtype = bool)
       correct_participant = self.full_results[self.full_results['Student ID'] == participant.ID]
       n_answers = 0
       for skill in self.skills:
          for session in range(1, self.n_sessions + 1):
             try:
-               correct_skill = correct_participant[correct_participant['Activity Title'] == "{}_Q{}".format(skill.name, session)]
+               correct_skill = correct_participant[correct_participant['Activity Title'] == "{}_Q{}".format(skill, session)]
                first_try_index = correct_skill["Attempt Number"] == 1
                first_try_date_string = correct_skill["Date Created"][first_try_index].to_numpy()[0]
                first_try_date = datetime.datetime.strptime(first_try_date_string, _date_format)
@@ -375,9 +350,9 @@ class learning_module:
                has_answered = False
                correct = False
                first_try_date = None
-            participant.answered.loc[session, skill.name] = has_answered
-            participant.correct_first_try.loc[session, skill.name] = correct
-            participant.answer_date.loc[session, skill.name] = first_try_date
+            participant.answered.loc[session, skill] = has_answered
+            participant.correct_first_try.loc[session, skill] = correct
+            participant.answer_date.loc[session, skill] = first_try_date
       participant._cumulative_answers_by_date()
       self.flags.loc[participant.ID, 'started'] = True # Note that this is assumed by default, we cannot test it yet
       self.flags.loc[participant.ID, 'answered once'] = n_answers > 0
@@ -410,8 +385,6 @@ class learning_module:
          for participant in self.participants.values():
             participant.export_results(folder_path)
       return
-
-      
 
    ### Functions for handling data regarding groups of participants
    def _cumulative_answers_by_date(self, participants):
