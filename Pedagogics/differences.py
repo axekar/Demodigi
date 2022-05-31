@@ -62,7 +62,7 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
    max_sigma = 2 * max_sigma
 
    mu_vector = np.linspace(min_mu, max_mu, num = n_steps)
-   sigma_vector = np.linspace(min_sigma, max_sigma, num = n_steps)
+   sigma_vector = np.flip(np.linspace(max_sigma, min_sigma, num = n_steps, endpoint = False))
    mu_grid, sigma_grid = np.meshgrid(mu_vector, sigma_vector)
 
    # The log-prior P(mu, sigma). To stay consistent with a frequentist analysis,
@@ -90,7 +90,7 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
    fig, axs = plt.subplots(len(catapults))
    for i in range(len(catapults)):
       catapult = catapults[i]
-      axs[i].pcolormesh(mu_grid, sigma_grid, P[catapult])
+      axs[i].pcolormesh(mu_grid, sigma_grid, P[catapult], shading = 'nearest')
       axs.flat[i].set(xlabel=r'$\mu$', ylabel=r'$\sigma$', title = 'Catapult {}'.format(catapult))
    fig.tight_layout()
    plt.savefig('./{}/{}_posteriors.png'.format(plot_folder, plot_main_name))
