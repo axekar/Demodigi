@@ -53,10 +53,25 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
    
    catapult_pairs = list(itertools.combinations(catapults, 2))
 
+   # Magic number used when plotting histograms
+   n_bins = n_throws // 5
+
    # Generate throws for each catapult   
    throws = {}
    for catapult in catapults:
       throws[catapult] = sigma[catapult] * rd.randn(n_throws) + mu[catapult]
+
+   fig, axs = plt.subplots(len(catapults))
+   for i in range(len(catapults)):
+      catapult = catapults[i]
+      zoom_width = 3 * sigma[catapult]
+      axs.flat[i].hist(throws[catapult], bins = n_bins, label = r'Observerat')
+      axs.flat[i].set(xlabel=r'Kaststräcka', ylabel=r'Antal', title = 'Katapult {}'.format(catapult))
+      axs.flat[i].set_xlim(left = mu[catapult] - zoom_width, right = mu[catapult] + zoom_width)
+   fig.set_size_inches(6, 8)
+   fig.tight_layout()
+   plt.savefig('./{}/{}_histogram.png'.format(plot_folder, plot_main_name))
+   plt.close()
 
    # Make a grid of the possible values of mu and sigma. This would be
    # computationally infeasible if we had many parameters, but with just
@@ -81,6 +96,8 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
    sigma_vector = np.flip(np.linspace(max_sigma, min_sigma, num = n_steps, endpoint = False))
    mu_grid, sigma_grid = np.meshgrid(mu_vector, sigma_vector)
    delta_vector = np.linspace(-max_mu, max_mu, num=delta_steps)
+
+
 
    # The log-prior P(mu, sigma). To stay consistent with a frequentist analysis,
    # we use a flat prior.
@@ -109,6 +126,7 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
       catapult = catapults[i]
       axs.flat[i].pcolormesh(mu_grid, sigma_grid, P[catapult], shading = 'nearest')
       axs.flat[i].set(xlabel=r'$\mu$', ylabel=r'$\sigma$', title = 'Katapult {}'.format(catapult))
+   fig.set_size_inches(6, 8)
    fig.tight_layout()
    plt.savefig('./{}/{}_full_posteriors.png'.format(plot_folder, plot_main_name))
    plt.close()
@@ -134,13 +152,13 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
       axs.flat[2*i].set_xlim(left = true_mu - zoom_width, right = true_mu + zoom_width)
       axs.flat[2*i].set(xlabel=r'$\mu$', ylabel=r'Onorm. $P\left( \mu \right)$', title = r'$P\left( \mu | kast \right)$ ({})'.format(catapult))
       
-      n_bins = n_throws // 5
-      axs.flat[2*i+1].hist(throws[catapult], bins = n_bins, label = 'Observed')
+      axs.flat[2*i+1].hist(throws[catapult], bins = n_bins, label = r'Observerat')
       bin_width = (max(throws[catapult]) - min(throws[catapult])) / n_bins
-      axs.flat[2*i+1].plot(mu_vector, best_fit[catapult] * n_throws * bin_width, label = 'Expected')
+      axs.flat[2*i+1].plot(mu_vector, best_fit[catapult] * n_throws * bin_width, label = r'Förväntat')
       axs.flat[2*i+1].set_xlim(left = true_mu - zoom_width, right = true_mu + zoom_width)
-      axs.flat[2*i+1].set(xlabel=r'$\mu$', ylabel=r'Throws', title = 'Bästa anpassning ({})'.format(catapult))
-      
+      axs.flat[2*i+1].set(xlabel=r'$\mu$', ylabel=r'Antal kast', title = 'Bästa anpassning ({})'.format(catapult))
+      axs.flat[2*i+1].legend()
+   fig.set_size_inches(12, 8)
    fig.tight_layout()
    plt.savefig('./{}/{}_mu_posteriors.png'.format(plot_folder, plot_main_name))
    plt.close()
@@ -170,6 +188,7 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
       axs.flat[2*i+1].fill_between(delta_vector[n_steps-1:], normalised_delta_mu[n_steps-1:])
       axs.flat[2*i+1].set_xlim(left = true_delta - zoom_width, right = true_delta + zoom_width)
       axs.flat[2*i+1].set(xlabel=r'$\Delta \mu$', ylabel=r'Onorm. $P \left( \Delta \mu \right)$', title = r'$P\left( \Delta \mu > 0 \right) = {:.2f}$'.format(P_dge0[catapult_pair]))
+   fig.set_size_inches(12, 4)
    fig.tight_layout()
    plt.savefig('./{}/{}_delta_posteriors.png'.format(plot_folder, plot_main_name))
    plt.close()
