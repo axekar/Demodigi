@@ -30,7 +30,7 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
    """
    Say that we have two catapults A and B, and we want to know which one
    is better. We have decided that for our purposes the 'better' catapult
-   is the one that one average throws rocks the furthest. We also believe
+   is the one that on average throws rocks the furthest. We also believe
    that the range of the individual throws follows a normal distribution.
    
    To figure out which one is best, we fire each catapult n times and put
@@ -47,6 +47,8 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
       print('Values input were {} and {}'.format(sigma_A, sigma_B))
       return
    catapults = ['A', 'B']
+   # A catapult with negative range isn't *wrong* per se, it just means
+   # we have to turn it around before shooting
    mu = {'A':abs(mu_A), 'B':abs(mu_B)}
    sigma = {'A':sigma_A, 'B':sigma_B}
    # Everything below here should be agnostic as to the number of catapults
@@ -201,5 +203,40 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
    fig.tight_layout()
    plt.savefig('./{}/{}_delta_posteriors.png'.format(plot_folder, plot_main_name))
    plt.close()
-
    return
+   
+def compare_coins(P_A, P_B, n_tosses, plot_folder = 'differences_plots', plot_main_name = 'Coins'):
+   """
+   Say that we have two coins A and B, and we want to know which one is
+   better. We have decided that for our purposes the 'better' coin
+   is the one that has the highest chance of coming up heads. We also
+   believe that the probability of getting a certain number of heads over
+   a certain number of tosses follows a binomial distribution.
+   
+   To figure out which one is best, we flip each coin n times and put
+   the results into our statistical model, which gives us a posterior
+   probability over P for each coin. Using that we can calculate the
+   probability distribution over the differences in P. This then gives us
+   the probability of one coin being better than the other.
+   """
+
+   if P_A > 1 or P_B > 1:
+      print('Probabilities cannot be larger than one!')
+      print('Values input were {} and {}'.format(P_A, P_B))
+      return
+   if P_A < 0 or P_B < 0:
+      print('Probabilities cannot be smaller than zero!')
+      print('Values input were {} and {}'.format(P_A, P_B))
+      return
+   coins = ['A', 'B']
+   P = {'A':abs(P_A), 'B':abs(P_B)}
+   
+   # Everything below here should be agnostic as to the number of coins
+   
+   coin_pairs = list(itertools.combinations(coins, 2))
+
+   # Generate tosses for each coin
+   tosses = {}
+   for coin in coins:
+      tosses[coin] = np.sum(rd.uniform(0., 1., size = n_tosses) < P[coin])
+   return tosses
