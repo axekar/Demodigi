@@ -48,18 +48,18 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
    # Make a grid of the possible values of mu and sigma. This would be
    # computationally infeasible if we had many parameters, but with just
    # two we can get away with it.
-   n_steps = 100
-   
-   min_mu = 0
-   min_sigma = 0   
+   n_steps = 1000
 
-   max_mu = 0
+   min_sigma = 0      
+   min_mu = 0
+
    max_sigma = 0
+   max_mu = 0
    for catapult in catapults:
-      max_mu = max(max_mu, mu[catapult])
       max_sigma = max(max_sigma, sigma[catapult])
-   max_mu = 2 * max_mu
+      max_mu = max(max_mu, mu[catapult] + sigma[catapult])
    max_sigma = 2 * max_sigma
+   max_mu = 2 * max_mu
 
    mu_vector = np.linspace(min_mu, max_mu, num = n_steps)
    sigma_vector = np.flip(np.linspace(max_sigma, min_sigma, num = n_steps, endpoint = False))
@@ -80,7 +80,7 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
          log_L_by_throw[catapult][:,:,i] = np.log(1. / (sigma_grid * np.sqrt(2 * np.pi))) + ( - (1./2.) * ((throws[catapult][i] - mu_grid) / (sigma_grid))**2)
       log_L[catapult] = np.sum(log_L_by_throw[catapult], axis = 2)
    
-   # The posterior
+   # The full posterior over mu and sigma
    log_P = {}
    P = {}
    for catapult in catapults:
@@ -93,6 +93,23 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
       axs[i].pcolormesh(mu_grid, sigma_grid, P[catapult], shading = 'nearest')
       axs.flat[i].set(xlabel=r'$\mu$', ylabel=r'$\sigma$', title = 'Catapult {}'.format(catapult))
    fig.tight_layout()
-   plt.savefig('./{}/{}_posteriors.png'.format(plot_folder, plot_main_name))
+   plt.savefig('./{}/{}_full_posteriors.png'.format(plot_folder, plot_main_name))
+   plt.close()
 
+   # The flattened posteriors over mu and sigma
+   P_mu = {}
+   P_sigma = {}
+   for catapult in catapults:
+      P_mu[catapult] = np.sum(P[catapult], axis = 0)
+      P_sigma[catapult] = np.sum(P[catapult], axis = 1)
+      
+   fig, axs = plt.subplots(len(catapults))
+   for i in range(len(catapults)):
+      catapult = catapults[i]
+      axs[i].plot(mu_vector, P_mu[catapult] / np.max(P_mu[catapult]))
+      axs[i].vlines(mu[catapult], 0, 1)
+      axs.flat[i].set(xlabel=r'$\mu$', ylabel=r'Unnorm. $P\left( \mu \right)$', title = 'Catapult {}'.format(catapult))
+   fig.tight_layout()
+   plt.savefig('./{}/{}_mu_posteriors.png'.format(plot_folder, plot_main_name))
+   plt.close()
    return
