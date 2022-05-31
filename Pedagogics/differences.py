@@ -256,7 +256,7 @@ def compare_coins(P_A, P_B, n_tosses, plot_folder = 'differences_plots', plot_ma
    # use a flat prior.
    log_prior = {}
    for coin in coins:
-      log_prior[coin] = np.ones(n_steps)
+      log_prior[coin] = np.zeros(n_steps)
       
    # The log-likelihood P(successes|P)
    log_L = {}
@@ -271,4 +271,12 @@ def compare_coins(P_A, P_B, n_tosses, plot_folder = 'differences_plots', plot_ma
          log_L[coin][-1] = - np.inf
       else:
          log_L[coin][-1] = - logB(heads[coin] + 1, tails + 1)
-   return log_L
+
+   # The full posterior over P, also called P because my notation is bad
+   log_P = {}
+   P = {}
+   for coin in coins:
+      log_P[coin] = log_prior[coin] + log_L[coin]
+      P[coin] = np.exp(log_P[coin])
+
+   return P
