@@ -92,6 +92,7 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
       catapult = catapults[i]
       axs[i].pcolormesh(mu_grid, sigma_grid, P[catapult])
       axs.flat[i].set(xlabel=r'$\mu$', ylabel=r'$\sigma$', title = 'Catapult {}'.format(catapult))
-
+   fig.tight_layout()
    plt.savefig('./{}/{}_posteriors.png'.format(plot_folder, plot_main_name))
+
    return
