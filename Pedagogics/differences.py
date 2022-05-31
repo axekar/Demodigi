@@ -18,6 +18,8 @@ Written by Alvin Gavel
 https://github.com/Alvin-Gavel/Demodigi
 """
 
+import itertools
+
 import numpy as np
 import numpy.random as rd
 import matplotlib.pyplot as plt
@@ -29,16 +31,26 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
    is better. We have decided that for our purposes the 'better' catapult
    is the one that one average throws rocks the furthest. We also believe
    that the range of the individual throws follows a normal distribution.
+   
+   To figure out which one is best, we fire each catapult n times and put
+   the results into our statistical model, which gives us a posterior
+   probability over mu for each catapult. Using that we can calculate the
+   probability distribution over the differences in mu. This then gives us
+   the probability of one catapult being better than the other.
    """
 
+   # If you for some reason want to adjust the code to look at more than
+   # two catapults, the bit you need to modify starts here
    if sigma_A < 0 or sigma_B < 0:
       print('Standard deviation cannot be negative!')
       print('Values input were {} and {}'.format(sigma_A, sigma_B))
       return
-
    catapults = ['A', 'B']
    mu = {'A':abs(mu_A), 'B':abs(mu_B)}
    sigma = {'A':sigma_A, 'B':sigma_B}
+   # Everything below here should be agnostic as to the number of catapults
+   
+   catapult_pairs = list(itertools.combinations(catapults, 2))
 
    # Generate throws for each catapult   
    throws = {}
@@ -49,6 +61,7 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
    # computationally infeasible if we had many parameters, but with just
    # two we can get away with it.
    n_steps = 1000
+   delta_steps = 2 * n_steps - 1
 
    min_sigma = 0      
    min_mu = 0
@@ -64,6 +77,7 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
    mu_vector = np.linspace(min_mu, max_mu, num = n_steps)
    sigma_vector = np.flip(np.linspace(max_sigma, min_sigma, num = n_steps, endpoint = False))
    mu_grid, sigma_grid = np.meshgrid(mu_vector, sigma_vector)
+   delta_vector = np.linspace(-max_mu, max_mu, num=delta_steps)
 
    # The log-prior P(mu, sigma). To stay consistent with a frequentist analysis,
    # we use a flat prior.
@@ -112,4 +126,28 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
    fig.tight_layout()
    plt.savefig('./{}/{}_mu_posteriors.png'.format(plot_folder, plot_main_name))
    plt.close()
+   
+   # The posterior over the differences in mu
+   delta_mu = {}
+   for catapult_pair in catapult_pairs:
+      delta_mu[catapult_pair] = np.convolve(P_mu[catapult_pair[0]], np.flip(P_mu[catapult_pair[1]]))
+
+   fig, axs = plt.subplots(len(catapult_pairs), 2)
+   for i in range(len(catapult_pairs)):
+      catapult_pair = catapult_pairs[i]
+      true_delta = mu[catapult_pair[0]] - mu[catapult_pair[1]]
+      zoom_width = 2 * max(sigma[catapult_pair[0]], sigma[catapult_pair[1]])
+      
+      axs[i].plot(delta_vector, delta_mu[catapult_pair] / np.max(delta_mu[catapult_pair]))
+      axs[i].vlines(true_delta, 0, 1)
+      axs.flat[2*i].set(xlabel=r'$\Delta \mu$', ylabel=r'Unnorm. $P \left( \Delta \mu \right)$', title = 'Catapults {} & {} (full range)'.format(catapult_pair[0], catapult_pair[1]))
+      
+      axs[i+1].plot(delta_vector, delta_mu[catapult_pair] / np.max(delta_mu[catapult_pair]))
+      axs[i+1].vlines(true_delta, 0, 1)
+      axs[i+1].set_xlim(left = true_delta - zoom_width, right = true_delta + zoom_width)
+      axs.flat[2*i+1].set(xlabel=r'$\Delta \mu$', ylabel=r'Unnorm. $P \left( \Delta \mu \right)$', title = 'Catapults {} & {} (zoomed in)'.format(catapult_pair[0], catapult_pair[1]))
+   fig.tight_layout()
+   plt.savefig('./{}/{}_delta_posteriors.png'.format(plot_folder, plot_main_name))
+   plt.close()
+
    return
