@@ -158,7 +158,6 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
       
       axs.flat[2*i+1].plot(delta_vector, normalised_delta_mu)
       axs.flat[2*i+1].fill_between(delta_vector[n_steps-1:], normalised_delta_mu[n_steps-1:])
-      axs.flat[2*i+1].vlines(true_delta, 0, 1)
       axs.flat[2*i+1].set_xlim(left = true_delta - zoom_width, right = true_delta + zoom_width)
       axs.flat[2*i+1].set(xlabel=r'$\Delta \mu$', ylabel=r'Unnorm. $P \left( \Delta \mu \right)$', title = r'$P\left( \Delta \mu > 0 \right) = {:.2f}$'.format(P_dge0[catapult_pair]))
    fig.tight_layout()
