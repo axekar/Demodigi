@@ -97,8 +97,6 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
    mu_grid, sigma_grid = np.meshgrid(mu_vector, sigma_vector)
    delta_vector = np.linspace(-max_mu, max_mu, num=delta_steps)
 
-
-
    # The log-prior P(mu, sigma). To stay consistent with a frequentist analysis,
    # we use a flat prior.
    log_prior = {}
@@ -191,13 +189,14 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
       normalised_delta_mu = delta_mu[catapult_pair] / np.max(delta_mu[catapult_pair])
       
       axs.flat[2*i].plot(delta_vector, normalised_delta_mu)
-      axs.flat[2*i].vlines(true_delta, 0, 1)
-      axs.flat[2*i].set(xlabel=r'$\Delta \mu$', ylabel=r'Onorm. $P \left( \Delta \mu \right)$', title = r'{} & {}'.format(catapult_pair[0], catapult_pair[1]))
-      
+      axs.flat[2*i].fill_between(delta_vector[n_steps-1:], normalised_delta_mu[n_steps-1:])
+      axs.flat[2*i].set_xlim(left = true_delta - zoom_width, right = true_delta + zoom_width)
+      axs.flat[2*i].set(xlabel=r'$\Delta \mu$', ylabel=r'Onorm. $P \left( \Delta \mu \right)$', title = r'$P\left( \Delta \mu > 0 \right) = {:.2f}$'.format(P_dge0[catapult_pair]))
+
       axs.flat[2*i+1].plot(delta_vector, normalised_delta_mu)
-      axs.flat[2*i+1].fill_between(delta_vector[n_steps-1:], normalised_delta_mu[n_steps-1:])
+      axs.flat[2*i+1].fill_between(delta_vector[:n_steps], normalised_delta_mu[:n_steps])
       axs.flat[2*i+1].set_xlim(left = true_delta - zoom_width, right = true_delta + zoom_width)
-      axs.flat[2*i+1].set(xlabel=r'$\Delta \mu$', ylabel=r'Onorm. $P \left( \Delta \mu \right)$', title = r'$P\left( \Delta \mu > 0 \right) = {:.2f}$'.format(P_dge0[catapult_pair]))
+      axs.flat[2*i+1].set(xlabel=r'$\Delta \mu$', ylabel=r'Onorm. $P \left( \Delta \mu \right)$', title = r'$P\left( \Delta \mu < 0 \right) = {:.2f}$'.format(P_dle0[catapult_pair]))
    fig.set_size_inches(12, 4)
    fig.tight_layout()
    plt.savefig('./{}/{}_delta_posteriors.png'.format(plot_folder, plot_main_name))
