@@ -141,26 +141,36 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
       max_index = np.argmax(P[catapult])
       best_fit[catapult] = st.norm.pdf(mu_vector, loc = mu_grid.flatten()[max_index], scale = sigma_grid.flatten()[max_index])
 
-   fig, axs = plt.subplots(len(catapults), 2)
+   fig, axs = plt.subplots(1, len(catapults))
    for i in range(len(catapults)):
       catapult = catapults[i]
       true_mu = mu[catapult]
       zoom_width = 3 * sigma[catapult]
       
-      axs.flat[2*i].plot(mu_vector, P_mu[catapult] / np.max(P_mu[catapult]))
-      axs.flat[2*i].vlines(true_mu, 0, 1)
-      axs.flat[2*i].set_xlim(left = true_mu - zoom_width, right = true_mu + zoom_width)
-      axs.flat[2*i].set(xlabel=r'$\mu$', ylabel=r'Onorm. $P\left( \mu \right)$', title = r'$P\left( \mu | kast \right)$ ({})'.format(catapult))
-      
-      axs.flat[2*i+1].hist(throws[catapult], bins = n_bins, label = r'Observerat')
-      bin_width = (max(throws[catapult]) - min(throws[catapult])) / n_bins
-      axs.flat[2*i+1].plot(mu_vector, best_fit[catapult] * n_throws * bin_width, label = r'Förväntat')
-      axs.flat[2*i+1].set_xlim(left = true_mu - zoom_width, right = true_mu + zoom_width)
-      axs.flat[2*i+1].set(xlabel=r'$\mu$', ylabel=r'Antal kast', title = 'Bästa anpassning ({})'.format(catapult))
-      axs.flat[2*i+1].legend()
-   fig.set_size_inches(12, 8)
+      axs.flat[i].plot(mu_vector, P_mu[catapult] / np.max(P_mu[catapult]))
+      axs.flat[i].vlines(true_mu, 0, 1)
+      axs.flat[i].set_xlim(left = true_mu - zoom_width, right = true_mu + zoom_width)
+      axs.flat[i].set(xlabel=r'$\mu$', ylabel=r'Onorm. $P\left( \mu \right)$', title = r'$P\left( \mu | kast \right)$ ({})'.format(catapult))
+   fig.set_size_inches(12, 4)
    fig.tight_layout()
    plt.savefig('./{}/{}_mu_posteriors.png'.format(plot_folder, plot_main_name))
+   plt.close()
+
+   fig, axs = plt.subplots(1, len(catapults))
+   for i in range(len(catapults)):
+      catapult = catapults[i]
+      true_mu = mu[catapult]
+      zoom_width = 3 * sigma[catapult]
+      
+      axs.flat[i].hist(throws[catapult], bins = n_bins, label = r'Observerat')
+      bin_width = (max(throws[catapult]) - min(throws[catapult])) / n_bins
+      axs.flat[i].plot(mu_vector, best_fit[catapult] * n_throws * bin_width, label = r'Förväntat')
+      axs.flat[i].set_xlim(left = true_mu - zoom_width, right = true_mu + zoom_width)
+      axs.flat[i].set(xlabel=r'$\mu$', ylabel=r'Antal kast', title = 'Bästa anpassning ({})'.format(catapult))
+      axs.flat[i].legend()
+   fig.set_size_inches(12, 4)
+   fig.tight_layout()
+   plt.savefig('./{}/{}_best_fit.png'.format(plot_folder, plot_main_name))
    plt.close()
    
    # The posterior over the differences in mu, and the probability that
