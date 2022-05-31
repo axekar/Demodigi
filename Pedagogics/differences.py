@@ -121,12 +121,12 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
       log_P[catapult] = log_prior[catapult] + log_L[catapult]
       P[catapult] = np.exp(log_P[catapult])
    
-   fig, axs = plt.subplots(len(catapults))
+   fig, axs = plt.subplots(1, len(catapults))
    for i in range(len(catapults)):
       catapult = catapults[i]
       axs.flat[i].pcolormesh(mu_grid, sigma_grid, P[catapult], shading = 'nearest')
       axs.flat[i].set(xlabel=r'$\mu$', ylabel=r'$\sigma$', title = 'Katapult {}'.format(catapult))
-   fig.set_size_inches(6, 8)
+   fig.set_size_inches(12, 4)
    fig.tight_layout()
    plt.savefig('./{}/{}_full_posteriors.png'.format(plot_folder, plot_main_name))
    plt.close()
