@@ -248,7 +248,7 @@ def compare_coins(P_A, P_B, n_tosses, plot_folder = 'differences_plots', plot_ma
       heads[coin] = np.sum(rd.uniform(0., 1., size = n_tosses) < P[coin])
       
    # Make a vector of the possible values of P
-   n_steps = 10
+   n_steps = 1000
    delta_steps = 2 * n_steps - 1
    P_vector = np.linspace(0., 1., num = n_steps)
    
@@ -262,21 +262,33 @@ def compare_coins(P_A, P_B, n_tosses, plot_folder = 'differences_plots', plot_ma
    log_L = {}
    for coin in coins:
       tails = n_tosses - heads[coin]
-      log_L[coin] = heads[coin] * np.log(P_vector) + tails * np.log(1 - P_vector) - logB(heads[coin] + 1, tails + 1)
-      if heads[coin] > 0:
-         log_L[coin][0] = - np.inf
-      else:
-         log_L[coin][0] = - logB(heads[coin] + 1, tails + 1)
-      if tails > 0:
-         log_L[coin][-1] = - np.inf
-      else:
-         log_L[coin][-1] = - logB(heads[coin] + 1, tails + 1)
+      with np.errstate(divide = 'ignore'):
+         log_L[coin] = heads[coin] * np.log(P_vector) + tails * np.log(1 - P_vector) - logB(heads[coin] + 1, tails + 1)
+         if heads[coin] > 0:
+            log_L[coin][0] = - np.inf
+         else:
+            log_L[coin][0] = - logB(heads[coin] + 1, tails + 1)
+         if tails > 0:
+            log_L[coin][-1] = - np.inf
+         else:
+            log_L[coin][-1] = - logB(heads[coin] + 1, tails + 1)
 
-   # The full posterior over P, also called P because my notation is bad
-   log_P = {}
-   P = {}
+   # The full posterior over P
+   log_pP = {}
+   pP = {}
    for coin in coins:
-      log_P[coin] = log_prior[coin] + log_L[coin]
-      P[coin] = np.exp(log_P[coin])
-
-   return P
+      log_pP[coin] = log_prior[coin] + log_L[coin]
+      pP[coin] = np.exp(log_pP[coin])
+      
+   fig, axs = plt.subplots(1, len(coins))
+   for i in range(len(coins)):
+      coin = coins[i]
+      axs.flat[i].plot(P_vector, pP[coin])
+      axs.flat[i].vlines(P[coin], 0, max(pP[coin]))
+      axs.flat[i].set_xlim(left = 0, right = 1)
+      axs.flat[i].set(xlabel=r'$P$', ylabel=r'$P\left( P \right)$', title = r'$p(P|kast)$ (Mynt {})'.format(coin))
+   fig.set_size_inches(12, 4)
+   fig.tight_layout()
+   plt.savefig('./{}/{}_P_posteriors.png'.format(plot_folder, plot_main_name))
+   plt.close()
+   return
