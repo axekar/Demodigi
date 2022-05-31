@@ -61,14 +61,14 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
    for catapult in catapults:
       throws[catapult] = sigma[catapult] * rd.randn(n_throws) + mu[catapult]
 
-   fig, axs = plt.subplots(len(catapults))
+   fig, axs = plt.subplots(1, len(catapults))
    for i in range(len(catapults)):
       catapult = catapults[i]
       zoom_width = 3 * sigma[catapult]
       axs.flat[i].hist(throws[catapult], bins = n_bins, label = r'Observerat')
       axs.flat[i].set(xlabel=r'Kaststräcka', ylabel=r'Antal', title = 'Katapult {}'.format(catapult))
       axs.flat[i].set_xlim(left = mu[catapult] - zoom_width, right = mu[catapult] + zoom_width)
-   fig.set_size_inches(6, 8)
+   fig.set_size_inches(12, 4)
    fig.tight_layout()
    plt.savefig('./{}/{}_histogram.png'.format(plot_folder, plot_main_name))
    plt.close()
