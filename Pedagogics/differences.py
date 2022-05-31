@@ -107,8 +107,8 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
    fig, axs = plt.subplots(len(catapults))
    for i in range(len(catapults)):
       catapult = catapults[i]
-      axs[i].pcolormesh(mu_grid, sigma_grid, P[catapult], shading = 'nearest')
-      axs.flat[i].set(xlabel=r'$\mu$', ylabel=r'$\sigma$', title = 'Catapult {}'.format(catapult))
+      axs.flat[i].pcolormesh(mu_grid, sigma_grid, P[catapult], shading = 'nearest')
+      axs.flat[i].set(xlabel=r'$\mu$', ylabel=r'$\sigma$', title = 'Katapult {}'.format(catapult))
    fig.tight_layout()
    plt.savefig('./{}/{}_full_posteriors.png'.format(plot_folder, plot_main_name))
    plt.close()
@@ -132,20 +132,18 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
       axs.flat[2*i].plot(mu_vector, P_mu[catapult] / np.max(P_mu[catapult]))
       axs.flat[2*i].vlines(true_mu, 0, 1)
       axs.flat[2*i].set_xlim(left = true_mu - zoom_width, right = true_mu + zoom_width)
-      axs.flat[2*i].set(xlabel=r'$\mu$', ylabel=r'Unnorm. $P\left( \mu \right)$', title = 'Catapult {} posterior over $\mu$'.format(catapult))
+      axs.flat[2*i].set(xlabel=r'$\mu$', ylabel=r'Onorm. $P\left( \mu \right)$', title = r'$P\left( \mu | kast \right)$ ({})'.format(catapult))
       
       n_bins = n_throws // 5
       axs.flat[2*i+1].hist(throws[catapult], bins = n_bins, label = 'Observed')
       bin_width = (max(throws[catapult]) - min(throws[catapult])) / n_bins
       axs.flat[2*i+1].plot(mu_vector, best_fit[catapult] * n_throws * bin_width, label = 'Expected')
       axs.flat[2*i+1].set_xlim(left = true_mu - zoom_width, right = true_mu + zoom_width)
-      axs.flat[2*i+1].set(xlabel=r'$\mu$', ylabel=r'Throws', title = 'Catapult {} best fit posterior'.format(catapult))
+      axs.flat[2*i+1].set(xlabel=r'$\mu$', ylabel=r'Throws', title = 'Bästa anpassning ({})'.format(catapult))
       
    fig.tight_layout()
    plt.savefig('./{}/{}_mu_posteriors.png'.format(plot_folder, plot_main_name))
    plt.close()
-   
-   
    
    # The posterior over the differences in mu, and the probability that
    # the difference is below/above zero
@@ -166,12 +164,12 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
       
       axs.flat[2*i].plot(delta_vector, normalised_delta_mu)
       axs.flat[2*i].vlines(true_delta, 0, 1)
-      axs.flat[2*i].set(xlabel=r'$\Delta \mu$', ylabel=r'Unnorm. $P \left( \Delta \mu \right)$', title = 'Catapults {} & {} (full range)'.format(catapult_pair[0], catapult_pair[1]))
+      axs.flat[2*i].set(xlabel=r'$\Delta \mu$', ylabel=r'Onorm. $P \left( \Delta \mu \right)$', title = r'{} & {}'.format(catapult_pair[0], catapult_pair[1]))
       
       axs.flat[2*i+1].plot(delta_vector, normalised_delta_mu)
       axs.flat[2*i+1].fill_between(delta_vector[n_steps-1:], normalised_delta_mu[n_steps-1:])
       axs.flat[2*i+1].set_xlim(left = true_delta - zoom_width, right = true_delta + zoom_width)
-      axs.flat[2*i+1].set(xlabel=r'$\Delta \mu$', ylabel=r'Unnorm. $P \left( \Delta \mu \right)$', title = r'$P\left( \Delta \mu > 0 \right) = {:.2f}$'.format(P_dge0[catapult_pair]))
+      axs.flat[2*i+1].set(xlabel=r'$\Delta \mu$', ylabel=r'Onorm. $P \left( \Delta \mu \right)$', title = r'$P\left( \Delta \mu > 0 \right) = {:.2f}$'.format(P_dge0[catapult_pair]))
    fig.tight_layout()
    plt.savefig('./{}/{}_delta_posteriors.png'.format(plot_folder, plot_main_name))
    plt.close()
