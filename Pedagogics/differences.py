@@ -70,6 +70,7 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
       axs.flat[i].hist(throws[catapult], bins = n_bins, label = r'Observerat')
       axs.flat[i].set(xlabel=r'Kaststräcka', ylabel=r'Antal', title = 'Katapult {}'.format(catapult))
       axs.flat[i].set_xlim(left = mu[catapult] - zoom_width, right = mu[catapult] + zoom_width)
+      #axs.flat[i].set_ylim(bottom = 0, top = max()) # This would be good, but seems to be a pain to code.
    fig.set_size_inches(12, 4)
    fig.tight_layout()
    plt.savefig('./{}/{}_histogram.png'.format(plot_folder, plot_main_name))
@@ -239,4 +240,16 @@ def compare_coins(P_A, P_B, n_tosses, plot_folder = 'differences_plots', plot_ma
    tosses = {}
    for coin in coins:
       tosses[coin] = np.sum(rd.uniform(0., 1., size = n_tosses) < P[coin])
+      
+   # Make a vector of the possible values of P
+   n_steps = 1000
+   delta_steps = 2 * n_steps - 1
+   P_vector = np.linspace(0., 1., num = n_steps)
+   
+   # The log-prior P(P). To stay consistent with a frequentist analysis, we
+   # use a flat prior.
+   log_prior = {}
+   for coin in coins:
+      log_prior[coin] = np.ones(n_steps)
+   
    return tosses
