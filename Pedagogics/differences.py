@@ -22,6 +22,7 @@ import itertools
 
 import numpy as np
 import numpy.random as rd
+import scipy.stats as st
 import matplotlib.pyplot as plt
 
 
@@ -73,6 +74,8 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
       max_mu = max(max_mu, mu[catapult] + sigma[catapult])
    max_sigma = 2 * max_sigma
    max_mu = 2 * max_mu
+   
+   mu_step_width = (max_mu - min_mu) / n_steps
 
    mu_vector = np.linspace(min_mu, max_mu, num = n_steps)
    sigma_vector = np.flip(np.linspace(max_sigma, min_sigma, num = n_steps, endpoint = False))
@@ -113,27 +116,34 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
    # The flattened posteriors over mu and sigma
    P_mu = {}
    P_sigma = {}
+   best_fit = {}
    for catapult in catapults:
       P_mu[catapult] = np.sum(P[catapult], axis = 0)
       P_sigma[catapult] = np.sum(P[catapult], axis = 1)
-      
+      max_index = np.argmax(P[catapult])
+      best_fit[catapult] = st.norm.pdf(mu_vector, loc = mu_grid.flatten()[max_index], scale = sigma_grid.flatten()[max_index])
+
    fig, axs = plt.subplots(len(catapults), 2)
    for i in range(len(catapults)):
       catapult = catapults[i]
       true_mu = mu[catapult]
-      zoom_width = 2 * sigma[catapult]
+      zoom_width = 3 * sigma[catapult]
       
       axs.flat[2*i].plot(mu_vector, P_mu[catapult] / np.max(P_mu[catapult]))
       axs.flat[2*i].vlines(true_mu, 0, 1)
-      axs.flat[2*i].set(xlabel=r'$\mu$', ylabel=r'Unnorm. $P\left( \mu \right)$', title = 'Catapult {} (full range)'.format(catapult))
+      axs.flat[2*i].set_xlim(left = true_mu - zoom_width, right = true_mu + zoom_width)
+      axs.flat[2*i].set(xlabel=r'$\mu$', ylabel=r'Unnorm. $P\left( \mu \right)$', title = 'Catapult {} posterior over $\mu$'.format(catapult))
       
-      axs.flat[2*i+1].plot(mu_vector, P_mu[catapult] / np.max(P_mu[catapult]))
-      axs.flat[2*i+1].vlines(true_mu, 0, 1)
+      axs.flat[2*i+1].hist(throws[catapult], bins = n_throws // 5, label = 'Observed')
+      axs.flat[2*i+1].plot(mu_vector, best_fit[catapult] * n_throws * 5, label = 'Expected')
       axs.flat[2*i+1].set_xlim(left = true_mu - zoom_width, right = true_mu + zoom_width)
-      axs.flat[2*i+1].set(xlabel=r'$\mu$', ylabel=r'Unnorm. $P\left( \mu \right)$', title = 'Catapult {} (zoomed in)'.format(catapult))
+      axs.flat[2*i+1].set(xlabel=r'$\mu$', ylabel=r'Throws', title = 'Catapult {} best fit posterior'.format(catapult))
+      
    fig.tight_layout()
    plt.savefig('./{}/{}_mu_posteriors.png'.format(plot_folder, plot_main_name))
    plt.close()
+   
+   
    
    # The posterior over the differences in mu, and the probability that
    # the difference is below/above zero
