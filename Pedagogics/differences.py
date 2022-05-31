@@ -134,8 +134,10 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
       axs.flat[2*i].set_xlim(left = true_mu - zoom_width, right = true_mu + zoom_width)
       axs.flat[2*i].set(xlabel=r'$\mu$', ylabel=r'Unnorm. $P\left( \mu \right)$', title = 'Catapult {} posterior over $\mu$'.format(catapult))
       
-      axs.flat[2*i+1].hist(throws[catapult], bins = n_throws // 5, label = 'Observed')
-      axs.flat[2*i+1].plot(mu_vector, best_fit[catapult] * n_throws * 5, label = 'Expected')
+      n_bins = n_throws // 5
+      axs.flat[2*i+1].hist(throws[catapult], bins = n_bins, label = 'Observed')
+      bin_width = (max(throws[catapult]) - min(throws[catapult])) / n_bins
+      axs.flat[2*i+1].plot(mu_vector, best_fit[catapult] * n_throws * bin_width, label = 'Expected')
       axs.flat[2*i+1].set_xlim(left = true_mu - zoom_width, right = true_mu + zoom_width)
       axs.flat[2*i+1].set(xlabel=r'$\mu$', ylabel=r'Throws', title = 'Catapult {} best fit posterior'.format(catapult))
       
