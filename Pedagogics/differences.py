@@ -23,6 +23,7 @@ import itertools
 import numpy as np
 import numpy.random as rd
 import scipy.stats as st
+import scipy.special as sp
 import matplotlib.pyplot as plt
 
 
@@ -220,6 +221,11 @@ def compare_coins(P_A, P_B, n_tosses, plot_folder = 'differences_plots', plot_ma
    probability distribution over the differences in P. This then gives us
    the probability of one coin being better than the other.
    """
+   def logB(alpha, beta):
+      """
+      The logarithm of the normalisation factor to the binomial likelihood
+      """
+      return sp.loggamma(alpha) + sp.loggamma(beta) - sp.loggamma(alpha + beta)
 
    if P_A > 1 or P_B > 1:
       print('Probabilities cannot be larger than one!')
@@ -237,12 +243,12 @@ def compare_coins(P_A, P_B, n_tosses, plot_folder = 'differences_plots', plot_ma
    coin_pairs = list(itertools.combinations(coins, 2))
 
    # Generate tosses for each coin
-   tosses = {}
+   heads = {}
    for coin in coins:
-      tosses[coin] = np.sum(rd.uniform(0., 1., size = n_tosses) < P[coin])
+      heads[coin] = np.sum(rd.uniform(0., 1., size = n_tosses) < P[coin])
       
    # Make a vector of the possible values of P
-   n_steps = 1000
+   n_steps = 10
    delta_steps = 2 * n_steps - 1
    P_vector = np.linspace(0., 1., num = n_steps)
    
@@ -251,5 +257,18 @@ def compare_coins(P_A, P_B, n_tosses, plot_folder = 'differences_plots', plot_ma
    log_prior = {}
    for coin in coins:
       log_prior[coin] = np.ones(n_steps)
-   
-   return tosses
+      
+   # The log-likelihood P(successes|P)
+   log_L = {}
+   for coin in coins:
+      tails = n_tosses - heads[coin]
+      log_L[coin] = heads[coin] * np.log(P_vector) + tails * np.log(1 - P_vector) - logB(heads[coin] + 1, tails + 1)
+      if heads[coin] > 0:
+         log_L[coin][0] = - np.inf
+      else:
+         log_L[coin][0] = - logB(heads[coin] + 1, tails + 1)
+      if tails > 0:
+         log_L[coin][-1] = - np.inf
+      else:
+         log_L[coin][-1] = - logB(heads[coin] + 1, tails + 1)
+   return log_L
