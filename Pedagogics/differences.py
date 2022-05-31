@@ -135,10 +135,15 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
    plt.savefig('./{}/{}_mu_posteriors.png'.format(plot_folder, plot_main_name))
    plt.close()
    
-   # The posterior over the differences in mu
+   # The posterior over the differences in mu, and the probability that
+   # the difference is below/above zero
    delta_mu = {}
+   P_dle0 = {}
+   P_dge0 = {}
    for catapult_pair in catapult_pairs:
       delta_mu[catapult_pair] = np.convolve(P_mu[catapult_pair[0]], np.flip(P_mu[catapult_pair[1]]))
+      P_dle0[catapult_pair] = np.sum(delta_mu[catapult_pair][:n_steps]) / np.sum(delta_mu[catapult_pair])
+      P_dge0[catapult_pair] = np.sum(delta_mu[catapult_pair][n_steps:]) / np.sum(delta_mu[catapult_pair])
 
    fig, axs = plt.subplots(len(catapult_pairs), 2)
    for i in range(len(catapult_pairs)):
