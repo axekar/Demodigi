@@ -143,22 +143,24 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
    for catapult_pair in catapult_pairs:
       delta_mu[catapult_pair] = np.convolve(P_mu[catapult_pair[0]], np.flip(P_mu[catapult_pair[1]]))
       P_dle0[catapult_pair] = np.sum(delta_mu[catapult_pair][:n_steps]) / np.sum(delta_mu[catapult_pair])
-      P_dge0[catapult_pair] = np.sum(delta_mu[catapult_pair][n_steps:]) / np.sum(delta_mu[catapult_pair])
+      P_dge0[catapult_pair] = np.sum(delta_mu[catapult_pair][n_steps-1:]) / np.sum(delta_mu[catapult_pair])
 
    fig, axs = plt.subplots(len(catapult_pairs), 2)
    for i in range(len(catapult_pairs)):
       catapult_pair = catapult_pairs[i]
       true_delta = mu[catapult_pair[0]] - mu[catapult_pair[1]]
       zoom_width = 2 * max(sigma[catapult_pair[0]], sigma[catapult_pair[1]])
+      normalised_delta_mu = delta_mu[catapult_pair] / np.max(delta_mu[catapult_pair])
       
-      axs.flat[2*i].plot(delta_vector, delta_mu[catapult_pair] / np.max(delta_mu[catapult_pair]))
+      axs.flat[2*i].plot(delta_vector, normalised_delta_mu)
       axs.flat[2*i].vlines(true_delta, 0, 1)
       axs.flat[2*i].set(xlabel=r'$\Delta \mu$', ylabel=r'Unnorm. $P \left( \Delta \mu \right)$', title = 'Catapults {} & {} (full range)'.format(catapult_pair[0], catapult_pair[1]))
       
-      axs.flat[2*i+1].plot(delta_vector, delta_mu[catapult_pair] / np.max(delta_mu[catapult_pair]))
+      axs.flat[2*i+1].plot(delta_vector, normalised_delta_mu)
+      axs.flat[2*i+1].fill_between(delta_vector[n_steps-1:], normalised_delta_mu[n_steps-1:])
       axs.flat[2*i+1].vlines(true_delta, 0, 1)
       axs.flat[2*i+1].set_xlim(left = true_delta - zoom_width, right = true_delta + zoom_width)
-      axs.flat[2*i+1].set(xlabel=r'$\Delta \mu$', ylabel=r'Unnorm. $P \left( \Delta \mu \right)$', title = 'Catapults {} & {} (zoomed in)'.format(catapult_pair[0], catapult_pair[1]))
+      axs.flat[2*i+1].set(xlabel=r'$\Delta \mu$', ylabel=r'Unnorm. $P \left( \Delta \mu \right)$', title = r'$P\left( \Delta \mu > 0 \right) = {:.2f}$'.format(P_dge0[catapult_pair]))
    fig.tight_layout()
    plt.savefig('./{}/{}_delta_posteriors.png'.format(plot_folder, plot_main_name))
    plt.close()
