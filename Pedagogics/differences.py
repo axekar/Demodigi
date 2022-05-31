@@ -23,7 +23,7 @@ import numpy.random as rd
 import matplotlib.pyplot as plt
 
 
-def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws):
+def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'differences_plots', plot_main_name = 'Catapults'):
    """
    Say that we have two catapults A and B, and we want to know which one
    is better. We have decided that for our purposes the 'better' catapult
@@ -93,5 +93,5 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws):
       axs[i].pcolormesh(mu_grid, sigma_grid, P[catapult])
       axs.flat[i].set(xlabel=r'$\mu$', ylabel=r'$\sigma$', title = 'Catapult {}'.format(catapult))
 
-   plt.show()
+   plt.savefig('./{}/{}_posteriors.png'.format(plot_folder, plot_main_name))
    return
