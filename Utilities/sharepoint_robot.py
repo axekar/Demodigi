@@ -230,7 +230,34 @@ class SharepointConnection(object):
       """
       print('Began work at {}'.format(datetime.now().strftime('%X')))
       self.go_to_start()
+      
+      # Give user permission to the start page
+      settings_menu = self.driver.find_element(By.CSS_SELECTOR, "[aria-label='Open the Settings menu to access personal and app settings']")
+      settings_menu.click()
+      sleep(2)
+      settings_button = self.driver.find_element(By.CSS_SELECTOR, "[aria-label='Site permissions']")
+      settings_button.click()
       sleep(5)
+      share_button = self.driver.find_element(By.XPATH, "//*[text()='Share site']")
+      share_button.click()
+      sleep(2)
+      add_field = self.driver.find_element(By.CSS_SELECTOR, "[aria-label='Add members to the site']")
+      add_field.click()
+      if not real_data:
+         address = 'alvin.gavel@arbetsförmedlingen.se'
+      else:
+         address = participant.email
+      add_field.send_keys(address)
+      sleep(2)
+      add_field.send_keys(Keys.RETURN)
+      sleep(2)
+      add_button = self.driver.find_element(By.XPATH, "//*[text()='Add']")
+      add_button.click()
+      sleep(2)
+
+      # Create a new list
+      self.go_to_start()
+      sleep(20)
       new_button = self.driver.find_element(By.NAME, "New")
       new_button.click()
       sleep(2)
@@ -297,8 +324,8 @@ class SharepointConnection(object):
       sleep(2)
       
       # Set read privileges
-      create_button = self.driver.find_element(By.CSS_SELECTOR, "[aria-label='Open the Settings menu to access personal and app settings']")
-      create_button.click()
+      settings_menu = self.driver.find_element(By.CSS_SELECTOR, "[aria-label='Open the Settings menu to access personal and app settings']")
+      settings_menu.click()
       sleep(2)
       settings_button = self.driver.find_element(By.CSS_SELECTOR, "[aria-label='List settings']")
       settings_button.click()
