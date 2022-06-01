@@ -290,7 +290,11 @@ def catapult_long_run(mu_A, mu_B, sigma_A, sigma_B, n_throws, n_trials, plotting
 
       axs.hist(P_dge0, bins = n_bins)
       axs.set(xlabel=r'$P \left( D > 0 \right)$', ylabel=r'Antal', title = r'$f\left( P \left( D > 0 \right) < 0.05 \right) = {:.2f}$, $f\left( P \left( D > 0 \right) > 0.95 \right) = {:.2f}$'.format(f_A_significantly_worse, f_A_significantly_better))
+      top = axs.get_ylim()[1]
+      axs.vlines(significance_threshold, 0, top, linestyles = 'dashed', color = 'black')
+      axs.vlines(1 - significance_threshold, 0, top, linestyles = 'dashed', color = 'black')
       axs.set_xlim(0, 1)
+      axs.set_ylim(0, top)
       fig.set_size_inches(12, 4)
       fig.tight_layout()
       plt.savefig('./{}/{}_histogram.png'.format(plot_folder, plot_main_name))
