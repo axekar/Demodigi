@@ -196,7 +196,7 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plotting = True, p
             axs.flat[i].vlines(true_mu, 0, max_P_mu * 1.1, linestyles = linestyles)
          axs.flat[i].set_xlim(left = mu_plot_min, right = mu_plot_max)
          axs.flat[i].set_ylim(bottom = 0, top = max_P_mu * 1.1)
-         axs.flat[i].set(xlabel=r'$\mu$', ylabel=r'$P\left( \mu \right)$', title = r'$P\left( \mu | kast \right)$ ({})'.format(catapult))
+         axs.flat[i].set(xlabel=r'$\mu$', ylabel=r'$P\left( \mu \right)$', title = r'$P\left( \mu | kast \right)$ (katapult {})'.format(catapult))
       fig.set_size_inches(12, 4)
       fig.tight_layout()
       plt.savefig('./{}/{}_mu_posteriors.png'.format(plot_folder, plot_main_name))
@@ -213,7 +213,7 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plotting = True, p
          axs.flat[i].plot(mu_vector, best_fit[catapult] * n_throws * bin_width, label = r'Förväntat')
          axs.flat[i].set_xlim(left = mu_plot_min, right = mu_plot_max)
          axs.flat[i].set_ylim(bottom = 0, top = histogram_y_max*1.1)
-         axs.flat[i].set(xlabel=r'Kastlängd', ylabel=r'Antal kast', title = r'Bästa anpassning ({})'.format(catapult))
+         axs.flat[i].set(xlabel=r'Kastlängd', ylabel=r'Antal kast', title = r'Bästa anpassning (katapult {})'.format(catapult))
          axs.flat[i].legend()
       fig.set_size_inches(12, 4)
       fig.tight_layout()
@@ -281,20 +281,15 @@ def catapult_long_run(mu_A, mu_B, sigma_A, sigma_B, n_throws, n_trials, plotting
       P_dge0.append(compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plotting = False)[('A', 'B')])
    P_dge0 = np.asarray(P_dge0)
    
-   # This is a completely arbitrary convention, but it's what people are
-   # used to
-   significance_threshold = 0.05
-   f_A_significantly_worse = np.sum(P_dge0 < significance_threshold) / n_trials
-   f_A_significantly_better = np.sum(P_dge0 > 1 - significance_threshold) / n_trials
+   f_A_probably_better = np.sum(P_dge0 > 0.5) / n_trials
    
    if plotting:
       fig, axs = plt.subplots()
 
       axs.hist(P_dge0, bins = n_bins)
-      axs.set(xlabel=r'$P \left( D > 0 \right)$', ylabel=r'Antal', title = r'$f\left( P \left( D > 0 \right) < 0.05 \right) = {:.2f}$, $f\left( P \left( D > 0 \right) > 0.95 \right) = {:.2f}$'.format(f_A_significantly_worse, f_A_significantly_better))
+      axs.set(xlabel=r'$P \left( D > 0 \right)$', ylabel=r'Antal', title = r'$f\left( P \left( D > 0 \right) > 0.5 \right) = {:.2f}$'.format(f_A_probably_better))
       top = axs.get_ylim()[1]
-      axs.vlines(significance_threshold, 0, top, linestyles = 'dashed', color = 'black')
-      axs.vlines(1 - significance_threshold, 0, top, linestyles = 'dashed', color = 'black')
+      axs.vlines(0.5, 0, top, linestyles = 'dashed', color = 'black')
       axs.set_xlim(0, 1)
       axs.set_ylim(0, top)
       fig.set_size_inches(12, 4)
