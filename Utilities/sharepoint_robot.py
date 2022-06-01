@@ -28,6 +28,11 @@ Running the module currently requires Chrome/Chromium, although it is
 probably trivial to modify it to use Firefox. By default the module
 assumes that the drivers are stored in a directory named "Drivers".
 
+NOTE: If you are on Windows, running this code with a script, and
+running the exact same instructions interactively in Ipython, is not
+guaranteed to give identical results. In some cases, using a script
+will cause a crash as letters with umlauts end up being garbled.
+
 Written by Alvin Gavel,
 https://github.com/Alvin-Gavel/Demodigi
 """
