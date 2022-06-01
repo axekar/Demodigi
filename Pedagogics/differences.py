@@ -27,7 +27,7 @@ import scipy.special as sp
 import matplotlib.pyplot as plt
 
 
-def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'differences_plots', plot_main_name = 'Catapults'):
+def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plotting = True, plot_folder = 'differences_plots', plot_main_name = 'Catapults'):
    """
    Say that we have two catapults A and B, and we want to know which one
    is better. We have decided that for our purposes the 'better' catapult
@@ -73,18 +73,19 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
       histogram_y_max = max(histogram_y_max, axs.flat[i].get_ylim()[1])
    plt.close()
 
-   fig, axs = plt.subplots(1, len(catapults))
-   for i in range(len(catapults)):
-      catapult = catapults[i]
-      zoom_width = 3 * sigma[catapult]
-      axs.flat[i].hist(throws[catapult], bins = n_bins, label = r'Observerat')
-      axs.flat[i].set(xlabel=r'Kaststräcka', ylabel=r'Antal', title = 'Katapult {}'.format(catapult))
-      axs.flat[i].set_xlim(left = mu[catapult] - zoom_width, right = mu[catapult] + zoom_width)
-      axs.flat[i].set_ylim(bottom = 0, top = histogram_y_max*1.1)
-   fig.set_size_inches(12, 4)
-   fig.tight_layout()
-   plt.savefig('./{}/{}_histogram.png'.format(plot_folder, plot_main_name))
-   plt.close()
+   if plotting:
+      fig, axs = plt.subplots(1, len(catapults))
+      for i in range(len(catapults)):
+         catapult = catapults[i]
+         zoom_width = 3 * sigma[catapult]
+         axs.flat[i].hist(throws[catapult], bins = n_bins, label = r'Observerat')
+         axs.flat[i].set(xlabel=r'Kaststräcka', ylabel=r'Antal', title = 'Katapult {}'.format(catapult))
+         axs.flat[i].set_xlim(left = mu[catapult] - zoom_width, right = mu[catapult] + zoom_width)
+         axs.flat[i].set_ylim(bottom = 0, top = histogram_y_max*1.1)
+      fig.set_size_inches(12, 4)
+      fig.tight_layout()
+      plt.savefig('./{}/{}_histogram.png'.format(plot_folder, plot_main_name))
+      plt.close()
 
    # Make a grid of the possible values of mu and sigma. This would be
    # computationally infeasible if we had many parameters, but with just
@@ -145,23 +146,23 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
    for catapult in catapults:
       log_P[catapult] = log_prior[catapult] + log_L[catapult]
       P[catapult] = np.exp(log_P[catapult])
-   
-   fig, axs = plt.subplots(1, len(catapults))
-   for i in range(len(catapults)):
-      catapult = catapults[i]
-      axs.flat[i].pcolormesh(mu_grid, sigma_grid, P[catapult], shading = 'nearest')
-      for catapult_2 in catapults:
-         if catapult_2 == catapult:
-            c = 'white'
-         else:
-            c = 'grey'
-         axs.flat[i].scatter(mu[catapult_2], sigma[catapult_2], c = c, edgecolors = 'black')
-      axs.flat[i].set_xlim(left = mu_plot_min, right = mu_plot_max)
-      axs.flat[i].set(xlabel=r'$\mu$', ylabel=r'$\sigma$', title = 'Katapult {}'.format(catapult))     
-   fig.set_size_inches(12, 4)
-   fig.tight_layout()
-   plt.savefig('./{}/{}_full_posteriors.png'.format(plot_folder, plot_main_name))
-   plt.close()
+   if plotting:
+      fig, axs = plt.subplots(1, len(catapults))
+      for i in range(len(catapults)):
+         catapult = catapults[i]
+         axs.flat[i].pcolormesh(mu_grid, sigma_grid, P[catapult], shading = 'nearest')
+         for catapult_2 in catapults:
+            if catapult_2 == catapult:
+               c = 'white'
+            else:
+               c = 'grey'
+            axs.flat[i].scatter(mu[catapult_2], sigma[catapult_2], c = c, edgecolors = 'black')
+         axs.flat[i].set_xlim(left = mu_plot_min, right = mu_plot_max)
+         axs.flat[i].set(xlabel=r'$\mu$', ylabel=r'$\sigma$', title = 'Katapult {}'.format(catapult))     
+      fig.set_size_inches(12, 4)
+      fig.tight_layout()
+      plt.savefig('./{}/{}_full_posteriors.png'.format(plot_folder, plot_main_name))
+      plt.close()
 
    # The flattened posteriors over mu and sigma
    P_mu = {}
@@ -178,42 +179,44 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
       max_index = np.argmax(P[catapult])
       best_fit[catapult] = st.norm.pdf(mu_vector, loc = mu_grid.flatten()[max_index], scale = sigma_grid.flatten()[max_index])
 
-   fig, axs = plt.subplots(1, len(catapults))
-   for i in range(len(catapults)):
-      catapult = catapults[i]
+   if plotting:
+      fig, axs = plt.subplots(1, len(catapults))
+      for i in range(len(catapults)):
+         catapult = catapults[i]
+   
+         axs.flat[i].plot(mu_vector, P_mu[catapult])
+         for catapult_2 in catapults:
+            true_mu = mu[catapult_2]
+            if catapult_2 == catapult:
+               linestyles = 'solid'
+            else:
+               linestyles = 'dashed'
+            axs.flat[i].vlines(true_mu, 0, max_P_mu * 1.1, linestyles = linestyles)
+         axs.flat[i].set_xlim(left = mu_plot_min, right = mu_plot_max)
+         axs.flat[i].set_ylim(bottom = 0, top = max_P_mu * 1.1)
+         axs.flat[i].set(xlabel=r'$\mu$', ylabel=r'$P\left( \mu \right)$', title = r'$P\left( \mu | kast \right)$ ({})'.format(catapult))
+      fig.set_size_inches(12, 4)
+      fig.tight_layout()
+      plt.savefig('./{}/{}_mu_posteriors.png'.format(plot_folder, plot_main_name))
+      plt.close()
 
-      axs.flat[i].plot(mu_vector, P_mu[catapult])
-      for catapult_2 in catapults:
-         true_mu = mu[catapult_2]
-         if catapult_2 == catapult:
-            linestyles = 'solid'
-         else:
-            linestyles = 'dashed'
-         axs.flat[i].vlines(true_mu, 0, max_P_mu * 1.1, linestyles = linestyles)
-      axs.flat[i].set_xlim(left = mu_plot_min, right = mu_plot_max)
-      axs.flat[i].set_ylim(bottom = 0, top = max_P_mu * 1.1)
-      axs.flat[i].set(xlabel=r'$\mu$', ylabel=r'$P\left( \mu \right)$', title = r'$P\left( \mu | kast \right)$ ({})'.format(catapult))
-   fig.set_size_inches(12, 4)
-   fig.tight_layout()
-   plt.savefig('./{}/{}_mu_posteriors.png'.format(plot_folder, plot_main_name))
-   plt.close()
-
-   fig, axs = plt.subplots(1, len(catapults))
-   for i in range(len(catapults)):
-      catapult = catapults[i]
-      true_mu = mu[catapult]
+   if plotting:
+      fig, axs = plt.subplots(1, len(catapults))
+      for i in range(len(catapults)):
+         catapult = catapults[i]
+         true_mu = mu[catapult]
       
-      axs.flat[i].hist(throws[catapult], bins = n_bins, label = r'Observerat')
-      bin_width = (max(throws[catapult]) - min(throws[catapult])) / n_bins
-      axs.flat[i].plot(mu_vector, best_fit[catapult] * n_throws * bin_width, label = r'Förväntat')
-      axs.flat[i].set_xlim(left = mu_plot_min, right = mu_plot_max)
-      axs.flat[i].set_ylim(bottom = 0, top = histogram_y_max*1.1)
-      axs.flat[i].set(xlabel=r'Kastlängd', ylabel=r'Antal kast', title = 'Bästa anpassning ({})'.format(catapult))
-      axs.flat[i].legend()
-   fig.set_size_inches(12, 4)
-   fig.tight_layout()
-   plt.savefig('./{}/{}_best_fit.png'.format(plot_folder, plot_main_name))
-   plt.close()
+         axs.flat[i].hist(throws[catapult], bins = n_bins, label = r'Observerat')
+         bin_width = (max(throws[catapult]) - min(throws[catapult])) / n_bins
+         axs.flat[i].plot(mu_vector, best_fit[catapult] * n_throws * bin_width, label = r'Förväntat')
+         axs.flat[i].set_xlim(left = mu_plot_min, right = mu_plot_max)
+         axs.flat[i].set_ylim(bottom = 0, top = histogram_y_max*1.1)
+         axs.flat[i].set(xlabel=r'Kastlängd', ylabel=r'Antal kast', title = 'Bästa anpassning ({})'.format(catapult))
+         axs.flat[i].legend()
+      fig.set_size_inches(12, 4)
+      fig.tight_layout()
+      plt.savefig('./{}/{}_best_fit.png'.format(plot_folder, plot_main_name))
+      plt.close()
    
    # The posterior over the differences in mu, and the probability that
    # the difference is below/above zero
@@ -229,38 +232,47 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
       P_dle0[catapult_pair] = np.sum(delta_mu[catapult_pair][:n_steps] * delta_step_width)
       P_dge0[catapult_pair] = np.sum(delta_mu[catapult_pair][n_steps-1:] * delta_step_width)
 
-   fig, axs = plt.subplots(len(catapult_pairs), 2)
-   for i in range(len(catapult_pairs)):
-      catapult_pair = catapult_pairs[i]
-      true_delta = mu[catapult_pair[0]] - mu[catapult_pair[1]]
-      index_true_delta = np.searchsorted(delta_vector, true_delta, side='left')
-      zoom_width = 2 * max(sigma[catapult_pair[0]], sigma[catapult_pair[1]])
+   if plotting:
+      fig, axs = plt.subplots(len(catapult_pairs), 2)
+      for i in range(len(catapult_pairs)):
+         catapult_pair = catapult_pairs[i]
+         true_delta = mu[catapult_pair[0]] - mu[catapult_pair[1]]
+         index_true_delta = np.searchsorted(delta_vector, true_delta, side='left')
+         zoom_width = 2 * max(sigma[catapult_pair[0]], sigma[catapult_pair[1]])
       
-      axs.flat[2*i].plot(delta_vector, delta_mu[catapult_pair])
-      axs.flat[2*i].fill_between(delta_vector[n_steps-1:], delta_mu[catapult_pair][n_steps-1:])
-      if delta_vector[index_true_delta] > 0:
-         axs.flat[2*i].vlines(true_delta, 0, delta_mu[catapult_pair][index_true_delta], linestyles = 'dashed', colors = 'white')
-      else:
-         axs.flat[2*i].vlines(true_delta, 0, delta_mu[catapult_pair][index_true_delta], linestyles = 'dashed')
-      axs.flat[2*i].vlines(true_delta, delta_mu[catapult_pair][index_true_delta], max_delta_mu * 1.1, linestyles = 'dashed')
-      axs.flat[2*i].set_xlim(left = true_delta - zoom_width, right = true_delta + zoom_width)
-      axs.flat[2*i].set_ylim(bottom = 0, top = max_delta_mu * 1.1)
-      axs.flat[2*i].set(xlabel=r'$D$', ylabel=r'$d \left( D \right)$', title = r'$P\left( D > 0 \right) = {:.2f}$'.format(P_dge0[catapult_pair]))
+         axs.flat[2*i].plot(delta_vector, delta_mu[catapult_pair])
+         axs.flat[2*i].fill_between(delta_vector[n_steps-1:], delta_mu[catapult_pair][n_steps-1:])
+         if delta_vector[index_true_delta] > 0:
+            axs.flat[2*i].vlines(true_delta, 0, delta_mu[catapult_pair][index_true_delta], linestyles = 'dashed', colors = 'white')
+         else:
+            axs.flat[2*i].vlines(true_delta, 0, delta_mu[catapult_pair][index_true_delta], linestyles = 'dashed')
+         axs.flat[2*i].vlines(true_delta, delta_mu[catapult_pair][index_true_delta], max_delta_mu * 1.1, linestyles = 'dashed')
+         axs.flat[2*i].set_xlim(left = true_delta - zoom_width, right = true_delta + zoom_width)
+         axs.flat[2*i].set_ylim(bottom = 0, top = max_delta_mu * 1.1)
+         axs.flat[2*i].set(xlabel=r'$D$', ylabel=r'$d \left( D \right)$', title = r'$P\left( D > 0 \right) = {:.2f}$'.format(P_dge0[catapult_pair]))
 
-      axs.flat[2*i+1].plot(delta_vector, delta_mu[catapult_pair])
-      axs.flat[2*i+1].fill_between(delta_vector[:n_steps], delta_mu[catapult_pair][:n_steps])
-      if delta_vector[index_true_delta] < 0:
-         axs.flat[2*i+1].vlines(true_delta, 0, delta_mu[catapult_pair][index_true_delta], linestyles = 'dashed', colors = 'white')
-      else:
-         axs.flat[2*i+1].vlines(true_delta, 0, delta_mu[catapult_pair][index_true_delta], linestyles = 'dashed')
-      axs.flat[2*i+1].vlines(true_delta, delta_mu[catapult_pair][index_true_delta], max_delta_mu * 1.1, linestyles = 'dashed')
-      axs.flat[2*i+1].set_xlim(left = true_delta - zoom_width, right = true_delta + zoom_width)
-      axs.flat[2*i+1].set_ylim(bottom = 0, top = max_delta_mu * 1.1)
-      axs.flat[2*i+1].set(xlabel=r'$D$', ylabel=r'$d \left( D \right)$', title = r'$P\left( D < 0 \right) = {:.2f}$'.format(P_dle0[catapult_pair]))
-   fig.set_size_inches(12, 4)
-   fig.tight_layout()
-   plt.savefig('./{}/{}_delta_posteriors.png'.format(plot_folder, plot_main_name))
-   plt.close()
+         axs.flat[2*i+1].plot(delta_vector, delta_mu[catapult_pair])
+         axs.flat[2*i+1].fill_between(delta_vector[:n_steps], delta_mu[catapult_pair][:n_steps])
+         if delta_vector[index_true_delta] < 0:
+            axs.flat[2*i+1].vlines(true_delta, 0, delta_mu[catapult_pair][index_true_delta], linestyles = 'dashed', colors = 'white')
+         else:
+            axs.flat[2*i+1].vlines(true_delta, 0, delta_mu[catapult_pair][index_true_delta], linestyles = 'dashed')
+         axs.flat[2*i+1].vlines(true_delta, delta_mu[catapult_pair][index_true_delta], max_delta_mu * 1.1, linestyles = 'dashed')
+         axs.flat[2*i+1].set_xlim(left = true_delta - zoom_width, right = true_delta + zoom_width)
+         axs.flat[2*i+1].set_ylim(bottom = 0, top = max_delta_mu * 1.1)
+         axs.flat[2*i+1].set(xlabel=r'$D$', ylabel=r'$d \left( D \right)$', title = r'$P\left( D < 0 \right) = {:.2f}$'.format(P_dle0[catapult_pair]))
+      fig.set_size_inches(12, 4)
+      fig.tight_layout()
+      plt.savefig('./{}/{}_delta_posteriors.png'.format(plot_folder, plot_main_name))
+      plt.close()
+   return P_dge0
+   
+def repeated_catapult_comparison(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'differences_plots', plot_main_name = 'Catapult_comparison'):
+   """
+   This will run the catapult_comparison function repeatedly, testing the
+   frequency behaviour.
+   """
+   pass
    return
    
 def compare_coins(P_A, P_B, n_tosses, plot_folder = 'differences_plots', plot_main_name = 'Coins'):
