@@ -215,7 +215,7 @@ class SharepointConnection(object):
       self.go_to_start()
       try:
          sleep(5)
-         list_button = self.driver.find_element(By.XPATH, "//*[text()='Konto-info för {}']".format(participant.name))
+         list_button = self.driver.find_element(By.XPATH, "//*[text()='{}']".format(participant.name))
          list_button.click()
          sleep(5)
          self.driver.find_element(By.XPATH, "//*[text()='{}']".format(participant.username))
