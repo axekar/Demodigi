@@ -233,16 +233,27 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
    for i in range(len(catapult_pairs)):
       catapult_pair = catapult_pairs[i]
       true_delta = mu[catapult_pair[0]] - mu[catapult_pair[1]]
+      index_true_delta = np.searchsorted(delta_vector, true_delta, side='left')
       zoom_width = 2 * max(sigma[catapult_pair[0]], sigma[catapult_pair[1]])
       
       axs.flat[2*i].plot(delta_vector, delta_mu[catapult_pair])
       axs.flat[2*i].fill_between(delta_vector[n_steps-1:], delta_mu[catapult_pair][n_steps-1:])
+      if delta_vector[index_true_delta] > 0:
+         axs.flat[2*i].vlines(true_delta, 0, delta_mu[catapult_pair][index_true_delta], linestyles = 'dashed', colors = 'white')
+      else:
+         axs.flat[2*i].vlines(true_delta, 0, delta_mu[catapult_pair][index_true_delta], linestyles = 'dashed')
+      axs.flat[2*i].vlines(true_delta, delta_mu[catapult_pair][index_true_delta], max_delta_mu * 1.1, linestyles = 'dashed')
       axs.flat[2*i].set_xlim(left = true_delta - zoom_width, right = true_delta + zoom_width)
       axs.flat[2*i].set_ylim(bottom = 0, top = max_delta_mu * 1.1)
       axs.flat[2*i].set(xlabel=r'$\Delta \mu$', ylabel=r'Onorm. $P \left( \Delta \mu \right)$', title = r'$P\left( \Delta \mu > 0 \right) = {:.2f}$'.format(P_dge0[catapult_pair]))
 
       axs.flat[2*i+1].plot(delta_vector, delta_mu[catapult_pair])
       axs.flat[2*i+1].fill_between(delta_vector[:n_steps], delta_mu[catapult_pair][:n_steps])
+      if delta_vector[index_true_delta] < 0:
+         axs.flat[2*i+1].vlines(true_delta, 0, delta_mu[catapult_pair][index_true_delta], linestyles = 'dashed', colors = 'white')
+      else:
+         axs.flat[2*i+1].vlines(true_delta, 0, delta_mu[catapult_pair][index_true_delta], linestyles = 'dashed')
+      axs.flat[2*i+1].vlines(true_delta, delta_mu[catapult_pair][index_true_delta], max_delta_mu * 1.1, linestyles = 'dashed')
       axs.flat[2*i+1].set_xlim(left = true_delta - zoom_width, right = true_delta + zoom_width)
       axs.flat[2*i+1].set_ylim(bottom = 0, top = max_delta_mu * 1.1)
       axs.flat[2*i+1].set(xlabel=r'$\Delta \mu$', ylabel=r'Onorm. $P \left( \Delta \mu \right)$', title = r'$P\left( \Delta \mu < 0 \right) = {:.2f}$'.format(P_dle0[catapult_pair]))
