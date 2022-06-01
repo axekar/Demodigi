@@ -79,7 +79,7 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plotting = True, p
          catapult = catapults[i]
          zoom_width = 3 * sigma[catapult]
          axs.flat[i].hist(throws[catapult], bins = n_bins, label = r'Observerat')
-         axs.flat[i].set(xlabel=r'Kaststräcka', ylabel=r'Antal', title = 'Katapult {}'.format(catapult))
+         axs.flat[i].set(xlabel=r'Kaststräcka', ylabel=r'Antal', title = r'Katapult {}'.format(catapult))
          axs.flat[i].set_xlim(left = mu[catapult] - zoom_width, right = mu[catapult] + zoom_width)
          axs.flat[i].set_ylim(bottom = 0, top = histogram_y_max*1.1)
       fig.set_size_inches(12, 4)
@@ -158,7 +158,7 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plotting = True, p
                c = 'grey'
             axs.flat[i].scatter(mu[catapult_2], sigma[catapult_2], c = c, edgecolors = 'black')
          axs.flat[i].set_xlim(left = mu_plot_min, right = mu_plot_max)
-         axs.flat[i].set(xlabel=r'$\mu$', ylabel=r'$\sigma$', title = 'Katapult {}'.format(catapult))     
+         axs.flat[i].set(xlabel=r'$\mu$', ylabel=r'$\sigma$', title = r'Katapult {}'.format(catapult))     
       fig.set_size_inches(12, 4)
       fig.tight_layout()
       plt.savefig('./{}/{}_full_posteriors.png'.format(plot_folder, plot_main_name))
@@ -211,7 +211,7 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plotting = True, p
          axs.flat[i].plot(mu_vector, best_fit[catapult] * n_throws * bin_width, label = r'Förväntat')
          axs.flat[i].set_xlim(left = mu_plot_min, right = mu_plot_max)
          axs.flat[i].set_ylim(bottom = 0, top = histogram_y_max*1.1)
-         axs.flat[i].set(xlabel=r'Kastlängd', ylabel=r'Antal kast', title = 'Bästa anpassning ({})'.format(catapult))
+         axs.flat[i].set(xlabel=r'Kastlängd', ylabel=r'Antal kast', title = r'Bästa anpassning ({})'.format(catapult))
          axs.flat[i].legend()
       fig.set_size_inches(12, 4)
       fig.tight_layout()
@@ -267,13 +267,35 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plotting = True, p
       plt.close()
    return P_dge0
    
-def repeated_catapult_comparison(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'differences_plots', plot_main_name = 'Catapult_comparison'):
+def catapult_long_run(mu_A, mu_B, sigma_A, sigma_B, n_throws, n_trials, plotting = True, plot_folder = 'differences_plots', plot_main_name = 'Catapult_comparison'):
    """
    This will run the catapult_comparison function repeatedly, testing the
-   frequency behaviour.
+   long-run frequency properties.
    """
-   pass
-   return
+   n_bins = n_trials // 5
+
+   P_dge0 = []
+   for i in range(n_trials):
+      P_dge0.append(compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plotting = False)[('A', 'B')])
+   P_dge0 = np.asarray(P_dge0)
+   
+   # This is a completely arbitrary convention, but it's what people are
+   # used to
+   significance_threshold = 0.05
+   f_A_significantly_worse = np.sum(P_dge0 < significance_threshold) / n_trials
+   f_A_significantly_better = np.sum(P_dge0 > 1 - significance_threshold) / n_trials
+   
+   if plotting:
+      fig, axs = plt.subplots()
+
+      axs.hist(P_dge0, bins = n_bins)
+      axs.set(xlabel=r'$P \left( D > 0 \right)$', ylabel=r'Antal', title = r'$f\left( P \left( D > 0 \right) < 0.05 \right) = {:.2f}$, $f\left( P \left( D > 0 \right) > 0.95 \right) = {:.2f}$'.format(f_A_significantly_worse, f_A_significantly_better))
+      axs.set_xlim(0, 1)
+      fig.set_size_inches(12, 4)
+      fig.tight_layout()
+      plt.savefig('./{}/{}_histogram.png'.format(plot_folder, plot_main_name))
+      plt.close()
+   return P_dge0
    
 def compare_coins(P_A, P_B, n_tosses, plot_folder = 'differences_plots', plot_main_name = 'Coins'):
    """
