@@ -354,7 +354,7 @@ def compare_coins(P_A, P_B, n_tosses, plotting = True, plot_folder = 'difference
    log_L = {}
    for coin in coins:
       tails = n_tosses - heads[coin]
-      with np.errstate(divide = 'ignore'):
+      with np.errstate(all = 'ignore'):
          log_L[coin] = heads[coin] * np.log(P_vector) + tails * np.log(1 - P_vector) - logB(heads[coin] + 1, tails + 1)
          if heads[coin] > 0:
             log_L[coin][0] = - np.inf
@@ -460,7 +460,6 @@ def coin_long_run(P_A, P_B, n_tosses, n_trials, plotting = True, plot_folder = '
    
    if plotting:
       fig, axs = plt.subplots()
-
       axs.hist(P_dge0, bins = n_bins)
       axs.set(xlabel=r'$P \left( D > 0 \right)$', ylabel=r'Antal', title = r'$f\left( P \left( D > 0 \right) > 0.5 \right) = {:.2f}$'.format(f_A_probably_better))
       top = axs.get_ylim()[1]
@@ -472,4 +471,3 @@ def coin_long_run(P_A, P_B, n_tosses, n_trials, plotting = True, plot_folder = '
       plt.savefig('./{}/{}_histogram.png'.format(plot_folder, plot_main_name))
       plt.close()
    return P_dge0
-   
