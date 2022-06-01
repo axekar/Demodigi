@@ -101,7 +101,17 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
    mu_grid, sigma_grid = np.meshgrid(mu_vector, sigma_vector)
    delta_vector = np.linspace(-max_mu, max_mu, num=delta_steps)
 
-   # To make the plots easy to compare, we will plot mu over the range
+   # To make the plots easy to compare, we will plot mu over the range of
+   # the true mu:s plus-minus three times the biggest sigmas
+   max_true_mu = -np.inf
+   min_true_mu = np.inf
+   max_true_sigma = 0
+   for catapult in catapults:
+      max_true_mu = max(max_true_mu, mu[catapult])
+      min_true_mu = min(min_true_mu, mu[catapult])
+      max_true_sigma = max(max_true_sigma, sigma[catapult])
+   mu_plot_max = max_true_mu + 3 * max_true_sigma
+   mu_plot_min = min_true_mu - 3 * max_true_sigma
 
    # The log-prior P(mu, sigma). To stay consistent with a frequentist analysis,
    # we use a flat prior.
@@ -129,7 +139,8 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
    for i in range(len(catapults)):
       catapult = catapults[i]
       axs.flat[i].pcolormesh(mu_grid, sigma_grid, P[catapult], shading = 'nearest')
-      axs.flat[i].set(xlabel=r'$\mu$', ylabel=r'$\sigma$', title = 'Katapult {}'.format(catapult))
+      axs.flat[i].set_xlim(left = mu_plot_min, right = mu_plot_max)
+      axs.flat[i].set(xlabel=r'$\mu$', ylabel=r'$\sigma$', title = 'Katapult {}'.format(catapult))     
    fig.set_size_inches(12, 4)
    fig.tight_layout()
    plt.savefig('./{}/{}_full_posteriors.png'.format(plot_folder, plot_main_name))
@@ -148,12 +159,10 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
    fig, axs = plt.subplots(1, len(catapults))
    for i in range(len(catapults)):
       catapult = catapults[i]
-      true_mu = mu[catapult]
-      zoom_width = 3 * sigma[catapult]
-      
+      true_mu = mu[catapult]      
       axs.flat[i].plot(mu_vector, P_mu[catapult] / np.max(P_mu[catapult]))
       axs.flat[i].vlines(true_mu, 0, 1)
-      axs.flat[i].set_xlim(left = true_mu - zoom_width, right = true_mu + zoom_width)
+      axs.flat[i].set_xlim(left = mu_plot_min, right = mu_plot_max)
       axs.flat[i].set(xlabel=r'$\mu$', ylabel=r'Onorm. $P\left( \mu \right)$', title = r'$P\left( \mu | kast \right)$ ({})'.format(catapult))
    fig.set_size_inches(12, 4)
    fig.tight_layout()
@@ -164,12 +173,11 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
    for i in range(len(catapults)):
       catapult = catapults[i]
       true_mu = mu[catapult]
-      zoom_width = 3 * sigma[catapult]
       
       axs.flat[i].hist(throws[catapult], bins = n_bins, label = r'Observerat')
       bin_width = (max(throws[catapult]) - min(throws[catapult])) / n_bins
       axs.flat[i].plot(mu_vector, best_fit[catapult] * n_throws * bin_width, label = r'Förväntat')
-      axs.flat[i].set_xlim(left = true_mu - zoom_width, right = true_mu + zoom_width)
+      axs.flat[i].set_xlim(left = mu_plot_min, right = mu_plot_max)
       axs.flat[i].set(xlabel=r'Kastlängd', ylabel=r'Antal kast', title = 'Bästa anpassning ({})'.format(catapult))
       axs.flat[i].legend()
    fig.set_size_inches(12, 4)
