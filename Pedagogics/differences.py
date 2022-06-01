@@ -58,8 +58,9 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plotting = True, p
    
    catapult_pairs = list(itertools.combinations(catapults, 2))
 
-   # Magic number used when plotting histograms
-   n_bins = n_throws // 5
+   # I *think* scaling with the sqrt of the total number of counts makes
+   # for the best histogram
+   n_bins = int(np.floor(np.sqrt(n_throws)))
 
    # Generate throws for each catapult   
    throws = {}
@@ -274,7 +275,7 @@ def catapult_long_run(mu_A, mu_B, sigma_A, sigma_B, n_throws, n_trials, plotting
    This will run the catapult_comparison function repeatedly, testing the
    long-run frequency properties.
    """
-   n_bins = n_trials // 5
+   n_bins = int(np.floor(np.sqrt(n_trials)))
 
    P_dge0 = []
    for i in range(n_trials):
