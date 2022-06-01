@@ -72,6 +72,7 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plotting = True, p
    fig, axs = plt.subplots(1, len(catapults))
    histogram_y_max = -np.inf
    for i in range(len(catapults)):   
+      catapult = catapults[i]
       axs.flat[i].hist(throws[catapult], bins = n_bins)
       histogram_y_max = max(histogram_y_max, axs.flat[i].get_ylim()[1])
    plt.close()
