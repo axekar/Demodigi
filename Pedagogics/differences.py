@@ -391,7 +391,7 @@ def compare_coins(P_A, P_B, n_tosses, plotting = True, plot_folder = 'difference
                linestyles = 'solid'
             else:
                linestyles = 'dashed'
-         axs.flat[i].vlines(true_P, 0, 1, linestyles = linestyles)
+            axs.flat[i].vlines(true_P, 0, pP_max * 1.1, linestyles = linestyles)
          axs.flat[i].set_xlim(left = 0, right = 1)
          axs.flat[i].set_ylim(bottom = 0, top = pP_max * 1.1)
          axs.flat[i].set(xlabel=r'$P$', ylabel=r'$P\left( P \right)$', title = r'$p(P|kast)$ (Mynt {})'.format(coin))
@@ -410,23 +410,24 @@ def compare_coins(P_A, P_B, n_tosses, plotting = True, plot_folder = 'difference
       P_dle0[coin_pair] = np.sum(delta_P[coin_pair][:n_steps]) / np.sum(delta_P[coin_pair])
       P_dge0[coin_pair] = np.sum(delta_P[coin_pair][n_steps-1:]) / np.sum(delta_P[coin_pair])
    
-   fig, axs = plt.subplots(len(coin_pairs), 2)
-   for i in range(len(coin_pairs)):
-      coin_pair = coin_pairs[i]
-      true_delta = P[coin_pair[0]] - P[coin_pair[1]]
-      normalised_delta_P = delta_P[coin_pair] / np.max(delta_P[coin_pair])
+   if plotting:
+      fig, axs = plt.subplots(len(coin_pairs), 2)
+      for i in range(len(coin_pairs)):
+         coin_pair = coin_pairs[i]
+         true_delta = P[coin_pair[0]] - P[coin_pair[1]]
+         normalised_delta_P = delta_P[coin_pair] / np.max(delta_P[coin_pair])
       
-      axs.flat[2*i].plot(delta_vector, normalised_delta_P)
-      axs.flat[2*i].fill_between(delta_vector[n_steps-1:], normalised_delta_P[n_steps-1:])
-      axs.flat[2*i].set_xlim(left = -1, right = 1)
-      axs.flat[2*i].set(xlabel=r'$\Delta P$', ylabel=r'$P \left( \Delta P \right)$', title = r'$P\left( \Delta P > 0 \right) = {:.2f}$'.format(P_dge0[coin_pair]))
+         axs.flat[2*i].plot(delta_vector, normalised_delta_P)
+         axs.flat[2*i].fill_between(delta_vector[n_steps-1:], normalised_delta_P[n_steps-1:])
+         axs.flat[2*i].set_xlim(left = -1, right = 1)
+         axs.flat[2*i].set(xlabel=r'$\Delta P$', ylabel=r'$P \left( \Delta P \right)$', title = r'$P\left( \Delta P > 0 \right) = {:.2f}$'.format(P_dge0[coin_pair]))
 
-      axs.flat[2*i+1].plot(delta_vector, normalised_delta_P)
-      axs.flat[2*i+1].fill_between(delta_vector[:n_steps], normalised_delta_P[:n_steps])
-      axs.flat[2*i+1].set_xlim(left = -1, right = 1)
-      axs.flat[2*i+1].set(xlabel=r'$\Delta P$', ylabel=r'$P \left( \Delta P \right)$', title = r'$P\left( \Delta P < 0 \right) = {:.2f}$'.format(P_dle0[coin_pair]))
-   fig.set_size_inches(12, 4)
-   fig.tight_layout()
-   plt.savefig('./{}/{}_delta_posteriors.png'.format(plot_folder, plot_main_name))
-   plt.close()
+         axs.flat[2*i+1].plot(delta_vector, normalised_delta_P)
+         axs.flat[2*i+1].fill_between(delta_vector[:n_steps], normalised_delta_P[:n_steps])
+         axs.flat[2*i+1].set_xlim(left = -1, right = 1)
+         axs.flat[2*i+1].set(xlabel=r'$\Delta P$', ylabel=r'$P \left( \Delta P \right)$', title = r'$P\left( \Delta P < 0 \right) = {:.2f}$'.format(P_dle0[coin_pair]))
+      fig.set_size_inches(12, 4)
+      fig.tight_layout()
+      plt.savefig('./{}/{}_delta_posteriors.png'.format(plot_folder, plot_main_name))
+      plt.close()
    return
