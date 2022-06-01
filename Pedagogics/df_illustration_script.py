@@ -34,4 +34,4 @@ df.coin_long_run(P_A, P_B, n_tosses, n_trials)
 # N.B.: This one takes a *long* time to run, and sometimes causes my
 #       computer to run out of memory
 if big_plot:
-   df.catapult_long_run(102, 98, 10, 10, 20, n_trials)
+   df.catapult_long_run(mu_A, mu_B, sigma, sigma, n_throws, n_trials)
