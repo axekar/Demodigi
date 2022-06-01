@@ -64,6 +64,15 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
    for catapult in catapults:
       throws[catapult] = sigma[catapult] * rd.randn(n_throws) + mu[catapult]
 
+   # Start by making dummy histograms to figure out where the maxima end
+   # up being
+   fig, axs = plt.subplots(1, len(catapults))
+   histogram_y_max = -np.inf
+   for i in range(len(catapults)):   
+      axs.flat[i].hist(throws[catapult], bins = n_bins)
+      histogram_y_max = max(histogram_y_max, axs.flat[i].get_ylim()[1])
+   plt.close()
+
    fig, axs = plt.subplots(1, len(catapults))
    for i in range(len(catapults)):
       catapult = catapults[i]
@@ -71,7 +80,7 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
       axs.flat[i].hist(throws[catapult], bins = n_bins, label = r'Observerat')
       axs.flat[i].set(xlabel=r'Kaststräcka', ylabel=r'Antal', title = 'Katapult {}'.format(catapult))
       axs.flat[i].set_xlim(left = mu[catapult] - zoom_width, right = mu[catapult] + zoom_width)
-      #axs.flat[i].set_ylim(bottom = 0, top = max()) # This would be good, but seems to be a pain to code.
+      axs.flat[i].set_ylim(bottom = 0, top = histogram_y_max*1.1)
    fig.set_size_inches(12, 4)
    fig.tight_layout()
    plt.savefig('./{}/{}_histogram.png'.format(plot_folder, plot_main_name))
@@ -94,8 +103,6 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
    max_sigma = 2 * max_sigma
    max_mu = 2 * max_mu
    
-
-
    mu_vector = np.linspace(min_mu, max_mu, num = n_steps)
    sigma_vector = np.flip(np.linspace(max_sigma, min_sigma, num = n_steps, endpoint = False))
    mu_grid, sigma_grid = np.meshgrid(mu_vector, sigma_vector)
@@ -200,6 +207,7 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
       bin_width = (max(throws[catapult]) - min(throws[catapult])) / n_bins
       axs.flat[i].plot(mu_vector, best_fit[catapult] * n_throws * bin_width, label = r'Förväntat')
       axs.flat[i].set_xlim(left = mu_plot_min, right = mu_plot_max)
+      axs.flat[i].set_ylim(bottom = 0, top = histogram_y_max*1.1)
       axs.flat[i].set(xlabel=r'Kastlängd', ylabel=r'Antal kast', title = 'Bästa anpassning ({})'.format(catapult))
       axs.flat[i].legend()
    fig.set_size_inches(12, 4)
