@@ -159,10 +159,18 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
    fig, axs = plt.subplots(1, len(catapults))
    for i in range(len(catapults)):
       catapult = catapults[i]
-      true_mu = mu[catapult]      
+      bottom, top = 0.0, 1.1
+
       axs.flat[i].plot(mu_vector, P_mu[catapult] / np.max(P_mu[catapult]))
-      axs.flat[i].vlines(true_mu, 0, 1)
+      for catapult_2 in catapults:
+         true_mu = mu[catapult_2]
+         if catapult_2 == catapult:
+            linestyles = 'solid'
+         else:
+            linestyles = 'dashed'
+         axs.flat[i].vlines(true_mu, bottom, top, linestyles = linestyles)
       axs.flat[i].set_xlim(left = mu_plot_min, right = mu_plot_max)
+      axs.flat[i].set_ylim(bottom = bottom, top = top)
       axs.flat[i].set(xlabel=r'$\mu$', ylabel=r'Onorm. $P\left( \mu \right)$', title = r'$P\left( \mu | kast \right)$ ({})'.format(catapult))
    fig.set_size_inches(12, 4)
    fig.tight_layout()
