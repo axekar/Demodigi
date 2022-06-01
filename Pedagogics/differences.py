@@ -26,6 +26,10 @@ import scipy.stats as st
 import scipy.special as sp
 import matplotlib.pyplot as plt
 
+# This ensured that the results will be the same from one run to the
+# next, even if they are 'random'.
+rd.seed(1729)
+
 
 def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plotting = True, plot_folder = 'differences_plots', plot_main_name = 'Catapults'):
    """
