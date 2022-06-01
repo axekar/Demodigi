@@ -576,7 +576,6 @@ class real_BBV(BBV):
    name_for_file : str
    \tRendition of the name suitable for use in a file name
    """
-   
    def __init__(self, name):
       """
       Parameters
@@ -1510,7 +1509,7 @@ class study:
       have high digital competence after the course module. This requires
       definition of bounds for low and high quality when creating the study.
       """
-      with np.errstate(divide = 'ignore'):
+      with np.errstate(all = 'ignore'):
          log_qki = np.zeros(len(Qki))
          log_qki[1:-1] = nlh * np.log(Qki[1:-1]) + (nl - nlh) * np.log(1 - Qki[1:-1]) - logB(nlh + 1, nl - nlh + 1)
          if nlh > 0:
@@ -1575,7 +1574,7 @@ class study:
    ### Functions specific to the Bayesian median tests
       
    def _logL_median(self, Qki, nki, n_good):
-      with np.errstate(divide = 'ignore'):
+      with np.errstate(all = 'ignore'):
          log_qki = np.zeros(len(Qki))
          log_qki[1:-1] = n_good * np.log(Qki[1:-1]) + (nki - n_good) * np.log(1 - Qki[1:-1]) - logB(n_good + 1, nki - n_good + 1)
          if n_good > 0:
