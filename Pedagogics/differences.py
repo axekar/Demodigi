@@ -144,16 +144,16 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plotting = True, p
       log_L[catapult] = np.sum(log_L_by_throw[catapult], axis = 2)
    
    # The full posterior over mu and sigma
-   log_P = {}
-   P = {}
+   log_p = {}
+   p = {}
    for catapult in catapults:
-      log_P[catapult] = log_prior[catapult] + log_L[catapult]
-      P[catapult] = np.exp(log_P[catapult])
+      log_p[catapult] = log_prior[catapult] + log_L[catapult]
+      p[catapult] = np.exp(log_p[catapult])
    if plotting:
       fig, axs = plt.subplots(1, len(catapults))
       for i in range(len(catapults)):
          catapult = catapults[i]
-         axs.flat[i].pcolormesh(mu_grid, sigma_grid, P[catapult], shading = 'nearest')
+         axs.flat[i].pcolormesh(mu_grid, sigma_grid, p[catapult], shading = 'nearest')
          for catapult_2 in catapults:
             if catapult_2 == catapult:
                c = 'white'
@@ -168,18 +168,18 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plotting = True, p
       plt.close()
 
    # The flattened posteriors over mu and sigma
-   P_mu = {}
-   P_sigma = {}
+   p_mu = {}
+   p_sigma = {}
    best_fit = {}
-   max_P_mu = -np.inf
+   max_p_mu = -np.inf
    for catapult in catapults:
-      unnormalised_P_mu = np.sum(P[catapult], axis = 0)
-      P_mu[catapult] = unnormalised_P_mu / np.sum(unnormalised_P_mu * mu_step_width)
-      max_P_mu = max(max_P_mu, np.max(P_mu[catapult]))
+      unnormalised_p_mu = np.sum(p[catapult], axis = 0)
+      p_mu[catapult] = unnormalised_p_mu / np.sum(unnormalised_p_mu * mu_step_width)
+      max_p_mu = max(max_p_mu, np.max(p_mu[catapult]))
       
-      unnormalised_P_sigma = np.sum(P[catapult], axis = 1)
-      P_sigma[catapult] = unnormalised_P_sigma / np.sum(unnormalised_P_sigma * sigma_step_width)
-      max_index = np.argmax(P[catapult])
+      unnormalised_p_sigma = np.sum(p[catapult], axis = 1)
+      p_sigma[catapult] = unnormalised_p_sigma / np.sum(unnormalised_p_sigma * sigma_step_width)
+      max_index = np.argmax(p[catapult])
       best_fit[catapult] = st.norm.pdf(mu_vector, loc = mu_grid.flatten()[max_index], scale = sigma_grid.flatten()[max_index])
 
    if plotting:
@@ -187,17 +187,17 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plotting = True, p
       for i in range(len(catapults)):
          catapult = catapults[i]
    
-         axs.flat[i].plot(mu_vector, P_mu[catapult])
+         axs.flat[i].plot(mu_vector, p_mu[catapult])
          for catapult_2 in catapults:
             true_mu = mu[catapult_2]
             if catapult_2 == catapult:
                linestyles = 'solid'
             else:
                linestyles = 'dashed'
-            axs.flat[i].vlines(true_mu, 0, max_P_mu * 1.1, linestyles = linestyles)
+            axs.flat[i].vlines(true_mu, 0, max_p_mu * 1.1, linestyles = linestyles)
          axs.flat[i].set_xlim(left = mu_plot_min, right = mu_plot_max)
-         axs.flat[i].set_ylim(bottom = 0, top = max_P_mu * 1.1)
-         axs.flat[i].set(xlabel=r'$\mu$', ylabel=r'$P\left( \mu \right)$', title = r'$P\left( \mu | kast \right)$ (katapult {})'.format(catapult))
+         axs.flat[i].set_ylim(bottom = 0, top = max_p_mu * 1.1)
+         axs.flat[i].set(xlabel=r'$\mu$', ylabel=r'$p\left( \mu \right)$', title = r'$p\left( \mu | kast \right)$ (katapult {})'.format(catapult))
       fig.set_size_inches(12, 4)
       fig.tight_layout()
       plt.savefig('./{}/{}_mu_posteriors.png'.format(plot_folder, plot_main_name))
@@ -228,7 +228,7 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plotting = True, p
    P_dge0 = {}
    max_delta_mu = -np.inf
    for catapult_pair in catapult_pairs:
-      unnormalised_delta_mu = np.convolve(P_mu[catapult_pair[0]], np.flip(P_mu[catapult_pair[1]]))
+      unnormalised_delta_mu = np.convolve(p_mu[catapult_pair[0]], np.flip(p_mu[catapult_pair[1]]))
       delta_mu[catapult_pair] = unnormalised_delta_mu / np.sum(unnormalised_delta_mu * delta_step_width)
       
       max_delta_mu = max(max_delta_mu, np.max(delta_mu[catapult_pair]))
