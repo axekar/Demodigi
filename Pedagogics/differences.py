@@ -94,12 +94,16 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
    max_sigma = 2 * max_sigma
    max_mu = 2 * max_mu
    
-   mu_step_width = (max_mu - min_mu) / n_steps
+
 
    mu_vector = np.linspace(min_mu, max_mu, num = n_steps)
    sigma_vector = np.flip(np.linspace(max_sigma, min_sigma, num = n_steps, endpoint = False))
    mu_grid, sigma_grid = np.meshgrid(mu_vector, sigma_vector)
    delta_vector = np.linspace(-max_mu, max_mu, num=delta_steps)
+
+   mu_step_width = (max_mu - min_mu) / n_steps
+   sigma_step_width = (max_sigma - min_sigma) / n_steps
+   delta_step_width = (max(delta_vector) - min(delta_vector)) / delta_steps
 
    # To make the plots easy to compare, we will plot mu over the range of
    # the true mu:s plus-minus three times the biggest sigmas
@@ -112,11 +116,6 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
       max_true_sigma = max(max_true_sigma, sigma[catapult])
    mu_plot_max = max_true_mu + 3 * max_true_sigma
    mu_plot_min = min_true_mu - 3 * max_true_sigma
-   
-   # We currently plot unnormalised posteriors, where the peak is simple
-   # at one
-   posterior_plot_top = 1.1
-   posterior_plot_bottom = 0.0
 
    # The log-prior P(mu, sigma). To stay consistent with a frequentist analysis,
    # we use a flat prior.
@@ -161,28 +160,32 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
    P_mu = {}
    P_sigma = {}
    best_fit = {}
+   max_P_mu = -np.inf
    for catapult in catapults:
-      P_mu[catapult] = np.sum(P[catapult], axis = 0)
-      P_sigma[catapult] = np.sum(P[catapult], axis = 1)
+      unnormalised_P_mu = np.sum(P[catapult], axis = 0)
+      P_mu[catapult] = unnormalised_P_mu / np.sum(unnormalised_P_mu * mu_step_width)
+      max_P_mu = max(max_P_mu, np.max(P_mu[catapult]))
+      
+      unnormalised_P_sigma = np.sum(P[catapult], axis = 1)
+      P_sigma[catapult] = unnormalised_P_sigma / np.sum(unnormalised_P_sigma * sigma_step_width)
       max_index = np.argmax(P[catapult])
       best_fit[catapult] = st.norm.pdf(mu_vector, loc = mu_grid.flatten()[max_index], scale = sigma_grid.flatten()[max_index])
 
    fig, axs = plt.subplots(1, len(catapults))
    for i in range(len(catapults)):
       catapult = catapults[i]
-      bottom, top = 0.0, 1.1
 
-      axs.flat[i].plot(mu_vector, P_mu[catapult] / np.max(P_mu[catapult]))
+      axs.flat[i].plot(mu_vector, P_mu[catapult])
       for catapult_2 in catapults:
          true_mu = mu[catapult_2]
          if catapult_2 == catapult:
             linestyles = 'solid'
          else:
             linestyles = 'dashed'
-         axs.flat[i].vlines(true_mu, posterior_plot_bottom, posterior_plot_top, linestyles = linestyles)
+         axs.flat[i].vlines(true_mu, 0, max_P_mu * 1.1, linestyles = linestyles)
       axs.flat[i].set_xlim(left = mu_plot_min, right = mu_plot_max)
-      axs.flat[i].set_ylim(bottom = posterior_plot_bottom, top = posterior_plot_top)
-      axs.flat[i].set(xlabel=r'$\mu$', ylabel=r'Onorm. $P\left( \mu \right)$', title = r'$P\left( \mu | kast \right)$ ({})'.format(catapult))
+      axs.flat[i].set_ylim(bottom = 0, top = max_P_mu * 1.1)
+      axs.flat[i].set(xlabel=r'$\mu$', ylabel=r'$P\left( \mu \right)$', title = r'$P\left( \mu | kast \right)$ ({})'.format(catapult))
    fig.set_size_inches(12, 4)
    fig.tight_layout()
    plt.savefig('./{}/{}_mu_posteriors.png'.format(plot_folder, plot_main_name))
@@ -209,28 +212,31 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
    delta_mu = {}
    P_dle0 = {}
    P_dge0 = {}
+   max_delta_mu = -np.inf
    for catapult_pair in catapult_pairs:
-      delta_mu[catapult_pair] = np.convolve(P_mu[catapult_pair[0]], np.flip(P_mu[catapult_pair[1]]))
-      P_dle0[catapult_pair] = np.sum(delta_mu[catapult_pair][:n_steps]) / np.sum(delta_mu[catapult_pair])
-      P_dge0[catapult_pair] = np.sum(delta_mu[catapult_pair][n_steps-1:]) / np.sum(delta_mu[catapult_pair])
+      unnormalised_delta_mu = np.convolve(P_mu[catapult_pair[0]], np.flip(P_mu[catapult_pair[1]]))
+      delta_mu[catapult_pair] = unnormalised_delta_mu / np.sum(unnormalised_delta_mu * delta_step_width)
+      
+      max_delta_mu = max(max_delta_mu, np.max(delta_mu[catapult_pair]))
+      P_dle0[catapult_pair] = np.sum(delta_mu[catapult_pair][:n_steps])
+      P_dge0[catapult_pair] = np.sum(delta_mu[catapult_pair][n_steps-1:])
 
    fig, axs = plt.subplots(len(catapult_pairs), 2)
    for i in range(len(catapult_pairs)):
       catapult_pair = catapult_pairs[i]
       true_delta = mu[catapult_pair[0]] - mu[catapult_pair[1]]
       zoom_width = 2 * max(sigma[catapult_pair[0]], sigma[catapult_pair[1]])
-      normalised_delta_mu = delta_mu[catapult_pair] / np.max(delta_mu[catapult_pair])
       
-      axs.flat[2*i].plot(delta_vector, normalised_delta_mu)
-      axs.flat[2*i].fill_between(delta_vector[n_steps-1:], normalised_delta_mu[n_steps-1:])
+      axs.flat[2*i].plot(delta_vector, delta_mu[catapult_pair])
+      axs.flat[2*i].fill_between(delta_vector[n_steps-1:], delta_mu[catapult_pair][n_steps-1:])
       axs.flat[2*i].set_xlim(left = true_delta - zoom_width, right = true_delta + zoom_width)
-      axs.flat[2*i].set_ylim(bottom = posterior_plot_bottom, top = posterior_plot_top)
+      axs.flat[2*i].set_ylim(bottom = 0, top = max_delta_mu * 1.1)
       axs.flat[2*i].set(xlabel=r'$\Delta \mu$', ylabel=r'Onorm. $P \left( \Delta \mu \right)$', title = r'$P\left( \Delta \mu > 0 \right) = {:.2f}$'.format(P_dge0[catapult_pair]))
 
-      axs.flat[2*i+1].plot(delta_vector, normalised_delta_mu)
-      axs.flat[2*i+1].fill_between(delta_vector[:n_steps], normalised_delta_mu[:n_steps])
+      axs.flat[2*i+1].plot(delta_vector, delta_mu[catapult_pair])
+      axs.flat[2*i+1].fill_between(delta_vector[:n_steps], delta_mu[catapult_pair][:n_steps])
       axs.flat[2*i+1].set_xlim(left = true_delta - zoom_width, right = true_delta + zoom_width)
-      axs.flat[2*i+1].set_ylim(bottom = posterior_plot_bottom, top = posterior_plot_top)
+      axs.flat[2*i+1].set_ylim(bottom = 0, top = max_delta_mu * 1.1)
       axs.flat[2*i+1].set(xlabel=r'$\Delta \mu$', ylabel=r'Onorm. $P \left( \Delta \mu \right)$', title = r'$P\left( \Delta \mu < 0 \right) = {:.2f}$'.format(P_dle0[catapult_pair]))
    fig.set_size_inches(12, 4)
    fig.tight_layout()
