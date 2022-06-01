@@ -101,6 +101,8 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
    mu_grid, sigma_grid = np.meshgrid(mu_vector, sigma_vector)
    delta_vector = np.linspace(-max_mu, max_mu, num=delta_steps)
 
+   # To make the plots easy to compare, we will plot mu over the range
+
    # The log-prior P(mu, sigma). To stay consistent with a frequentist analysis,
    # we use a flat prior.
    log_prior = {}
@@ -168,7 +170,7 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
       bin_width = (max(throws[catapult]) - min(throws[catapult])) / n_bins
       axs.flat[i].plot(mu_vector, best_fit[catapult] * n_throws * bin_width, label = r'Förväntat')
       axs.flat[i].set_xlim(left = true_mu - zoom_width, right = true_mu + zoom_width)
-      axs.flat[i].set(xlabel=r'$\mu$', ylabel=r'Antal kast', title = 'Bästa anpassning ({})'.format(catapult))
+      axs.flat[i].set(xlabel=r'Kastlängd', ylabel=r'Antal kast', title = 'Bästa anpassning ({})'.format(catapult))
       axs.flat[i].legend()
    fig.set_size_inches(12, 4)
    fig.tight_layout()
