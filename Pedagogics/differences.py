@@ -440,4 +440,37 @@ def compare_coins(P_A, P_B, n_tosses, plotting = True, plot_folder = 'difference
       fig.tight_layout()
       plt.savefig('./{}/{}_delta_posteriors.png'.format(plot_folder, plot_main_name))
       plt.close()
-   return
+   return P_dge0
+   
+def coin_long_run(P_A, P_B, n_tosses, n_trials, plotting = True, plot_folder = 'differences_plots', plot_main_name = 'Coin_comparison'):
+   """
+   This will run the coin_comparison function repeatedly, testing the
+   long-run frequency properties.
+   """
+   
+   # Only n_tosses different trial outcomes are actually possible, so
+   # having more bins than that creates an oddly spiked histogram.
+   n_bins = min(int(np.floor(np.sqrt(n_trials))), n_tosses // 2)
+
+   P_dge0 = []
+   for i in range(n_trials):
+      P_dge0.append(compare_coins(P_A, P_B, n_tosses, plotting = False)[('A', 'B')])
+   P_dge0 = np.asarray(P_dge0)
+   
+   f_A_probably_better = np.sum(P_dge0 > 0.5) / n_trials
+   
+   if plotting:
+      fig, axs = plt.subplots()
+
+      axs.hist(P_dge0, bins = n_bins)
+      axs.set(xlabel=r'$P \left( D > 0 \right)$', ylabel=r'Antal', title = r'$f\left( P \left( D > 0 \right) > 0.5 \right) = {:.2f}$'.format(f_A_probably_better))
+      top = axs.get_ylim()[1]
+      axs.vlines(0.5, 0, top, linestyles = 'dashed', color = 'black')
+      axs.set_xlim(0, 1)
+      axs.set_ylim(0, top)
+      fig.set_size_inches(12, 4)
+      fig.tight_layout()
+      plt.savefig('./{}/{}_histogram.png'.format(plot_folder, plot_main_name))
+      plt.close()
+   return P_dge0
+   
