@@ -112,6 +112,11 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
       max_true_sigma = max(max_true_sigma, sigma[catapult])
    mu_plot_max = max_true_mu + 3 * max_true_sigma
    mu_plot_min = min_true_mu - 3 * max_true_sigma
+   
+   # We currently plot unnormalised posteriors, where the peak is simple
+   # at one
+   posterior_plot_top = 1.1
+   posterior_plot_bottom = 0.0
 
    # The log-prior P(mu, sigma). To stay consistent with a frequentist analysis,
    # we use a flat prior.
@@ -168,9 +173,9 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
             linestyles = 'solid'
          else:
             linestyles = 'dashed'
-         axs.flat[i].vlines(true_mu, bottom, top, linestyles = linestyles)
+         axs.flat[i].vlines(true_mu, posterior_plot_bottom, posterior_plot_top, linestyles = linestyles)
       axs.flat[i].set_xlim(left = mu_plot_min, right = mu_plot_max)
-      axs.flat[i].set_ylim(bottom = bottom, top = top)
+      axs.flat[i].set_ylim(bottom = posterior_plot_bottom, top = posterior_plot_top)
       axs.flat[i].set(xlabel=r'$\mu$', ylabel=r'Onorm. $P\left( \mu \right)$', title = r'$P\left( \mu | kast \right)$ ({})'.format(catapult))
    fig.set_size_inches(12, 4)
    fig.tight_layout()
@@ -213,11 +218,13 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
       axs.flat[2*i].plot(delta_vector, normalised_delta_mu)
       axs.flat[2*i].fill_between(delta_vector[n_steps-1:], normalised_delta_mu[n_steps-1:])
       axs.flat[2*i].set_xlim(left = true_delta - zoom_width, right = true_delta + zoom_width)
+      axs.flat[2*i].set_ylim(bottom = posterior_plot_bottom, top = posterior_plot_top)
       axs.flat[2*i].set(xlabel=r'$\Delta \mu$', ylabel=r'Onorm. $P \left( \Delta \mu \right)$', title = r'$P\left( \Delta \mu > 0 \right) = {:.2f}$'.format(P_dge0[catapult_pair]))
 
       axs.flat[2*i+1].plot(delta_vector, normalised_delta_mu)
       axs.flat[2*i+1].fill_between(delta_vector[:n_steps], normalised_delta_mu[:n_steps])
       axs.flat[2*i+1].set_xlim(left = true_delta - zoom_width, right = true_delta + zoom_width)
+      axs.flat[2*i+1].set_ylim(bottom = posterior_plot_bottom, top = posterior_plot_top)
       axs.flat[2*i+1].set(xlabel=r'$\Delta \mu$', ylabel=r'Onorm. $P \left( \Delta \mu \right)$', title = r'$P\left( \Delta \mu < 0 \right) = {:.2f}$'.format(P_dle0[catapult_pair]))
    fig.set_size_inches(12, 4)
    fig.tight_layout()
