@@ -226,13 +226,13 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
       delta_mu[catapult_pair] = unnormalised_delta_mu / np.sum(unnormalised_delta_mu * delta_step_width)
       
       max_delta_mu = max(max_delta_mu, np.max(delta_mu[catapult_pair]))
-      P_dle0[catapult_pair] = np.sum(delta_mu[catapult_pair][:n_steps])
-      P_dge0[catapult_pair] = np.sum(delta_mu[catapult_pair][n_steps-1:])
+      P_dle0[catapult_pair] = np.sum(delta_mu[catapult_pair][:n_steps] * delta_step_width)
+      P_dge0[catapult_pair] = np.sum(delta_mu[catapult_pair][n_steps-1:] * delta_step_width)
 
    fig, axs = plt.subplots(len(catapult_pairs), 2)
    for i in range(len(catapult_pairs)):
       catapult_pair = catapult_pairs[i]
-      true_delta = mu[catapult_pair[0]] - mu[catapult_pair[1]]
+      true_delta = mu[catapult_pair[1]] - mu[catapult_pair[0]]
       zoom_width = 2 * max(sigma[catapult_pair[0]], sigma[catapult_pair[1]])
       
       axs.flat[2*i].plot(delta_vector, delta_mu[catapult_pair])
