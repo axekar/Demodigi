@@ -232,7 +232,7 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
    fig, axs = plt.subplots(len(catapult_pairs), 2)
    for i in range(len(catapult_pairs)):
       catapult_pair = catapult_pairs[i]
-      true_delta = mu[catapult_pair[1]] - mu[catapult_pair[0]]
+      true_delta = mu[catapult_pair[0]] - mu[catapult_pair[1]]
       zoom_width = 2 * max(sigma[catapult_pair[0]], sigma[catapult_pair[1]])
       
       axs.flat[2*i].plot(delta_vector, delta_mu[catapult_pair])
