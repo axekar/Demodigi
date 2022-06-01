@@ -26,6 +26,8 @@ import scipy.stats as st
 import scipy.special as sp
 import matplotlib.pyplot as plt
 
+## TO DO: fix notation - P is probability, p is probability density
+
 
 def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plotting = True, plot_folder = 'differences_plots', plot_main_name = 'Catapults'):
    """
@@ -301,7 +303,7 @@ def catapult_long_run(mu_A, mu_B, sigma_A, sigma_B, n_throws, n_trials, plotting
       plt.close()
    return P_dge0
    
-def compare_coins(P_A, P_B, n_tosses, plot_folder = 'differences_plots', plot_main_name = 'Coins'):
+def compare_coins(P_A, P_B, n_tosses, plotting = True, plot_folder = 'differences_plots', plot_main_name = 'Coins'):
    """
    Say that we have two coins A and B, and we want to know which one is
    better. We have decided that for our purposes the 'better' coin
@@ -371,21 +373,32 @@ def compare_coins(P_A, P_B, n_tosses, plot_folder = 'differences_plots', plot_ma
    # The full posterior over P
    log_pP = {}
    pP = {}
+   pP_max = -np.inf
    for coin in coins:
       log_pP[coin] = log_prior[coin] + log_L[coin]
       pP[coin] = np.exp(log_pP[coin])
-      
-   fig, axs = plt.subplots(1, len(coins))
-   for i in range(len(coins)):
-      coin = coins[i]
-      axs.flat[i].plot(P_vector, pP[coin])
-      axs.flat[i].vlines(P[coin], 0, max(pP[coin]))
-      axs.flat[i].set_xlim(left = 0, right = 1)
-      axs.flat[i].set(xlabel=r'$P$', ylabel=r'$P\left( P \right)$', title = r'$p(P|kast)$ (Mynt {})'.format(coin))
-   fig.set_size_inches(12, 4)
-   fig.tight_layout()
-   plt.savefig('./{}/{}_P_posteriors.png'.format(plot_folder, plot_main_name))
-   plt.close()
+      pP_max = max(pP_max, np.max(pP[coin]))
+
+   if plotting:
+      fig, axs = plt.subplots(1, len(coins))
+      for i in range(len(coins)):
+         coin = coins[i]
+   
+         axs.flat[i].plot(P_vector, pP[coin])
+         for coin_2 in coins:
+            true_P = P[coin_2]
+            if coin_2 == coin:
+               linestyles = 'solid'
+            else:
+               linestyles = 'dashed'
+         axs.flat[i].vlines(true_P, 0, 1, linestyles = linestyles)
+         axs.flat[i].set_xlim(left = 0, right = 1)
+         axs.flat[i].set_ylim(bottom = 0, top = pP_max * 1.1)
+         axs.flat[i].set(xlabel=r'$P$', ylabel=r'$P\left( P \right)$', title = r'$p(P|kast)$ (Mynt {})'.format(coin))
+      fig.set_size_inches(12, 4)
+      fig.tight_layout()
+      plt.savefig('./{}/{}_P_posteriors.png'.format(plot_folder, plot_main_name))
+      plt.close()
    
    # The posterior over the differences in P, and the probability that
    # the difference is below/above zero
