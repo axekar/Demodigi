@@ -26,8 +26,6 @@ import scipy.stats as st
 import scipy.special as sp
 import matplotlib.pyplot as plt
 
-## TO DO: fix notation - P is probability, p is probability density
-
 
 def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plotting = True, plot_folder = 'differences_plots', plot_main_name = 'Catapults'):
    """
