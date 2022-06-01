@@ -144,7 +144,12 @@ def compare_catapults(mu_A, mu_B, sigma_A, sigma_B, n_throws, plot_folder = 'dif
    for i in range(len(catapults)):
       catapult = catapults[i]
       axs.flat[i].pcolormesh(mu_grid, sigma_grid, P[catapult], shading = 'nearest')
-      axs.flat[i].scatter(mu[catapult], sigma[catapult], c = 'white', edgecolors = 'black')
+      for catapult_2 in catapults:
+         if catapult_2 == catapult:
+            c = 'white'
+         else:
+            c = 'grey'
+         axs.flat[i].scatter(mu[catapult_2], sigma[catapult_2], c = c, edgecolors = 'black')
       axs.flat[i].set_xlim(left = mu_plot_min, right = mu_plot_max)
       axs.flat[i].set(xlabel=r'$\mu$', ylabel=r'$\sigma$', title = 'Katapult {}'.format(catapult))     
    fig.set_size_inches(12, 4)
