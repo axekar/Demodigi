@@ -270,7 +270,7 @@ class SharepointConnection(object):
       list_choice.click()
       sleep(2)
       name_field = self.driver.find_element(By.XPATH, "//*[text()='Name']/following::input[@type='text']")
-      name_field.send_keys("Konto-info för {}".format(participant.name))
+      name_field.send_keys("{}".format(participant.name))
       sleep(2)
       desc_field = self.driver.find_element(By.XPATH, "//*[text()='Description']/following::textarea")
       desc_field.send_keys("Canvas-användarnamn och lösenord till {}".format(participant.name))
@@ -370,7 +370,7 @@ class SharepointConnection(object):
       if not real_data:
          invite_field.send_keys("Om detta inte varit ett simulerat test så skulle en text ha skrivits här och skickats till mailadressen {}. Nu skickas den till dig, för att bekräfta att mailandet fungerar.".format(participant.email))
       else:
-         invite_field.send_keys("Hej! Detta är ett test utfört av Alvin inom Demokratisk Digitalisering, för att testa om det går att överföra Canvas-användarnamn och lösenord via en SharePoint-sida, där varje deltagare får se en lista som innehåller deras eget användarnamn och lösenord. Nedan finns en länk till en sida som heter 'Konto-info för {}'. När du har tid, klicka på den länken och kolla om du kan se ett (påhittat) användarnamn och lösenord, och gärna också att du inte kan se detta för någon annan än dig själv.".format(participant.name))
+         invite_field.send_keys("Hej! Detta är ett test utfört av Alvin inom Demokratisk Digitalisering, för att testa om det går att överföra Canvas-användarnamn och lösenord via en SharePoint-sida, där varje deltagare får se en lista som innehåller deras eget användarnamn och lösenord. Nedan finns en länk till en sida som heter '{}' som innehåller ditt användarnamn och lösenord.".format(participant.name))
       sleep(2)
       options_button = self.driver.find_element(By.ID, "Share_ShowHideMoreOptions")
       options_button.click()
