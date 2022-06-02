@@ -366,14 +366,17 @@ class SharepointConnection(object):
       name_field.send_keys(address)
       name_field.send_keys(Keys.RETURN)
       sleep(2)
-      invite_field = self.driver.find_element(By.ID, "TxtEmailBody")  
-      if not real_data:
-         invite_field.send_keys("Om detta inte varit ett simulerat test så skulle en text ha skrivits här och skickats till mailadressen {}. Nu skickas den till dig, för att bekräfta att mailandet fungerar.".format(participant.email))
-      else:
-         invite_field.send_keys("Hej! Detta är ett test utfört av Alvin inom Demokratisk Digitalisering, för att testa om det går att överföra Canvas-användarnamn och lösenord via en SharePoint-sida, där varje deltagare får se en lista som innehåller deras eget användarnamn och lösenord. Nedan finns en länk till en sida som heter '{}' som innehåller ditt användarnamn och lösenord.".format(participant.name))
-      sleep(2)
+      #invite_field = self.driver.find_element(By.ID, "TxtEmailBody")  
+      #if not real_data:
+      #   invite_field.send_keys("Om detta inte varit ett simulerat test så skulle en text ha skrivits här och skickats till mailadressen {}. Nu skickas den till dig, för att bekräfta att mailandet fungerar.".format(participant.email))
+      #else:
+      #   invite_field.send_keys("Hej! Detta är ett test utfört av Alvin inom Demokratisk Digitalisering, för att testa om det går att överföra Canvas-användarnamn och lösenord via en SharePoint-sida, där varje deltagare får se en lista som innehåller deras eget användarnamn och lösenord. Nedan finns en länk till en sida som heter '{}' som innehåller ditt användarnamn och lösenord.".format(participant.name))
+      #sleep(2)
       options_button = self.driver.find_element(By.ID, "Share_ShowHideMoreOptions")
       options_button.click()
+      sleep(2)
+      sendmail_button = self.driver.find_element(By.ID, "chkSendEmailv15")
+      sendmail_button.click()
       sleep(2)
       options_list = self.driver.find_element(By.ID, "DdlGroup")
       options_list.click()
