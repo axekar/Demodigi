@@ -35,6 +35,36 @@ https://github.com/Alvin-Gavel/Demodigi
 
 import secrets
 
+class wordlist:
+   """
+   This is a list of words used when generating account IDs and
+   passwords. This will work if you are working on Ubuntu. If you are
+   a Windows user, feel free to adapt the code to get it to work for
+   you.
+
+   Attributes
+   ----------
+   words : list of str
+   \tThe words that will be used to generate IDs and passwords
+   """
+   def __init__(self, language):
+      """
+      Parameters
+      ----------
+      language : str
+      \tTells the wordlist which dict file to choose
+      """
+      if language.lower() == 'english':
+         fpath = '/usr/share/dict/words'
+      else:
+         print('Cannot recognise language {}'.format(language))
+         return
+      f = open(fpath)
+      self.words = [word.strip() for word in f]
+      f.close()
+      return
+
+
 class participant:
    """
    This represents a single person taking a learning module.
@@ -49,18 +79,21 @@ class participant:
    \tlogging in on our learning platform. It will be a sequence of five
    \twords in the Swedish language.
    """
-   def __init__(self):
+   def __init__(self, wordlist):
+      """
+      Parameters
+      ----------
+      wordlist : wordlist object
+      \tAn object containing the words to generate IDs and passwords from
+      """
+      self.wordlist = wordlist
       self.ID = self.generate_ID()
       self.password = self.generate_password()
       return
       
    def generate_ID(self):
-      with open('/usr/share/dict/words') as f:
-         words = [word.strip() for word in f]
-      return secrets.choice(words)
+      return secrets.choice(self.wordlist.words)
       
    def generate_password(self):
-      with open('/usr/share/dict/words') as f:
-         words = [word.strip() for word in f]
-      return ' '.join(secrets.choice(words) for i in range(5))
+      return ' '.join(secrets.choice(self.wordlist.words) for i in range(5))
    
