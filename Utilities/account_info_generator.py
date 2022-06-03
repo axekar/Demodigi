@@ -94,8 +94,9 @@ class participant:
       return
       
    def generate_ID(self):
-      return secrets.choice(self.wordlist.words)
+      unadjusted = secrets.choice(self.wordlist.words)
+      return unadjusted[0].upper() + unadjusted[1:].lower()
       
    def generate_password(self):
-      return ' '.join(secrets.choice(self.wordlist.words) for i in range(5))
+      return ' '.join(secrets.choice(self.wordlist.words) for i in range(5)).lower()
    
