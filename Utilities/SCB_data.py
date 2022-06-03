@@ -21,3 +21,25 @@ each participant:
 Written by Alvin Gavel,
 https://github.com/Alvin-Gavel/Demodigi
 """
+
+import pandas as pd
+
+class SCB_data:
+   """
+   This represents the data that is of interest to SCB
+   """
+   def __init__(self):
+      self.account_data = pd.DataFrame(columns = ['Femställig kod', 'Startdatum', 'Uppskattad tid', 'Avslutat läromodulen?'])
+      self.full_results = pd.DataFrame([])
+      self.results_read = False
+      return
+   
+   def import_oli_results(self, filepath):
+      """
+      Import a file with the raw statistics directly out of OLI-Torus, in the
+      tab-separated values format.
+      """
+      raw = pd.read_csv(filepath, sep='\t')
+      self.full_results = raw.astype({"Student ID": str}) # This sometimes gets interpreted as int
+      self.results_read = True
+      return
