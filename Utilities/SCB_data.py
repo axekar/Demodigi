@@ -43,3 +43,25 @@ class SCB_data:
       self.full_results = raw.astype({"Student ID": str}) # This sometimes gets interpreted as int
       self.results_read = True
       return
+      
+   def find_start_date(self):
+      """
+      Figures out when a participant has started working on the module
+      """
+      pass
+      return
+      
+   def has_finished(self):
+      """
+      Figures out whether a participant has finished the module
+      """
+      pass
+      return
+      
+   def connect_ID_and_code(self, filepath)
+      """
+      Opens a file mapping OLI-Torus' student IDs to the five-character
+      identifiers used within AF.
+      """
+      pass
+      return
