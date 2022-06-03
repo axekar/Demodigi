@@ -77,37 +77,49 @@ class wordlist:
       f.close()
       return
 
-
-class participant:
+class participant_list:
    """
-   This represents a single person taking a learning module.
+   This represents a list of people taking the learning module
    
    Attributes
    ----------
-   ID : string
-   \tSome unique identifier of the participant. This will be a noun in
+   n_participants : int
+   \tThe number of participants in the learning module
+   wordlist : wordlist object
+   \tAn object containing the words to generate IDs and passwords from
+   IDs : list of string
+   \tSome unique identifiers of the participants. This will be a noun in
    \tthe Swedish language.
-   password : string
-   \tAn easy-to-remember but hard-to-guess passphrase necessary for
-   \tlogging in on our learning platform. It will be a sequence of five
-   \twords in the Swedish language.
+   passwords : list of string
+   \tEasy-to-remember but hard-to-guess passphrases necessary for logging
+   \tin on our learning platform. It will be a sequence of five words in
+   \tthe Swedish language.
    """
-   def __init__(self, wordlist):
+   def __init__(self, n_participants, wordlist):
       """
       Parameters
       ----------
+      n_participants : int
+      \tDescribed under attributes
       wordlist : wordlist object
-      \tAn object containing the words to generate IDs and passwords from
+      \tDescribed under attributes
       """
+      self.n_participants = n_participants
       self.wordlist = wordlist
-      self.ID = self.generate_ID()
-      self.password = self.generate_password()
+      self.IDs = self.generate_IDs()
+      self.passwords = self.generate_passwords()
       return
       
-   def generate_ID(self):
-      unadjusted = secrets.choice(self.wordlist.words)
-      return unadjusted[0].upper() + unadjusted[1:].lower()
+   def generate_IDs(self):
+      IDs = []
+      for i in range(self.n_participants):
+         unadjusted = secrets.choice(self.wordlist.words)
+         IDs.append(unadjusted[0].upper() + unadjusted[1:].lower())
+      return IDs
       
-   def generate_password(self):
-      return ' '.join(secrets.choice(self.wordlist.words) for i in range(5)).lower()
+   def generate_passwords(self):
+      passwords = []
+      for i in range(self.n_participants):
+         passwords.append(' '.join(secrets.choice(self.wordlist.words) for i in range(5)).lower())
+      return passwords
    
