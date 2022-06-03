@@ -33,12 +33,13 @@ Written by Alvin Gavel,
 https://github.com/Alvin-Gavel/Demodigi
 """
 
+import sys
 import secrets
 
 class wordlist:
    """
    This is a list of words used when generating account IDs and
-   passwords. This will work if you are working on Ubuntu. If you are
+   passwords. This will work if you are working on Linux. If you are
    a Windows user, feel free to adapt the code to get it to work for
    you.
 
@@ -54,12 +55,17 @@ class wordlist:
       language : str
       \tTells the wordlist which dict file to choose
       """
-      if language.lower() == 'english':
-         fpath = '/usr/share/dict/words'
-      elif language.lower() == 'swedish':
-         fpath = '/usr/share/dict/svenska'
+      self.words = []
+      if sys.platform in ["linux", "linux2"]:
+         if language.lower() == 'english':
+            fpath = '/usr/share/dict/words'
+         elif language.lower() == 'swedish':
+            fpath = '/usr/share/dict/svenska'
+         else:
+            print('Cannot recognise language {}'.format(language))
+            return
       else:
-         print('Cannot recognise language {}'.format(language))
+         print('You will have to supply a language file manually')
          return
       f = open(fpath, encoding='latin-1')
       self.words = [word.strip() for word in f]
