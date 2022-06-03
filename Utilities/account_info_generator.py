@@ -17,11 +17,11 @@ the users to not have password managers.
 
 When generating user IDs, I will take the following approach:
 
- - It should be a Swedish noun, not obscene or otherwise offensive
+ - It should be a Swedish word, not obscene or otherwise offensive
 
 When generating passwords, I will take the following approach:
 
- - It should consist of five Swedish nouns, separated by spaces
+ - It should consist of five Swedish word, separated by spaces
 
  - It should consist of only lowercase letters. We will not do the
    mixing of cases, numbers and special characters that is typically
@@ -34,3 +34,33 @@ https://github.com/Alvin-Gavel/Demodigi
 """
 
 import secrets
+
+class participant:
+   """
+   This represents a single person taking a learning module.
+   
+   Attributes
+   ----------
+   ID : string
+   \tSome unique identifier of the participant. This will be a noun in
+   \tthe Swedish language.
+   password : string
+   \tAn easy-to-remember but hard-to-guess passphrase necessary for
+   \tlogging in on our learning platform. It will be a sequence of five
+   \twords in the Swedish language.
+   """
+   def __init__(self):
+      self.ID = self.generate_ID()
+      self.password = self.generate_password()
+      return
+      
+   def generate_ID(self):
+      with open('/usr/share/dict/words') as f:
+         words = [word.strip() for word in f]
+      return secrets.choice(words)
+      
+   def generate_password(self):
+      with open('/usr/share/dict/words') as f:
+         words = [word.strip() for word in f]
+      return ' '.join(secrets.choice(words) for i in range(5))
+   
