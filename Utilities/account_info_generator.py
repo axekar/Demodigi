@@ -56,10 +56,12 @@ class wordlist:
       """
       if language.lower() == 'english':
          fpath = '/usr/share/dict/words'
+      elif language.lower() == 'swedish':
+         fpath = '/usr/share/dict/svenska'
       else:
          print('Cannot recognise language {}'.format(language))
          return
-      f = open(fpath)
+      f = open(fpath, encoding='latin-1')
       self.words = [word.strip() for word in f]
       f.close()
       return
