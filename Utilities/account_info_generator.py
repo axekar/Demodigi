@@ -21,7 +21,7 @@ When generating user IDs, I will take the following approach:
 
 When generating passwords, I will take the following approach:
 
- - It should consist of five Swedish word, separated by spaces
+ - It should consist of five Swedish words, separated by spaces
 
  - It should consist of only lowercase letters. We will not do the
    mixing of cases, numbers and special characters that is typically
@@ -45,6 +45,11 @@ class wordlist:
    ----------
    words : list of str
    \tThe words that will be used to generate IDs and passwords
+   n_words : int
+   \tThe number of words in the word list
+   n_passwords : int
+   \tThe number of unique five-word passwords that can be generated using
+   \tthis word list
    """
    def __init__(self, language):
       """
@@ -53,7 +58,12 @@ class wordlist:
       language : str
       \tTells the wordlist which dict file to choose
       """
-      self.words = []
+      self.words = self.try_automatic_reading(language)
+      self.n_words = len(self.words)
+      self.n_passwords = self.n_words**5
+      return
+      
+   def try_automatic_reading(self, language):
       if sys.platform in ["linux", "linux2"]:
          if language.lower() == 'english':
             fpath = '/usr/share/dict/words'
@@ -61,21 +71,25 @@ class wordlist:
             fpath = '/usr/share/dict/svenska'
          else:
             print('Cannot recognise language {}'.format(language))
-            return
+            return []
       else:
          print('You will have to supply a dictionary file manually')
-         return
-      self.read_dictionary_file(fpath)
-      return
-      
+         return []
+      words = self.read_dictionary_file(fpath)
+      return words
+                   
    def read_dictionary_file(self, fpath):
       """
       Read a dictionary file containing one word per line
       """
       f = open(fpath, encoding='latin-1')
-      self.words = [word.strip() for word in f]
+      words = [word.strip() for word in f]
       f.close()
-      return
+      return words
+      
+   def print_info(self):
+      print("This word list has {} entries".format(self.n_words))
+      print("This permits about {:.0e} unique passwords".format(self.n_passwords))
 
 class participant_list:
    """
