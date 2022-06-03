@@ -39,9 +39,7 @@ import secrets
 class wordlist:
    """
    This is a list of words used when generating account IDs and
-   passwords. This will work if you are working on Linux. If you are
-   a Windows user, feel free to adapt the code to get it to work for
-   you.
+   passwords.
 
    Attributes
    ----------
@@ -65,8 +63,15 @@ class wordlist:
             print('Cannot recognise language {}'.format(language))
             return
       else:
-         print('You will have to supply a language file manually')
+         print('You will have to supply a dictionary file manually')
          return
+      self.read_dictionary_file(fpath)
+      return
+      
+   def read_dictionary_file(self, fpath):
+      """
+      Read a dictionary file containing one word per line
+      """
       f = open(fpath, encoding='latin-1')
       self.words = [word.strip() for word in f]
       f.close()
