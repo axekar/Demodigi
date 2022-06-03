@@ -36,6 +36,7 @@ https://github.com/Alvin-Gavel/Demodigi
 import sys
 import secrets
 
+import numpy as np
 import pandas as pd
 
 class wordlist:
@@ -63,6 +64,7 @@ class wordlist:
       self.words = self.try_automatic_reading(language)
       self.n_words = len(self.words)
       self.n_passwords = self.n_words**5
+      self.entropy = np.log2(float(self.n_passwords))
       return
       
    def try_automatic_reading(self, language):
@@ -92,6 +94,8 @@ class wordlist:
    def print_info(self):
       print("This word list has {} entries".format(self.n_words))
       print("This permits about {:.0e} unique passwords".format(self.n_passwords))
+      print("This is {:.0f} bits of entropy".format(self.entropy))
+      return
 
 class participant_list:
    """
