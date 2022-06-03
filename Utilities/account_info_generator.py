@@ -36,6 +36,8 @@ https://github.com/Alvin-Gavel/Demodigi
 import sys
 import secrets
 
+import pandas as pd
+
 class wordlist:
    """
    This is a list of words used when generating account IDs and
@@ -101,13 +103,8 @@ class participant_list:
    \tThe number of participants in the learning module
    wordlist : wordlist object
    \tAn object containing the words to generate IDs and passwords from
-   IDs : list of string
-   \tSome unique identifiers of the participants. This will be a noun in
-   \tthe Swedish language.
-   passwords : list of string
-   \tEasy-to-remember but hard-to-guess passphrases necessary for logging
-   \tin on our learning platform. It will be a sequence of five words in
-   \tthe Swedish language.
+   account_data : pandas DataFrame
+   \tThe IDs and passwords of the participants
    """
    def __init__(self, n_participants, wordlist):
       """
@@ -120,8 +117,9 @@ class participant_list:
       """
       self.n_participants = n_participants
       self.wordlist = wordlist
-      self.IDs = self.generate_IDs()
-      self.passwords = self.generate_passwords()
+      self.account_data = pd.DataFrame()
+      self.account_data['ID'] = self.generate_IDs()
+      self.account_data['password'] = self.generate_passwords()
       return
       
    def generate_IDs(self):
@@ -137,3 +135,14 @@ class participant_list:
          passwords.append(' '.join(secrets.choice(self.wordlist.words) for i in range(5)).lower())
       return passwords
    
+   def save_data(self, filepath):
+      """
+      Unfortunately, it seems that we will supply the IDs and passwords to
+      the learning platform in the form of a csv-file where the passwords
+      are written in plaintext. Needless to say, I take no responsibility
+      for any consequences of doing this.
+      """
+      self.account_data.to_csv(filepath, index=False)
+      return
+   
+      
