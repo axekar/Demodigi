@@ -33,69 +33,72 @@ Written by Alvin Gavel,
 https://github.com/Alvin-Gavel/Demodigi
 """
 
-import sys
 import secrets
+import string
+import sys
 
 import numpy as np
 import pandas as pd
 
-class wordlist:
-   """
-   This is a list of words used when generating account IDs and
-   passwords.
 
-   Attributes
-   ----------
-   words : list of str
-   \tThe words that will be used to generate IDs and passwords
-   n_words : int
-   \tThe number of words in the word list
-   n_passwords : int
-   \tThe number of unique five-word passwords that can be generated using
-   \tthis word list
-   """
-   def __init__(self, language):
+class password_generator:
+   def __init__(self, length, method, wordlist = None):
       """
       Parameters
       ----------
-      language : str
-      \tTells the wordlist which dict file to choose
+      method : str
+      \tThe method used for generating a password
+      length : int
+      \tThe number of characters in a password - where a 'character' may be
+      \tan entire word
       """
-      self.words = self.try_automatic_reading(language)
-      self.n_words = len(self.words)
-      self.n_passwords = self.n_words**5
-      self.entropy = np.log2(float(self.n_passwords))
+      self.length = length
+      if method.lower() == 'xkcd':
+         self.alphabet = wordlist.words
+         self.delimiter = ' '
+      elif method.lower() == 'alphabetic (lower)':
+         self.alphabet = string.ascii_lowercase
+         self.delimiter = ''
+      elif method.lower() == 'alphabetic (upper)':
+         self.alphabet = string.ascii_uppercase
+         self.delimiter = ''
+      elif method.lower() == 'alphabetic':
+         self.alphabet = string.ascii_letters
+         self.delimiter = ''
+      elif method.lower() == 'alphanumeric':
+         self.alphabet = string.ascii_letters + string.digits
+         self.delimiter = ''
+      elif method.lower() == 'mixed':
+         self.alphabet = string.ascii_letters + string.digits + string.punctuation
+         self.delimiter = ''
+      else:
+         print('Cannot recognise method')
+      
+      self.n_words = len(self.alphabet)
+      self.n_possible_passwords = self.n_words**length
+      self.entropy = np.log2(float(self.n_possible_passwords))
       return
       
-   def try_automatic_reading(self, language):
-      if sys.platform in ["linux", "linux2"]:
-         if language.lower() == 'english':
-            fpath = '/usr/share/dict/words'
-         elif language.lower() == 'swedish':
-            fpath = '/usr/share/dict/svenska'
-         else:
-            print('Cannot recognise language {}'.format(language))
-            return []
-      else:
-         print('You will have to supply a dictionary file manually')
-         return []
-      words = self.read_dictionary_file(fpath)
-      return words
+   def generate_password(self):
+      return self.delimiter.join(secrets.choice(self.alphabet) for i in range(self.length))
                    
-   def read_dictionary_file(self, fpath):
-      """
-      Read a dictionary file containing one word per line
-      """
-      f = open(fpath, encoding='latin-1')
-      words = [word.strip() for word in f]
-      f.close()
-      return words
       
    def print_info(self):
       print("This word list has {} entries".format(self.n_words))
-      print("This permits about {:.0e} unique passwords".format(self.n_passwords))
-      print("This is {:.0f} bits of entropy".format(self.entropy))
+      print("This permits about {:.0e} unique passwords, chosen with uniform probability".format(self.n_possible_passwords))
+      print("This corresponds to {:.0f} bits of entropy".format(self.entropy))
       return
+
+class wordlist:
+   """
+   This represents a list of words, which may be used in generating
+   account IDs or XKCD-style passwords
+   """
+   def __init__(self, file_path):
+      f = open(file_path, encoding='latin-1')
+      self.words = [word.strip().lower() for word in f]
+      f.close()
+      return   
 
 class participant_list:
    """
@@ -110,7 +113,7 @@ class participant_list:
    account_data : pandas DataFrame
    \tThe IDs and passwords of the participants
    """
-   def __init__(self, n_participants, wordlist):
+   def __init__(self, n_participants, name_wordlist, password_wordlist, password_length = 5, password_method = 'xkcd'):
       """
       Parameters
       ----------
@@ -120,7 +123,9 @@ class participant_list:
       \tDescribed under attributes
       """
       self.n_participants = n_participants
-      self.wordlist = wordlist
+      self.name_wordlist = name_wordlist
+      self.password_wordlist = password_wordlist
+      self.password_generator = password_generator(password_length, password_method, wordlist = self.password_wordlist)
       self.account_data = pd.DataFrame()
       self.account_data['ID'] = self.generate_IDs()
       self.account_data['password'] = self.generate_passwords()
@@ -129,14 +134,14 @@ class participant_list:
    def generate_IDs(self):
       IDs = []
       for i in range(self.n_participants):
-         unadjusted = secrets.choice(self.wordlist.words)
+         unadjusted = secrets.choice(self.name_wordlist.words)
          IDs.append(unadjusted[0].upper() + unadjusted[1:].lower())
       return IDs
       
    def generate_passwords(self):
       passwords = []
       for i in range(self.n_participants):
-         passwords.append(' '.join(secrets.choice(self.wordlist.words) for i in range(5)).lower())
+         passwords.append(self.password_generator.generate_password())
       return passwords
    
    def save_data(self, filepath):
@@ -148,5 +153,3 @@ class participant_list:
       """
       self.account_data.to_csv(filepath, index=False)
       return
-   
-      
