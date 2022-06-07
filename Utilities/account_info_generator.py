@@ -42,19 +42,45 @@ import pandas as pd
 
 
 class password_generator:
+   """
+   This generates passwords consisting of n characters chosen with uniform
+   probability. What the characters are depends on the choice of method:
+   
+   - alphabetic (lower): Lowercase letters from the English alphabet
+
+   - alphabetic (upper): Uppercase letters
+   
+   - alphabetic: Upper- and lowercase letters
+
+   - alphanumeric: Upper- and lowercase letters, together with numerals
+   
+   - mixed: Upper- and lowercase letters, numerals and special characters
+   
+   - XKCD: In this case the characters are entire words, which requires a
+     wordlist to be supplied.
+     
+   Not that the 'XKCD' method is the only one I actually recommend. The
+   others are there only in case an inflexible password policy requires us
+   to use them, or to allow quickly demonstrating why they are so bad.
+   """
    def __init__(self, length, method, wordlist = None):
       """
       Parameters
       ----------
-      method : str
-      \tThe method used for generating a password
       length : int
       \tThe number of characters in a password - where a 'character' may be
       \tan entire word
+      method : str
+      \tThe method used for generating a password
+      Optinal parameters:
+      -------------------
+      wordlist : list of str
+      \tWhen using the 'xkcd' method, this is a list of words used to
+      \tgenerate the passwords
       """
       self.length = length
       if method.lower() == 'xkcd':
-         self.alphabet = wordlist.words
+         self.alphabet = wordlist
          self.delimiter = ' '
       elif method.lower() == 'alphabetic (lower)':
          self.alphabet = string.ascii_lowercase
@@ -84,21 +110,22 @@ class password_generator:
                    
       
    def print_info(self):
-      print("This word list has {} entries".format(self.n_words))
+      """
+      Gives some basic information about the method for generating passwords
+      """
+      print("The character list has {} entries".format(self.n_words))
       print("This permits about {:.0e} unique passwords, chosen with uniform probability".format(self.n_possible_passwords))
       print("This corresponds to {:.0f} bits of entropy".format(self.entropy))
       return
 
-class wordlist:
+def read_wordlist(file_path):
    """
-   This represents a list of words, which may be used in generating
-   account IDs or XKCD-style passwords
+   Read a file of words, assuming each line has one word on it
    """
-   def __init__(self, file_path):
-      f = open(file_path, encoding='latin-1')
-      self.words = [word.strip().lower() for word in f]
-      f.close()
-      return   
+   f = open(file_path, encoding='latin-1')
+   words = [word.strip().lower() for word in f]
+   f.close()
+   return words
 
 class participant_list:
    """
@@ -108,37 +135,41 @@ class participant_list:
    ----------
    n_participants : int
    \tThe number of participants in the learning module
-   wordlist : wordlist object
-   \tAn object containing the words to generate IDs and passwords from
+   name_wordlist : list of str
+   \tA list of words to use when generating account names
+   password_wordlist : list of str
+   \tA list of words to use when generating passwords
+   password_length : int
+   \tThe number of words in a password
    account_data : pandas DataFrame
    \tThe IDs and passwords of the participants
    """
-   def __init__(self, n_participants, name_wordlist, password_wordlist, password_length = 5, password_method = 'xkcd'):
+   def __init__(self, n_participants, name_wordlist, password_wordlist, password_length = 5):
       """
       Parameters
       ----------
       n_participants : int
       \tDescribed under attributes
-      wordlist : wordlist object
+      name_wordlist : list of str
       \tDescribed under attributes
       """
       self.n_participants = n_participants
       self.name_wordlist = name_wordlist
       self.password_wordlist = password_wordlist
-      self.password_generator = password_generator(password_length, password_method, wordlist = self.password_wordlist)
+      self.password_generator = password_generator(password_length, 'xkcd', wordlist = self.password_wordlist)
       self.account_data = pd.DataFrame()
-      self.account_data['ID'] = self.generate_IDs()
-      self.account_data['password'] = self.generate_passwords()
+      self.account_data['ID'] = self._generate_IDs()
+      self.account_data['password'] = self._generate_passwords()
       return
       
-   def generate_IDs(self):
+   def _generate_IDs(self):
       IDs = []
       for i in range(self.n_participants):
-         unadjusted = secrets.choice(self.name_wordlist.words)
+         unadjusted = secrets.choice(self.name_wordlist)
          IDs.append(unadjusted[0].upper() + unadjusted[1:].lower())
       return IDs
       
-   def generate_passwords(self):
+   def _generate_passwords(self):
       passwords = []
       for i in range(self.n_participants):
          passwords.append(self.password_generator.generate_password())
