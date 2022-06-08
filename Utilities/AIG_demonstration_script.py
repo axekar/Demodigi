@@ -24,7 +24,7 @@ wordlist = aig.read_wordlist('Word_lists/Svenska')
 
 account_info = aig.participant_list(wordlist, wordlist, password_length = 5)
 
-account_info.simulate_participants(10)
+account_info.simulate_participant_data(10)
 
 account_info.generate_account_data()
 

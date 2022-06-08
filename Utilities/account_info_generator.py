@@ -134,14 +134,7 @@ class participant_list:
    
    Attributes
    ----------
-   ID_wordlist : list of str
-   \tA list of words to use when generating account ID
-   password_wordlist : list of str
-   \tA list of words to use when generating passwords
-   password_length : int
-   \tThe number of words in a password
-   account_data : pandas DataFrame
-   \tThe IDs and passwords of the participants
+   [TBD]
    """
    def __init__(self, ID_wordlist, password_wordlist, password_length = 5):
       """
@@ -160,14 +153,15 @@ class participant_list:
       self.ID_wordlist = ID_wordlist
       self.password_wordlist = password_wordlist
       self.password_generator = password_generator(password_length, 'xkcd', wordlist = self.password_wordlist)
-      self.account_data = pd.DataFrame(columns = ['name', 'email', 'account name', 'password'])
+      self.participant_data = pd.DataFrame(columns = ['name', 'email', 'user_id'])
+      self.account_data = pd.DataFrame(columns = ['user_id', 'login_id', 'password', 'status'])
       self.n_participants = np.nan
-      self.read_participant_info = False
+      self.participant_info_read = False
       return
       
    ### Functions for getting data about the actual participants
       
-   def simulate_participants(self, n_participants):
+   def simulate_participant_data(self, n_participants):
       """
       Create fictional participants, to test that the code works
       """
@@ -177,9 +171,9 @@ class participant_list:
       for i in range(self.n_participants):
          names.append('Robot {}'.format(i))
          emails.append('robot_{}@skynet.gov'.format(i))
-      self.account_data['name'] = names
-      self.account_data['email'] = emails
-      self.read_participant_info = True
+      self.participant_data['name'] = names
+      self.participant_data['email'] = emails
+      self.participant_info_read = True
       return
       
    def read_participant_data(self, filepath):
@@ -188,9 +182,9 @@ class participant_list:
       """
       participant_data = pd.read_csv(filepath)
       self.n_participants = len(participant_data) 
-      self.account_data['name'] = participant_data['name']
-      self.account_data['email'] = participant_data['email']
-      self.read_participant_info = True
+      self.participant_data['name'] = participant_data['name']
+      self.participant_data['email'] = participant_data['email']
+      self.participant_info_read = True
       return
       
    ### Functions for creating account data
@@ -200,9 +194,13 @@ class participant_list:
       Create account names and passwords for the participants, assuming a
       list of participants has been loaded or simulated.
       """
-      if self.read_participant_info:
-         self.account_data['account name'] = self._generate_IDs()
+      if self.participant_info_read:
+         IDs = self._generate_IDs()
+         self.participant_data['user_id'] = IDs
+         self.account_data['user_id'] = IDs
+         self.account_data['login_id'] = IDs
          self.account_data['password'] = self._generate_passwords()
+         self.account_data['status'] = 'active' * self.n_participants
       else:
          print("Cannot generate account data without participant data")
       return
@@ -234,11 +232,7 @@ class participant_list:
       
    def save_simulated_participants(self, filepath):
       """
-      Save the names and emails of simulated participants. (In principle this
-      also works for real participants, but there is no reason to).
+      Save the names, emails and user_ids (if defined) for the particants
       """
-      participant_data = pd.DataFrame()
-      participant_data['name'] = self.account_data['name']
-      participant_data['email'] = self.account_data['email']
-      participant_data.to_csv(filepath, index=False)
+      self.participant_data.to_csv(filepath, index=False)
       return
