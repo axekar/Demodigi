@@ -133,8 +133,6 @@ class participant_list:
    
    Attributes
    ----------
-   n_participants : int
-   \tThe number of participants in the learning module
    ID_wordlist : list of str
    \tA list of words to use when generating account ID
    password_wordlist : list of str
@@ -144,22 +142,49 @@ class participant_list:
    account_data : pandas DataFrame
    \tThe IDs and passwords of the participants
    """
-   def __init__(self, n_participants, ID_wordlist, password_wordlist, password_length = 5):
+   def __init__(self, ID_wordlist, password_wordlist, password_length = 5):
       """
       Parameters
       ----------
-      n_participants : int
-      \tDescribed under attributes
       ID_wordlist : list of str
       \tDescribed under attributes
+      password_wordlist : list of str
+      \tDescribed under attributes
+
+      Optional parameters
+      -------------------
+      password_length : int
+      \tThe number of symbols that will make up a password
       """
-      self.n_participants = n_participants
       self.ID_wordlist = ID_wordlist
       self.password_wordlist = password_wordlist
       self.password_generator = password_generator(password_length, 'xkcd', wordlist = self.password_wordlist)
-      self.account_data = pd.DataFrame()
-      self.account_data['ID'] = self._generate_IDs()
-      self.account_data['password'] = self._generate_passwords()
+      self.account_data = pd.DataFrame(columns = ['name', 'email', 'account name', 'password'])
+      self.n_particpants = np.nan
+      self.read_participant_info = False
+      return
+      
+   def simulate_participants(self, n_participants):
+      """
+      Create fictional participants, to test that the code works
+      """
+      self.n_participants = n_participants
+      names = []
+      emails = []
+      for i in range(self.n_participants):
+         names.append('Robot {}'.format(i))
+         emails.append('robot_{}@skynet.gov'.format(i))
+      self.account_data['name'] = names
+      self.account_data['email'] = emails
+      self.read_participant_info = True
+      return
+      
+   def generate_account_data(self):
+      if self.read_participant_info:
+         self.account_data['account name'] = self._generate_IDs()
+         self.account_data['password'] = self._generate_passwords()
+      else:
+         print("Cannot generate account data without participant data")
       return
       
    def _generate_IDs(self):
