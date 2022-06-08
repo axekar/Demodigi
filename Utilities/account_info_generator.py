@@ -135,8 +135,8 @@ class participant_list:
    ----------
    n_participants : int
    \tThe number of participants in the learning module
-   name_wordlist : list of str
-   \tA list of words to use when generating account names
+   ID_wordlist : list of str
+   \tA list of words to use when generating account ID
    password_wordlist : list of str
    \tA list of words to use when generating passwords
    password_length : int
@@ -144,17 +144,17 @@ class participant_list:
    account_data : pandas DataFrame
    \tThe IDs and passwords of the participants
    """
-   def __init__(self, n_participants, name_wordlist, password_wordlist, password_length = 5):
+   def __init__(self, n_participants, ID_wordlist, password_wordlist, password_length = 5):
       """
       Parameters
       ----------
       n_participants : int
       \tDescribed under attributes
-      name_wordlist : list of str
+      ID_wordlist : list of str
       \tDescribed under attributes
       """
       self.n_participants = n_participants
-      self.name_wordlist = name_wordlist
+      self.ID_wordlist = ID_wordlist
       self.password_wordlist = password_wordlist
       self.password_generator = password_generator(password_length, 'xkcd', wordlist = self.password_wordlist)
       self.account_data = pd.DataFrame()
@@ -165,7 +165,7 @@ class participant_list:
    def _generate_IDs(self):
       IDs = []
       for i in range(self.n_participants):
-         unadjusted = secrets.choice(self.name_wordlist)
+         unadjusted = secrets.choice(self.ID_wordlist)
          IDs.append(unadjusted[0].upper() + unadjusted[1:].lower())
       return IDs
       
