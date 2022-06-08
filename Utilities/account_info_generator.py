@@ -33,6 +33,7 @@ Written by Alvin Gavel,
 https://github.com/Alvin-Gavel/Demodigi
 """
 
+import hashlib as hl
 import secrets
 import string
 import sys
@@ -200,7 +201,7 @@ class participant_list:
          self.account_data['user_id'] = IDs
          self.account_data['login_id'] = IDs
          self.account_data['password'] = self._generate_passwords()
-         self.account_data['status'] = 'active' * self.n_participants
+         self.account_data['status'] = 'active'
       else:
          print("Cannot generate account data without participant data")
       return
@@ -220,17 +221,28 @@ class participant_list:
    
    ### Functions for saving data
    
-   def save_data(self, filepath):
+   def save_account_data(self, filepath):
       """
-      Unfortunately, it seems that we will supply the IDs and passwords to
-      the learning platform in the form of a csv-file where the passwords
-      are written in plaintext. Needless to say, I take no responsibility
-      for any consequences of doing this.
+      Save account data, with *unhashed* passwords
       """
       self.account_data.to_csv(filepath, index=False)
       return
+
+   def save_account_data_hashed(self, filepath):
+      """
+      Save account data, with passwords hashed
+      """
+
+      hashed_passwords = []
+      for password in self.account_data['password']:
+         salt = 'salt' # I am actually not sure how Canvas handles salting
+         hashed_passwords.append(hl.pbkdf2_hmac('sha1', bytes(password, 'utf-8'), bytes(salt, 'utf-8'), 1))
+      hashed_data = self.account_data.drop('password', axis = 1)
+      hashed_data['ssha_password'] = hashed_passwords
+      hashed_data.to_csv(filepath, index=False)
+      return
       
-   def save_simulated_participants(self, filepath):
+   def save_participant_data(self, filepath):
       """
       Save the names, emails and user_ids (if defined) for the particants
       """
