@@ -302,7 +302,7 @@ def catapult_long_run(mu_A, mu_B, sigma_A, sigma_B, n_throws, n_trials, plotting
       plt.close()
    return P_dge0
    
-def compare_coins(P_A, P_B, n_tosses, plotting = True, plot_folder = 'differences_plots', plot_main_name = 'Coins'):
+def compare_coins(P_A, P_B, n_tosses, verbose = True, plotting = True, plot_folder = 'differences_plots', plot_main_name = 'Coins'):
    """
    Say that we have two coins A and B, and we want to know which one is
    better. We have decided that for our purposes the 'better' coin
@@ -341,6 +341,8 @@ def compare_coins(P_A, P_B, n_tosses, plotting = True, plot_folder = 'difference
    heads = {}
    for coin in coins:
       heads[coin] = np.sum(rd.uniform(0., 1., size = n_tosses) < P[coin])
+      if verbose:
+         print('Coin {} scored {} heads'.format(coin, heads[coin]))
       
    # Make a vector of the possible values of P
    n_steps = 1000
@@ -410,7 +412,9 @@ def compare_coins(P_A, P_B, n_tosses, plotting = True, plot_folder = 'difference
       P_dle0[coin_pair] = np.sum(delta_P[coin_pair][:n_steps]) / np.sum(delta_P[coin_pair])
       P_dge0[coin_pair] = np.sum(delta_P[coin_pair][n_steps-1:]) / np.sum(delta_P[coin_pair])
       max_delta_P = max(max_delta_P, np.max(delta_P[coin_pair]))
-   
+      if verbose:
+         print('Probability that coin {} has higher P than coin {} is {:.2f}'.format(coin_pair[0], coin_pair[1], P_dge0[coin_pair]))
+      
    if plotting:
       fig, axs = plt.subplots(len(coin_pairs), 2)
       for i in range(len(coin_pairs)):
