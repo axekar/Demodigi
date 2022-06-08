@@ -6,6 +6,8 @@ The current contents of this directory are:
 
 `account_info_generator.py`: A module for generating anonymous account IDs and easy to remember but hard to guess passwords
 
+`AIG_demonstration_script.py`: A script demonstrating how to use the `account_info_generator` module
+
 `employees.py`: A module for figuring out the organisational positions of the employees at AF
 
 `preprocessing.py`: A module for handling the data that comes out of OLI-Torus, changing it into a format suitable for the factorial_experiment module one level further up

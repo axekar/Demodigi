@@ -2,7 +2,7 @@
 This is a script for demonstrating how to use the module
 factorial_experiment.
 
-The scripts simulates study with 1000 participants and three
+The script simulates study with 1000 participants and three
 manipulations, two of which give a slight improvement and one of which
 does nothing. There are four BBVs that affect the initial digital
 competence, the effect of the learning module, or both. Two of them are
