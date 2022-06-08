@@ -160,9 +160,11 @@ class participant_list:
       self.password_wordlist = password_wordlist
       self.password_generator = password_generator(password_length, 'xkcd', wordlist = self.password_wordlist)
       self.account_data = pd.DataFrame(columns = ['name', 'email', 'account name', 'password'])
-      self.n_particpants = np.nan
+      self.n_participants = np.nan
       self.read_participant_info = False
       return
+      
+   ### Functions for getting data about the actual participants
       
    def simulate_participants(self, n_participants):
       """
@@ -178,6 +180,19 @@ class participant_list:
       self.account_data['email'] = emails
       self.read_participant_info = True
       return
+      
+   def read_participant_data(self, filepath):
+      """
+      Read names and email addresses from a csv-file of participants
+      """
+      participant_data = pd.read_csv(filepath)
+      self.n_participants = len(participant_data) 
+      self.account_data['name'] = participant_data['name']
+      self.account_data['email'] = participant_data['email']
+      self.read_participant_info = True
+      return
+      
+   ### Functions for creating account data
       
    def generate_account_data(self):
       if self.read_participant_info:
@@ -200,6 +215,8 @@ class participant_list:
          passwords.append(self.password_generator.generate_password())
       return passwords
    
+   ### Functions for saving data
+   
    def save_data(self, filepath):
       """
       Unfortunately, it seems that we will supply the IDs and passwords to
@@ -208,4 +225,14 @@ class participant_list:
       for any consequences of doing this.
       """
       self.account_data.to_csv(filepath, index=False)
+      return
+      
+   def save_simulated_participants(self, filepath):
+      """
+      Save the names and emails of simulated particpants
+      """
+      participant_data = pd.DataFrame()
+      participant_data['name'] = self.account_data['name']
+      participant_data['email'] = self.account_data['email']
+      participant_data.to_csv(filepath, index=False)
       return
