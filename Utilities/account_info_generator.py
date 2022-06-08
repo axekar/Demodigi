@@ -231,6 +231,8 @@ class participant_list:
    def save_account_data_hashed(self, filepath):
       """
       Save account data, with passwords hashed
+      
+      NOT FULLY IMPLEMENTED, DO NOT USE YET
       """
 
       hashed_passwords = []
