@@ -41,6 +41,16 @@ import numpy as np
 import pandas as pd
 
 
+def read_wordlist(file_path):
+   """
+   Read a file of words, assuming each line has one word on it
+   """
+   f = open(file_path, encoding='latin-1')
+   words = [word.strip().lower() for word in f]
+   f.close()
+   return words
+   
+   
 class password_generator:
    """
    This generates passwords consisting of n characters chosen with uniform
@@ -108,7 +118,6 @@ class password_generator:
    def generate_password(self):
       return self.delimiter.join(secrets.choice(self.alphabet) for i in range(self.length))
                    
-      
    def print_info(self):
       """
       Gives some basic information about the method for generating passwords
@@ -118,14 +127,6 @@ class password_generator:
       print("This corresponds to {:.0f} bits of entropy".format(self.entropy))
       return
 
-def read_wordlist(file_path):
-   """
-   Read a file of words, assuming each line has one word on it
-   """
-   f = open(file_path, encoding='latin-1')
-   words = [word.strip().lower() for word in f]
-   f.close()
-   return words
 
 class participant_list:
    """
@@ -195,6 +196,10 @@ class participant_list:
    ### Functions for creating account data
       
    def generate_account_data(self):
+      """
+      Create account names and passwords for the participants, assuming a
+      list of participants has been loaded or simulated.
+      """
       if self.read_participant_info:
          self.account_data['account name'] = self._generate_IDs()
          self.account_data['password'] = self._generate_passwords()
@@ -229,7 +234,8 @@ class participant_list:
       
    def save_simulated_participants(self, filepath):
       """
-      Save the names and emails of simulated particpants
+      Save the names and emails of simulated participants. (In principle this
+      also works for real participants, but there is no reason to).
       """
       participant_data = pd.DataFrame()
       participant_data['name'] = self.account_data['name']
