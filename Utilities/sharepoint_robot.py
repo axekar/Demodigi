@@ -16,7 +16,7 @@ them the passwords in plaintext. One possible way of doing this - which
 this module is intended to test - is to create a SharePoint page that
 contains one list for each participant, which in turn contains the
 account name and password. Each list should be accessible only to that
-particpant, meaning that it should be connected to their AF account.
+participant, meaning that it should be connected to their AF account.
 
 Since the project will have around 8000-11000 participants, we do not
 want to create these lists manually. Unfortunately, we do not have any
