@@ -226,6 +226,14 @@ class SharepointConnection(object):
       print('Completed work at {}'.format(datetime.now().strftime('%X')))
       return verified
 
+   def make_feedback(self, participant, real_data):
+      """
+      This should make a page giving feedback to the participant, based on
+      their results.
+      """
+      pass
+      return
+
    def make_id_pwd_list(self, participant, real_data):
       """
       This should make a page with the user ID and password for one
