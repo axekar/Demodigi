@@ -33,6 +33,7 @@ Written by Alvin Gavel,
 https://github.com/Alvin-Gavel/Demodigi
 """
 
+import base64
 import hashlib as hl
 import secrets
 import string
@@ -237,8 +238,8 @@ class participant_list:
 
       hashed_passwords = []
       for password in self.account_data['password']:
-         salt = 'salt' # I am actually not sure how Canvas handles salting
-         hashed_passwords.append(hl.pbkdf2_hmac('sha1', bytes(password, 'utf-8'), bytes(salt, 'utf-8'), 1))
+         salt = ''
+         hashed_passwords.append('{SSHA}' + base64.b64encode(hl.pbkdf2_hmac('sha1', bytes(password, 'utf-8'), bytes(salt, 'utf-8'), 1)).decode('utf-8') )
       hashed_data = self.account_data.drop('password', axis = 1)
       hashed_data['ssha_password'] = hashed_passwords
       hashed_data.to_csv(filepath, index=False)
