@@ -22,7 +22,7 @@ save_directory = 'AIG_demo_files'
 
 wordlist = aig.read_wordlist('Word_lists/Svenska')
 
-account_info = aig.participant_list(wordlist, wordlist, password_length = 5)
+account_info = aig.participant_list(wordlist, password_length = 5)
 
 account_info.simulate_participant_data(10)
 
@@ -35,7 +35,7 @@ if save_results:
       account_info.save_participant_data('{}/participant_data.csv'.format(save_directory))
    
 if load_results:
-   loaded_info = aig.participant_list(wordlist, wordlist, password_length = 5)
+   loaded_info = aig.participant_list(wordlist, password_length = 5)
    loaded_info.read_participant_data('{}/participant_data.csv'.format(save_directory))
    loaded_info.generate_account_data()
    if save_results:

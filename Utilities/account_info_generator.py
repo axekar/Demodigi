@@ -129,6 +129,16 @@ class password_generator:
       print("This corresponds to {:.0f} bits of entropy".format(self.entropy))
       return
 
+class ID_generator:
+   def __init__(self):
+      self.adjective_list = pd.read_csv('Adjective-noun_lists/Adjectives.csv')
+      self.noun_list = pd.read_csv('Adjective-noun_lists/Nouns.csv')
+      
+   def generate_ID(self):
+      noun, gender = secrets.choice(list(zip(self.noun_list['ord'], self.noun_list['genus'])))
+      adjective = secrets.choice(self.adjective_list[gender])
+      return '{} {}'.format(adjective, noun)
+
 
 class participant_list:
    """
@@ -138,12 +148,10 @@ class participant_list:
    ----------
    [TBD]
    """
-   def __init__(self, ID_wordlist, password_wordlist, password_length = 5):
+   def __init__(self, password_wordlist, password_length = 5):
       """
       Parameters
       ----------
-      ID_wordlist : list of str
-      \tDescribed under attributes
       password_wordlist : list of str
       \tDescribed under attributes
 
@@ -152,7 +160,7 @@ class participant_list:
       password_length : int
       \tThe number of symbols that will make up a password
       """
-      self.ID_wordlist = ID_wordlist
+      self.ID_generator = ID_generator()
       self.password_wordlist = password_wordlist
       self.password_generator = password_generator(password_length, 'xkcd', wordlist = self.password_wordlist)
       self.participant_data = pd.DataFrame(columns = ['name', 'email', 'user_id'])
@@ -210,7 +218,7 @@ class participant_list:
    def _generate_IDs(self):
       IDs = []
       for i in range(self.n_participants):
-         unadjusted = secrets.choice(self.ID_wordlist)
+         unadjusted = self.ID_generator.generate_ID()
          IDs.append(unadjusted[0].upper() + unadjusted[1:].lower())
       return IDs
       
@@ -225,6 +233,7 @@ class participant_list:
       digested_password = hashed_password.hexdigest()
       b64encoded_password = base64.b64encode(digested_password.encode() + salt.encode())
       return b64encoded_password.decode()
+      
    ### Functions for saving data
    
    def save_account_data(self, filepath):
