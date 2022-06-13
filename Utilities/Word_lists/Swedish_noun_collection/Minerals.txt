@@ -1,0 +1,12 @@
+granit
+kalksten
+kvarts
+flinta
+sandsten
+skiffer
+basalt
+gråsten
+järnmalm
+kopparmalm
+guldmalm
+silvermalm

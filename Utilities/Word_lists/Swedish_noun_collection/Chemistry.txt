@@ -1,0 +1,13 @@
+atom
+grundämne
+jon
+molekyl
+alkohol
+syra
+bas
+vatten
+metall
+plast
+mineral
+gas
+vätska
