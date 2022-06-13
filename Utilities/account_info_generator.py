@@ -220,6 +220,11 @@ class participant_list:
          passwords.append(self.password_generator.generate_password())
       return passwords
    
+   def _hash_password(self, password, salt):
+      hashed_password = hl.sha1('{}{}'.format(password,salt).encode(encoding='UTF-8'))
+      digested_password = hashed_password.hexdigest()
+      b64encoded_password = base64.b64encode(digested_password.encode() + salt.encode())
+      return b64encoded_password.decode()
    ### Functions for saving data
    
    def save_account_data(self, filepath):
@@ -232,14 +237,11 @@ class participant_list:
    def save_account_data_hashed(self, filepath):
       """
       Save account data, with passwords hashed
-      
-      NOT FULLY IMPLEMENTED, DO NOT USE YET
       """
-
       hashed_passwords = []
       for password in self.account_data['password']:
-         salt = ''
-         hashed_passwords.append('{SSHA}' + base64.b64encode(hl.pbkdf2_hmac('sha1', bytes(password, 'utf-8'), bytes(salt, 'utf-8'), 1)).decode('utf-8') )
+         salt = ''.join(secrets.choice(string.ascii_letters) for i in range(16))
+         hashed_passwords.append('{SSHA}' + self._hash_password(password, salt))
       hashed_data = self.account_data.drop('password', axis = 1)
       hashed_data['ssha_password'] = hashed_passwords
       hashed_data.to_csv(filepath, index=False)
