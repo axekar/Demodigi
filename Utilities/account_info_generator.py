@@ -132,8 +132,8 @@ class password_generator:
 
 class ID_generator:
    def __init__(self):
-      self.adjective_list = pd.read_csv('Adjective-noun_lists/Adjectives.csv')
-      self.noun_list = pd.read_csv('Adjective-noun_lists/Nouns.csv')
+      self.adjective_list = pd.read_csv('Word_lists/Adjectives.csv')
+      self.noun_list = pd.read_csv('Word_lists/Nouns.csv')
       
    def generate_ID(self):
       noun, gender = secrets.choice(list(zip(self.noun_list['ord'], self.noun_list['genus'])))
