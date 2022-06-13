@@ -17,7 +17,8 @@ the users to not have password managers.
 
 When generating user IDs, I will take the following approach:
 
- - It should be a Swedish word, not obscene or otherwise offensive
+ - It should be a Swedish adjective followed by a noun, neither one of
+   which is offensive.
 
 When generating passwords, I will take the following approach:
 
@@ -217,9 +218,11 @@ class participant_list:
       
    def _generate_IDs(self):
       IDs = []
-      for i in range(self.n_participants):
+      while len(IDs) < self.n_participants:
          unadjusted = self.ID_generator.generate_ID()
-         IDs.append(unadjusted[0].upper() + unadjusted[1:].lower())
+         adjusted = unadjusted[0].upper() + unadjusted[1:].lower()
+         if not (adjusted in IDs):
+            IDs.append(adjusted)
       return IDs
       
    def _generate_passwords(self):
