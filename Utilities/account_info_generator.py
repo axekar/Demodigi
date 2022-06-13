@@ -218,11 +218,18 @@ class participant_list:
       
    def _generate_IDs(self):
       IDs = []
+      counter = 0
+      total_possibilities = len(self.ID_generator.adjective_list) * len(self.ID_generator.noun_list)
       while len(IDs) < self.n_participants:
+         if counter == total_possibilities:
+            print("Ran out of possible IDs!")
+            print("Word lists only permit {} combinations".format(total_possibilities))
+            return IDs
          unadjusted = self.ID_generator.generate_ID()
          adjusted = unadjusted[0].upper() + unadjusted[1:].lower()
          if not (adjusted in IDs):
             IDs.append(adjusted)
+         counter += 1
       return IDs
       
    def _generate_passwords(self):
