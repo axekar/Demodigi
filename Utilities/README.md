@@ -16,4 +16,4 @@ The current contents of this directory are:
 
 `sharepoint_robot.py`: A module for creating SharePoint pages to share passwords with participants in the project
 
-`Adjective-noun_lists`: Directory containing lists of adjectives and nouns, to be used by the `account_info_generator.py` when generating user names
+`Word_lists`: Directory containing lists of words to be used by the `account_info_generator.py` when generating user names and passwords
