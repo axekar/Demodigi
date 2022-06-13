@@ -32,9 +32,14 @@ pil
 båge
 armborst
 slangbella
+slunga
+katapult
 kanon
 luftvärnskanon
 pansarvärnskanon
+pansarfordon
+stridsvagn
+pansarvagn
 gevär
 kulspruta
 granat

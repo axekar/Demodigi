@@ -6,7 +6,6 @@ troll
 gast
 spöke
 drake
-vampyr
 vålnad
 demon
 djävul

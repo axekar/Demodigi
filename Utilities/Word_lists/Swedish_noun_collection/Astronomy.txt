@@ -1,4 +1,7 @@
 stjärna
+jättestjärna
+dvärgstjärna
+neutronstjärna
 stjärnhop
 planet
 planetoid
@@ -10,9 +13,13 @@ stjärnfall
 meteor
 meteorit
 nebulosa
+plasma
+gasmoln
 galax
 galaxhop
 supernova
 kvasar
+omloppsbana
 rymdskrot
 kesslersyndrom
+norrsken

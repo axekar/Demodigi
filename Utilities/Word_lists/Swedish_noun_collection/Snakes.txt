@@ -1,0 +1,7 @@
+snok
+skallerorm
+pytonorm
+huggorm
+kobra
+kungskobra
+spottkobra

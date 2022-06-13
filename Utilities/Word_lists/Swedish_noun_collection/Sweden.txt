@@ -23,3 +23,8 @@ västmanland
 ångermanland
 öland
 östergötland
+stockholm
+uppsala
+linköping
+göteborg
+lund

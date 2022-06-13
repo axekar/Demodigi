@@ -1,0 +1,13 @@
+stol
+länstol
+pall
+soffa
+bord
+skrivbord
+matbord
+köksbord
+fåtölj
+säng
+dubbelsäng
+loftsäng
+garderob

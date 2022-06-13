@@ -12,7 +12,7 @@ for word_file in word_files:
    
 full_word_list = sorted(list(set(full_word_list)))
 
-f = open("Full_Swedish_noun_list.txt", "w")
+f = open("Full_Swedish_noun_list.txt", "w", encoding='latin-1')
 for word in sorted(full_word_list):
    f.write('{}\n'.format(word))
 f.close()

@@ -11,3 +11,4 @@ plast
 mineral
 gas
 vätska
+glas
