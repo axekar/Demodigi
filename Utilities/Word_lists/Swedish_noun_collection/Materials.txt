@@ -1,0 +1,14 @@
+glas
+stål
+betong
+keramik
+brons
+skumgummi
+gummi
+masonit
+plywood
+gips
+trä
+furu
+spånskiva
+plåt

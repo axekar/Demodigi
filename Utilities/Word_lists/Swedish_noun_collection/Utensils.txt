@@ -13,3 +13,16 @@ kavel
 brödkavel
 visp
 elvisp
+tallrik
+dricksglas
+vinglas
+skål
+soppskål
+stekpanna
+kastrull
+durkslag
+sil
+smutsdisk
+diskmaskin
+diskmedel
+diskborste

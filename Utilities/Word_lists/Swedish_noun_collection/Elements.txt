@@ -13,6 +13,7 @@ magnesium
 aluminium
 silver
 fosfor
+tenn
 svavel
 klor
 argon

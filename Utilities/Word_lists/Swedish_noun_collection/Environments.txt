@@ -23,3 +23,4 @@ sankmark
 våtmark
 åkermark
 leråker
+glaciär

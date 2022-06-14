@@ -3,6 +3,7 @@ ansikte
 hår
 öra
 öronsnibb
+trumhinna
 öga
 ögonbryn
 ögonfrans
@@ -80,3 +81,18 @@ spott
 galla
 svett
 mjölk
+brosk
+ledbrosk
+skelett
+benmärg
+benhinna
+blodådra
+pulsåder
+kroppspulsåder
+aorta
+cell
+blodkropp
+hud
+underhud
+underhudsfett
+fettvävnad
