@@ -29,7 +29,7 @@ account_info.simulate_participant_data(10)
 account_info.fill_in_data_fields()
 
 if save_results:
-   account_info.save_account_names('{}/accounts.txt'.format(save_directory))
+   account_info.save_account_IDs('{}/accounts.txt'.format(save_directory))
    account_info.save_account_data('{}/account_data.csv'.format(save_directory))
    account_info.save_account_data_hashed('{}/account_data_hashed.csv'.format(save_directory))
    account_info.save_sharepoint_data('{}/sharepoint_data.csv'.format(save_directory))

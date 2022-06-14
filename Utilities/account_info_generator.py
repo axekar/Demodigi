@@ -311,12 +311,12 @@ class participant_list:
          print("There is no data to save")
       return
    
-   def save_account_names(self, filepath):
+   def save_account_IDs(self, filepath):
       """
       Save a list saying only which accounts exist, without connecting them
       to participants
       """
-      IDs = self.account_data[['user_id']]
+      IDs = self.account_data[['user_id']].sort_values('user_id')
       IDs.to_csv(filepath, index=False, header=False)
       return
    
