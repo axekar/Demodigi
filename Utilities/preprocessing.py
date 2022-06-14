@@ -69,11 +69,9 @@ class participant:
       self.accumulated_by_date = {}
       return
 
-   def export_results(self, folder_path):
+   def save_factorial_experiment_data(self, folder_path):
       """
-      This method will need to be implemented. It should export the results
-      in the form of a json file, which can be read by the
-      factorial_experiment module.
+      Save data that will be used by the factorial_experiment module.
       """
       if folder_path[-1] != '/':
          folder_path += '/'
@@ -84,7 +82,7 @@ class participant:
       f.write(packed)
       f.close()
       return
-
+      
    def _cumulative_answers_by_date(self):
       dates_when_something_happened = {}
       for date in self.answer_date.values.flatten():
@@ -305,7 +303,7 @@ class learning_module:
          print('There are no results to save!')
       else:
          for participant in self.participants.values():
-            participant.export_results(folder_path)
+            participant.save_factorial_experiment_data(folder_path)
       return
 
    ### Functions for handling data regarding groups of participants
