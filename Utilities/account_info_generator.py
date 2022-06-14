@@ -85,7 +85,7 @@ class password_generator:
       \tan entire word
       method : str
       \tThe method used for generating a password
-      Optinal parameters:
+      Optional parameters:
       -------------------
       wordlist : list of str
       \tWhen using the 'xkcd' method, this is a list of words used to
@@ -119,6 +119,9 @@ class password_generator:
       return
       
    def generate_password(self):
+      """
+      Generate one password consisting of a certain number of symbols.
+      """
       return self.delimiter.join(secrets.choice(self.alphabet) for i in range(self.length))
                    
    def print_info(self):
@@ -131,11 +134,21 @@ class password_generator:
       return
 
 class ID_generator:
+   """
+   This generates IDs consisting of one adjective followed by one noun,
+   which are assumed to be in the directory Word_lists.
+   """
    def __init__(self):
       self.adjective_list = pd.read_csv('Word_lists/Adjectives.csv')
       self.noun_list = pd.read_csv('Word_lists/Nouns.csv')
+      return
       
    def generate_ID(self):
+      """
+      Generate one ID consisting of an adjective followed by a noun. This
+      takes account of the fact that in Swedish, the form the adjective takes
+      depends on the grammatical gender of the noun. 
+      """
       noun, gender = secrets.choice(list(zip(self.noun_list['ord'], self.noun_list['genus'])))
       adjective = secrets.choice(self.adjective_list[gender])
       return '{} {}'.format(adjective, noun)
@@ -143,11 +156,24 @@ class ID_generator:
 
 class participant_list:
    """
-   This represents a list of people taking the learning module
+   This represents a list of people taking the learning module.
    
    Attributes
    ----------
-   [TBD]
+   ID_generator : ID_generator object
+   \tGenerates IDs in an adjective-noun format
+   password_wordlist : list of str
+   \tList of words used when generating passwords
+   password_generator : password_generator
+   \tGenerates passwords in the format of words separated by spaces
+   participant_data : pandas dataframe
+   \tData describing the participants in the learning module
+   account_data : pandas dataframe
+   \tData describing the Canvas accounts of the participants
+   n_participants : int
+   \tThe number of participants
+   participant_info_read : bool
+   \tWhether info about the participants has been read
    """
    def __init__(self, password_wordlist, password_length = 5):
       """
@@ -248,14 +274,19 @@ class participant_list:
    
    def save_account_data(self, filepath):
       """
-      Save account data, with *unhashed* passwords
+      Save account data, with *unhashed* passwords, in a format that can be
+      delivered to Canvas
       """
       self.account_data.to_csv(filepath, index=False)
       return
 
    def save_account_data_hashed(self, filepath):
       """
-      Save account data, with passwords hashed
+      Save account data, with hashed passwords, in a format that can be
+      delivered to Canvas
+      
+      The hashing procedure is described at:
+      https://community.canvaslms.com/t5/SIS-User-Articles/SSHA-Password-Generation/ta-p/243730
       """
       hashed_passwords = []
       for password in self.account_data['password']:
