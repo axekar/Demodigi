@@ -236,17 +236,6 @@ class participant_list:
       self.participant_data['email'] = emails
       self.participant_info_read = True
       return
-
-   def save_participants(self, filepath):
-      """
-      Save data for the participants. In general, there is no reason to do
-      this except for simulated data.
-      """
-      if self.participant_info_read:
-         self.participant_data.to_csv(filepath, index=False)
-      else:
-         print("There is no data to save")
-      return
       
    def read_participant_data(self, filepath):
       """
@@ -310,6 +299,28 @@ class participant_list:
       return b64encoded_password.decode()
       
    ### Functions for saving data
+   
+   def save_participants(self, filepath):
+      """
+      Save data for the participants. In general, there is no reason to do
+      this except for simulated data.
+      """
+      if self.participant_info_read:
+         self.participant_data.to_csv(filepath, index=False)
+      else:
+         print("There is no data to save")
+      return
+   
+   def save_account_names(self, filepath):
+      """
+      Save a list saying only which accounts exist, without connecting them
+      to participants
+      """
+      IDs = self.account_data[['user_id']]
+      IDs.to_csv(filepath, index=False, header=False)
+      return
+   
+   ### Functions for saving *sensitive* data
    ### NOTE: This information is in principle secret, meaning that is must
    ###       be stored in a place where it is accessible even to other
    ###       members of the project
