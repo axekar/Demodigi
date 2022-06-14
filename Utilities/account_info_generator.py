@@ -1,6 +1,6 @@
 """
 This module was written for the ESF-financed project Demokratisk
-Digitalisering. The project is a collaboration between
+Digitalisering (DD). The project is a collaboration between
 Arbetsförmedlingen (AF) and Kungliga Tekniska Högskolan (KTH). The
 purpose of the project is to increase the digital competence - as
 defined at https://ec.europa.eu/jrc/en/digcomp - of people working at
@@ -28,6 +28,25 @@ When generating passwords, I will take the following approach:
    mixing of cases, numbers and special characters that is typically
    recommended, since that makes passwords harder to remember without
    actually making them much more secure.
+   
+As far as I have been able to figure out, this is the current best
+practise for generating passwords. The more commonly recommended method
+of mixing upper- and lowercase with numbers and special characters does
+not inherently increase password entropy: With a random selection of
+symbols you can get any entropy you want by choosing sufficiently many
+symbols and having a sufficiently large alphabet of symbols. This being
+the case, for a given entropy this method gives much more easily
+memorable passwords than that method would. For a popular explanation
+of the underlying mathematics, see https://xkcd.com/936/
+   
+--- IMPORTANT NOTICE ---
+
+The data that comes out of this module must be handled with some care.
+To begin with, the passwords must obviously not be kept anywhere that
+can be accessed by anyone except project members that have the relevant
+privileges. In addition, the information about which user ID
+corresponds to which real-world person is also secret, and must be
+stored where only we can access it.
 
 Written by Alvin Gavel,
 
@@ -43,6 +62,7 @@ import sys
 import numpy as np
 import pandas as pd
 
+generic_warning = "NOTE: This information must be stored where it is not accessible to anyone except project members who have been so authorised."
 
 def read_wordlist(file_path):
    """
@@ -74,7 +94,8 @@ class password_generator:
      
    Not that the 'XKCD' method is the only one I actually recommend. The
    others are there only in case an inflexible password policy requires us
-   to use them, or to allow quickly demonstrating why they are so bad.
+   to use them, or to allow quickly demonstrating why they are so bad. For
+   a simply explanation of the method, see https://xkcd.com/936/
    """
    def __init__(self, length, method, wordlist = None):
       """
@@ -170,6 +191,8 @@ class participant_list:
    \tData describing the participants in the learning module
    account_data : pandas dataframe
    \tData describing the Canvas accounts of the participants
+   sharepoint_data : pandas dataframe
+   \tData to be passed on to the SharePoint robot, which will pass o
    n_participants : int
    \tThe number of participants
    participant_info_read : bool
@@ -190,8 +213,9 @@ class participant_list:
       self.ID_generator = ID_generator()
       self.password_wordlist = password_wordlist
       self.password_generator = password_generator(password_length, 'xkcd', wordlist = self.password_wordlist)
-      self.participant_data = pd.DataFrame(columns = ['name', 'email', 'user_id'])
+      self.participant_data = pd.DataFrame(columns = ['name', 'email'])
       self.account_data = pd.DataFrame(columns = ['user_id', 'login_id', 'password', 'status'])
+      self.sharepoint_data = pd.DataFrame(columns = ['name', 'email', 'user_id', 'password'])
       self.n_participants = np.nan
       self.participant_info_read = False
       return
@@ -212,6 +236,17 @@ class participant_list:
       self.participant_data['email'] = emails
       self.participant_info_read = True
       return
+
+   def save_participants(self, filepath):
+      """
+      Save data for the participants. In general, there is no reason to do
+      this except for simulated data.
+      """
+      if self.participant_info_read:
+         self.participant_data.to_csv(filepath, index=False)
+      else:
+         print("There is no data to save")
+      return
       
    def read_participant_data(self, filepath):
       """
@@ -226,18 +261,22 @@ class participant_list:
       
    ### Functions for creating account data
       
-   def generate_account_data(self):
+   def fill_in_data_fields(self):
       """
       Create account names and passwords for the participants, assuming a
       list of participants has been loaded or simulated.
       """
       if self.participant_info_read:
          IDs = self._generate_IDs()
-         self.participant_data['user_id'] = IDs
+         passwords = self._generate_passwords()
          self.account_data['user_id'] = IDs
          self.account_data['login_id'] = IDs
-         self.account_data['password'] = self._generate_passwords()
+         self.account_data['password'] = passwords
          self.account_data['status'] = 'active'
+         self.sharepoint_data['name'] = self.participant_data['name']
+         self.sharepoint_data['email'] = self.participant_data['name']
+         self.sharepoint_data['user_id'] = IDs
+         self.sharepoint_data['password'] = passwords
       else:
          print("Cannot generate account data without participant data")
       return
@@ -271,12 +310,19 @@ class participant_list:
       return b64encoded_password.decode()
       
    ### Functions for saving data
+   ### NOTE: This information is in principle secret, meaning that is must
+   ###       be stored in a place where it is accessible even to other
+   ###       members of the project
    
    def save_account_data(self, filepath):
       """
       Save account data, with *unhashed* passwords, in a format that can be
-      delivered to Canvas
+      delivered to Canvas.
+      
+      NOTE: This must not be stored where it can be accessed by anyone except
+            project members who have been authorised.
       """
+      print(generic_warning)
       self.account_data.to_csv(filepath, index=False)
       return
 
@@ -287,7 +333,11 @@ class participant_list:
       
       The hashing procedure is described at:
       https://community.canvaslms.com/t5/SIS-User-Articles/SSHA-Password-Generation/ta-p/243730
+
+      NOTE: This must not be stored where it can be accessed by anyone except
+            project members who have been authorised.
       """
+      print(generic_warning)
       hashed_passwords = []
       for password in self.account_data['password']:
          salt = ''.join(secrets.choice(string.ascii_letters) for i in range(16))
@@ -297,9 +347,14 @@ class participant_list:
       hashed_data.to_csv(filepath, index=False)
       return
       
-   def save_participant_data(self, filepath):
+   def save_sharepoint_data(self, filepath):
       """
-      Save the names, emails and user_ids (if defined) for the particants
+      Save the information that will be used by the sharepoint_robot
+      module
+
+      NOTE: This must not be stored where it can be accessed by anyone except
+            project members who have been authorised.
       """
-      self.participant_data.to_csv(filepath, index=False)
+      print(generic_warning)
+      self.sharepoint_data.to_csv(filepath, index=False)
       return
