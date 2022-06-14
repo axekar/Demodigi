@@ -6,7 +6,10 @@ word_files = os.listdir(word_file_directory)
 full_word_list = []
 for word_file in word_files:
    f = open('{}/{}'.format(word_file_directory, word_file))
-   words = [word.strip().lower() for word in f]
+   words = []
+   for word in f:
+      if word[0] != ';':
+         words.append(word.strip().lower())
    f.close()
    full_word_list += words
    
