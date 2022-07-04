@@ -5,8 +5,8 @@ account_info_generator.
 The script simulates a group of ten participants and generates account
 names and passwords for them. It requires there to be a directory named
 Word_lists in the same directory as it is run, and this has to contain
-a file named svenska which contains a list of words. It also requires a
-directory named AIG_demo_files to put its data in.
+a file named Full_Swedish_noun_list.txt which contains a list of words.
+It also requires a directory named AIG_demo_files to put its data in.
 """
 
 import account_info_generator as aig
