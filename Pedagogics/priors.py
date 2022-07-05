@@ -110,11 +110,15 @@ class experiment:
       x = r * np.cos(self.alpha) + rd.normal(loc=0.0, scale=self.sigma, size=self.n)
       y = r * np.sin(self.alpha) + rd.normal(loc=0.0, scale=self.sigma, size=self.n)
       self.measurements = np.asarray(list(zip(x, y)))
+      self.x_absmax = np.max(np.absolute(x))
+      self.y_absmax = np.max(np.absolute(y))
+      self.absmax = max(self.x_absmax, self.y_absmax)
       return 
    
    def P_scatter_given_true(self, x_true, y_true, x, y):
       return (1. / (self.sigma * np.sqrt(2 * np.pi))) * np.exp(- ((x_true - x)**2 + (y_true - y)**2) / (2 * self.sigma**2))
    
+
    # Fitting procedure using the parametrisation with alpha
    
    def calculate_likelihood_alpha(self):
@@ -195,8 +199,8 @@ class experiment:
       plt.scatter(self.measurements[:,0], self.measurements[:,1], s=1, marker = 's')
       plt.scatter([0, np.cos(self.alpha)], [0, np.sin(self.alpha)], c = 'k')
       plt.plot([0, np.cos(self.alpha)], [0, np.sin(self.alpha)], c = 'k', linestyle = '--')
-      plt.xlim(-1, 1)
-      plt.ylim(-1, 1)
+      plt.xlim(-max(1, self.absmax), max(1, self.absmax))
+      plt.ylim(-max(1, self.absmax), max(1, self.absmax))
       plt.xlabel(r'$x$')
       plt.ylabel(r'$y$') 
       plt.savefig('./{}/Measurements.png'.format(self.plot_folder))
@@ -212,8 +216,8 @@ class experiment:
       plt.plot([0, np.cos(self.alpha_frequentist_best_fit)], [0, np.sin(self.alpha_frequentist_best_fit)], c = 'b', linestyle = '--', label = r'Frekventistisk, $\alpha$')
       plt.plot([0, 1. / np.sqrt(1. + self.a_bayesian_best_fit**2)], [0, self.a_bayesian_best_fit / np.sqrt(1. + self.a_bayesian_best_fit**2)], c = 'r', linestyle = '-', label = r'Bayesiansk, $a$')
       plt.plot([0, 1. / np.sqrt(1. + self.a_frequentist_best_fit**2)], [0, self.a_frequentist_best_fit / np.sqrt(1. + self.a_frequentist_best_fit**2)], c = 'r', linestyle = '--', label = r'Frekventistisk, $a$')
-      plt.xlim(0, 1)
-      plt.ylim(0, 1)
+      plt.xlim(-max(1, self.absmax), max(1, self.absmax))
+      plt.ylim(-max(1, self.absmax), max(1, self.absmax))
       plt.xlabel(r'$x$')
       plt.ylabel(r'$y$') 
       plt.legend()
@@ -255,7 +259,7 @@ class experiment:
       plt.plot(self.alpha_range, self.posterior_alpha, c = 'b', linestyle = '-')
       plt.vlines(self.alpha, 0, np.max(self.posterior_alpha), colors='k', linestyles='--')
       plt.xlim(0, np.pi/2)
-      plt.xlabel(r'$x$')
+      plt.xlabel(r'$\alpha$')
       plt.ylabel(r'$P \left( \alpha | x, y \right)$')
       plt.savefig('./{}/Posterior_alpha.png'.format(self.plot_folder))
       return
@@ -279,7 +283,7 @@ class experiment:
       plt.vlines(self.a, 0, np.max(self.posterior_a), colors='k', linestyles='--')
       index_max = np.argmax(self.posterior_a)
       plt.xlim(0, self.a_range[min(index_max * 2, self.n_steps - 1)])
-      plt.xlabel(r'$x$')
+      plt.xlabel(r'$a$')
       plt.ylabel(r'$P \left( a | x, y \right)$')
       plt.savefig('./{}/Posterior_a.png'.format(self.plot_folder))
       return
