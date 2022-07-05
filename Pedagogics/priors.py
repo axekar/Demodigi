@@ -75,6 +75,7 @@ class experiment:
       self.n = n
       self.sigma = sigma
       self.n_steps = n_steps
+      
       # These are used in the fit that describes the line in terms of alpha
       self.alpha_range = np.linspace(0, 2*np.pi, num = self.n_steps)
       self.r_range = np.linspace(0, 1, num = self.n_steps)
@@ -88,6 +89,9 @@ class experiment:
    def run(self):
       self.generate_measurements()
       self.calculate_likelihood_alpha()
+      self.calculate_posterior_alpha()
+      self.frequentist_fit_alpha()
+      self.bayesian_fit_alpha()
       return
    
    def generate_measurements(self):
@@ -102,7 +106,9 @@ class experiment:
       return (1. / (self.sigma * np.sqrt(2 * np.pi))) * np.exp(- ((x_true - x)**2 + (y_true - y)**2) / (2 * self.sigma**2))
    
    def calculate_likelihood_alpha(self):
-      self.P_alpha = np.ones(self.n_steps)
+      # Note to self: I may rewrite this as a n_steps x n matrix, so that
+      # we can easily check the effect of analysing subsets of the data.
+      self.likelihood_alpha = np.ones(self.n_steps)
       
       for i in range(self.n_steps):
          alpha = self.alpha_range[i]
@@ -113,7 +119,19 @@ class experiment:
             y = self.measurements[j,1]
             integrand = self.P_scatter_given_true(x_true, y_true, x, y)
             P = np.trapz(integrand, x=self.r_range)
-            self.P_alpha[i] *= P
+            self.likelihood_alpha[i] *= P
+      return
+      
+   def frequentist_fit_alpha(self):
+      self.alpha_frequentist_best_fit = self.alpha_range[np.argmax(self.likelihood_alpha)]
+      return
+      
+   def calculate_posterior_alpha(self):
+      self.posterior_alpha = self.likelihood_alpha * np.ones(self.n_steps) * np.trapz(self.likelihood_alpha, x=self.alpha_range)
+      return
+      
+   def bayesian_fit_alpha(self):
+      self.alpha_bayesian_best_fit = self.alpha_range[np.argmax(self.posterior_alpha)]
       return
       
    # Plotting functions
@@ -121,6 +139,8 @@ class experiment:
    def plot(self):
       self.plot_data()
       self.plot_likelihood_alpha()
+      self.plot_posterior_alpha()
+      self.plot_fits()
       return
    
    def plot_data(self):
@@ -128,17 +148,38 @@ class experiment:
       plt.tight_layout()
       plt.scatter(self.measurements[:,0], self.measurements[:,1], s=1, marker = 's')
       plt.scatter([0, np.cos(self.alpha)], [0, np.sin(self.alpha)], c = 'k')
+      plt.plot([0, np.cos(self.alpha)], [0, np.sin(self.alpha)], c = 'k', linestyle = '--')
+      plt.xlim(-1, 1)
+      plt.ylim(-1, 1)
+      plt.savefig('./{}/Measurements.png'.format(self.plot_folder))
+      return
+      
+   def plot_fits(self):
+      plt.clf()
+      plt.tight_layout()
+      plt.scatter(self.measurements[:,0], self.measurements[:,1], s=1, marker = 's')
+      plt.scatter([0, np.cos(self.alpha)], [0, np.sin(self.alpha)], c = 'k')
       plt.plot([0, np.cos(self.alpha)], [0, np.sin(self.alpha)], c = 'k', linestyle = '--', label = 'True')
+      plt.plot([0, np.cos(self.alpha_bayesian_best_fit)], [0, np.sin(self.alpha_bayesian_best_fit)], c = 'b', linestyle = '-', label = 'Bayesian, alpha')
+      plt.plot([0, np.cos(self.alpha_frequentist_best_fit)], [0, np.sin(self.alpha_frequentist_best_fit)], c = 'b', linestyle = '--', label = 'Frequentist, alpha')
       plt.xlim(-1, 1)
       plt.ylim(-1, 1)
       plt.legend()
-      plt.savefig('./{}/Measurements.png'.format(self.plot_folder))
+      plt.savefig('./{}/Best_fits.png'.format(self.plot_folder))
       return
       
    def plot_likelihood_alpha(self):
       plt.clf()
       plt.tight_layout()
-      plt.plot(self.alpha_range, self.P_alpha, c = 'b', linestyle = '-')
-      plt.vlines(self.alpha, 0, np.max(self.P_alpha), colors='k', linestyles='--')
-      plt.savefig('./{}/P_alpha.png'.format(self.plot_folder))
+      plt.plot(self.alpha_range, self.likelihood_alpha, c = 'b', linestyle = '--')
+      plt.vlines(self.alpha, 0, np.max(self.likelihood_alpha), colors='k', linestyles='--')
+      plt.savefig('./{}/Likelihood_alpha.png'.format(self.plot_folder))
+      return
+      
+   def plot_posterior_alpha(self):
+      plt.clf()
+      plt.tight_layout()
+      plt.plot(self.alpha_range, self.posterior_alpha, c = 'b', linestyle = '-')
+      plt.vlines(self.alpha, 0, np.max(self.posterior_alpha), colors='k', linestyles='--')
+      plt.savefig('./{}/Posterior_alpha.png'.format(self.plot_folder))
       return
