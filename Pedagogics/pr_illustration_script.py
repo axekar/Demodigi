@@ -7,5 +7,5 @@ platta priors eller inga priors".
 import numpy as np
 import priors as pr
 
-toy_model = pr.experiment(np.pi / 4., 10, 0.1)
-toy_model.plot_data()
+toy_model = pr.experiment(np.pi / 4., 4, 0.1)
+toy_model.plot()

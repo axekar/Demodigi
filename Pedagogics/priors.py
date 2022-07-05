@@ -65,30 +65,80 @@ class experiment:
    sigma : float
    \tThe standard deviation in the random scatter. Note that for
    \tsimplicity the analysis assumes that this is known.
+   n_steps : int
+   \tThe number of steps to use in numerical calculations
    plot_folder : str
    \tPath to the folder where all plots should be placed.
    """
-   def __init__(self, alpha, n, sigma, plot_folder = 'priors_plots'):
+   def __init__(self, alpha, n, sigma, n_steps = 1000, plot_folder = 'priors_plots'):
       self.alpha = alpha
       self.n = n
       self.sigma = sigma
+      self.n_steps = n_steps
+      # These are used in the fit that describes the line in terms of alpha
+      self.alpha_range = np.linspace(0, 2*np.pi, num = self.n_steps)
+      self.r_range = np.linspace(0, 1, num = self.n_steps)
+      
       self.plot_folder = plot_folder
-      self.measurements = self.generate_data()
+      self.run()
       return
       
-   def generate_data(self):
+   # Statistics functions
+   
+   def run(self):
+      self.generate_measurements()
+      self.calculate_likelihood_alpha()
+      return
+   
+   def generate_measurements(self):
       r = rd.uniform(low = 0., high = 1., size = self.n)
       x = r * np.cos(self.alpha) + rd.normal(loc=0.0, scale=self.sigma, size=self.n)
       y = r * np.sin(self.alpha) + rd.normal(loc=0.0, scale=self.sigma, size=self.n)
-      return np.asarray(list(zip(x, y)))
+      self.measurements = np.asarray(list(zip(x, y)))
+      return 
+   
+   
+   def P_scatter_given_true(self, x_true, y_true, x, y):
+      return (1. / (self.sigma * np.sqrt(2 * np.pi))) * np.exp(- ((x_true - x)**2 + (y_true - y)**2) / (2 * self.sigma**2))
+   
+   def calculate_likelihood_alpha(self):
+      self.P_alpha = np.ones(self.n_steps)
       
+      for i in range(self.n_steps):
+         alpha = self.alpha_range[i]
+         x_true = self.r_range * np.cos(alpha)
+         y_true = self.r_range * np.sin(alpha)
+         for j in range(self.n):
+            x = self.measurements[j,0]
+            y = self.measurements[j,1]
+            integrand = self.P_scatter_given_true(x_true, y_true, x, y)
+            P = np.trapz(integrand, x=self.r_range)
+            self.P_alpha[i] *= P
+      return
+      
+   # Plotting functions
+      
+   def plot(self):
+      self.plot_data()
+      self.plot_likelihood_alpha()
+      return
+   
    def plot_data(self):
       plt.clf()
       plt.tight_layout()
       plt.scatter(self.measurements[:,0], self.measurements[:,1], s=1, marker = 's')
+      plt.scatter([0, np.cos(self.alpha)], [0, np.sin(self.alpha)], c = 'k')
       plt.plot([0, np.cos(self.alpha)], [0, np.sin(self.alpha)], c = 'k', linestyle = '--', label = 'True')
       plt.xlim(-1, 1)
       plt.ylim(-1, 1)
       plt.legend()
       plt.savefig('./{}/Measurements.png'.format(self.plot_folder))
+      return
+      
+   def plot_likelihood_alpha(self):
+      plt.clf()
+      plt.tight_layout()
+      plt.plot(self.alpha_range, self.P_alpha, c = 'b', linestyle = '-')
+      plt.vlines(self.alpha, 0, np.max(self.P_alpha), colors='k', linestyles='--')
+      plt.savefig('./{}/P_alpha.png'.format(self.plot_folder))
       return
