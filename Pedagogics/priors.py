@@ -101,7 +101,6 @@ class experiment:
       self.measurements = np.asarray(list(zip(x, y)))
       return 
    
-   
    def P_scatter_given_true(self, x_true, y_true, x, y):
       return (1. / (self.sigma * np.sqrt(2 * np.pi))) * np.exp(- ((x_true - x)**2 + (y_true - y)**2) / (2 * self.sigma**2))
    
@@ -159,9 +158,9 @@ class experiment:
       plt.tight_layout()
       plt.scatter(self.measurements[:,0], self.measurements[:,1], s=1, marker = 's')
       plt.scatter([0, np.cos(self.alpha)], [0, np.sin(self.alpha)], c = 'k')
-      plt.plot([0, np.cos(self.alpha)], [0, np.sin(self.alpha)], c = 'k', linestyle = '--', label = 'True')
-      plt.plot([0, np.cos(self.alpha_bayesian_best_fit)], [0, np.sin(self.alpha_bayesian_best_fit)], c = 'b', linestyle = '-', label = 'Bayesian, alpha')
-      plt.plot([0, np.cos(self.alpha_frequentist_best_fit)], [0, np.sin(self.alpha_frequentist_best_fit)], c = 'b', linestyle = '--', label = 'Frequentist, alpha')
+      plt.plot([0, np.cos(self.alpha)], [0, np.sin(self.alpha)], c = 'k', linestyle = '--', label = 'Sann')
+      plt.plot([0, np.cos(self.alpha_bayesian_best_fit)], [0, np.sin(self.alpha_bayesian_best_fit)], c = 'b', linestyle = '-', label = r'Bayesiansk, $\alpha$')
+      plt.plot([0, np.cos(self.alpha_frequentist_best_fit)], [0, np.sin(self.alpha_frequentist_best_fit)], c = 'b', linestyle = '--', label = r'Frekventistisk, $\alpha$')
       plt.xlim(-1, 1)
       plt.ylim(-1, 1)
       plt.legend()
