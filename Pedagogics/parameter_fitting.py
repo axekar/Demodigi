@@ -318,7 +318,7 @@ class experiment:
       plt.xlim(0, np.pi/2)
       plt.xlabel(r'$\alpha$')
       plt.ylabel(r'$P \left( \alpha | x, y \right)$')
-      plt.savefig('./{}/Posterior_alpha.png'.format(self.plot_folder))
+      plt.savefig('./{}/Posterior_alpha_flat_prior.png'.format(self.plot_folder))
       return
       
    def plot_likelihood_a(self):
@@ -343,5 +343,5 @@ class experiment:
       plt.xlim(0, self.a_range[min(index_max * 2, self.n_steps - 1)])
       plt.xlabel(r'$a$')
       plt.ylabel(r'$P \left( a | x, y \right)$')
-      plt.savefig('./{}/Posterior_a.png'.format(self.plot_folder))
+      plt.savefig('./{}/Posterior_a_flat_prior.png'.format(self.plot_folder))
       return
