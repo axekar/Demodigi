@@ -22,7 +22,6 @@ import matplotlib.pyplot as plt
 import imageio
 
 
-
 class experiment:
    """
    This represents the experiment and the following fitting of a model to
@@ -83,6 +82,8 @@ class experiment:
       self.r_range = np.linspace(0., 1., num = self.n_steps)
 
       self.likelihood = {}
+      self.prior = {'alpha':{'flat':np.ones(self.n_steps)},
+      		     'a':{'flat':np.ones(self.n_steps), 'non-informative': (1./np.pi) * (1. / (1 + self.parameter_range['a']))}}
       self.posterior = {}
       self.posterior_CDF = {}
       self.best_fits = {'alpha':{}, 'a':{}}
@@ -186,8 +187,12 @@ class experiment:
 
    def _calculate_posteriors(self):
       for parameter in ['alpha', 'a']:
-         self.posterior[parameter] = self.likelihood[parameter] * np.ones(self.n_steps) / np.trapz(self.likelihood[parameter], x=self.parameter_range[parameter])
-         self.posterior_CDF[parameter] = self._calculate_CDF(self.parameter_range[parameter], self.posterior[parameter])
+         self.posterior[parameter] = {}
+         self.posterior_CDF[parameter] = {}
+         for prior_name, prior_vector in self.prior[parameter].items():
+            unnormalised_posterior = self.likelihood[parameter] * prior_vector
+            self.posterior[parameter]['{} prior'.format(prior_name)] = unnormalised_posterior / np.trapz(unnormalised_posterior, x=self.parameter_range[parameter])
+            self.posterior_CDF[parameter]['{} prior'.format(prior_name)] = self._calculate_CDF(self.parameter_range[parameter], self.posterior[parameter]['{} prior'.format(prior_name)])
       return
 
 
@@ -201,14 +206,16 @@ class experiment:
 
    def _maximum_posterior_fit(self):
       for parameter in ['alpha', 'a']:
-         self.best_fits[parameter]['Maximum posterior, flat prior'] = self.parameter_range[parameter][np.argmax(self.posterior[parameter])]
+         for prior_name in self.prior[parameter].keys():
+            self.best_fits[parameter]['Maximum posterior, {} prior'.format(prior_name)] = self.parameter_range[parameter][np.argmax(self.posterior[parameter]['{} prior'.format(prior_name)])]
       return
       
    def _median_posterior_fit(self):
       for parameter in ['alpha', 'a']:
-         where_above = np.where(self.posterior_CDF[parameter] > 0.5)
-         first_above_index = where_above[0][0]
-         self.best_fits[parameter]['Median posterior, flat prior'] = self.parameter_range[parameter][first_above_index]
+         for prior_name in self.prior[parameter].keys():
+            where_above = np.where(self.posterior_CDF[parameter]['{} prior'.format(prior_name)] > 0.5)
+            first_above_index = where_above[0][0]
+            self.best_fits[parameter]['Median posterior, {} prior'.format(prior_name)] = self.parameter_range[parameter][first_above_index]
       return
       
 
@@ -287,20 +294,21 @@ class experiment:
       
    def plot_posterior(self):
       for parameter in ['alpha', 'a']:
-         plt.clf()
-         plt.tight_layout()
-         ymax = max(np.max(self.posterior[parameter]), 1.0)
-         plt.vlines(self.true_values[parameter], 0, np.max(self.posterior[parameter]), colors='k', linestyles='--', label = 'True value')
-         plt.plot(self.parameter_range[parameter], self.posterior[parameter], c = 'b', linestyle = '-', label = 'Posterior PDF')
-         plt.plot(self.parameter_range[parameter], self.posterior_CDF[parameter], c = 'r', linestyle = '-', label = 'Posterior CDF')
-         plt.vlines(self.best_fits[parameter]['Maximum posterior, flat prior'], 0, ymax, colors='b', linestyles='--', label = 'Max. posterior, flat prior')
-         plt.vlines(self.best_fits[parameter]['Median posterior, flat prior'], 0, ymax, colors='r', linestyles='--', label = 'Med. posterior, flat prior')
-         plt.xlim(0, np.pi/2)
-         plt.ylim(0, ymax)
-         plt.xlabel(r'${}$'.format(self._parameter_to_latex[parameter]))
-         plt.ylabel(r'$P \left( {} | x, y \right)$'.format(self._parameter_to_latex[parameter]))
-         plt.legend()
-         plt.savefig('./{}/Posterior_{}_flat_prior.png'.format(self.plot_folder, parameter))
+         for prior_name in self.prior[parameter].keys():
+            plt.clf()
+            plt.tight_layout()
+            ymax = max(np.max(self.posterior[parameter]['{} prior'.format(prior_name)]), 1.0)
+            plt.vlines(self.true_values[parameter], 0, np.max(self.posterior[parameter]['{} prior'.format(prior_name)]), colors='k', linestyles='--', label = 'True value')
+            plt.plot(self.parameter_range[parameter], self.posterior[parameter]['{} prior'.format(prior_name)], c = 'b', linestyle = '-', label = 'Posterior PDF')
+            plt.plot(self.parameter_range[parameter], self.posterior_CDF[parameter]['{} prior'.format(prior_name)], c = 'r', linestyle = '-', label = 'Posterior CDF')
+            plt.vlines(self.best_fits[parameter]['Maximum posterior, {} prior'.format(prior_name)], 0, ymax, colors='b', linestyles='--', label = 'Max. posterior, flat prior')
+            plt.vlines(self.best_fits[parameter]['Median posterior, {} prior'.format(prior_name)], 0, ymax, colors='r', linestyles='--', label = 'Med. posterior, flat prior')
+            plt.xlim(0, np.pi/2)
+            plt.ylim(0, ymax)
+            plt.xlabel(r'${}$'.format(self._parameter_to_latex[parameter]))
+            plt.ylabel(r'$P \left( {} | x, y \right)$'.format(self._parameter_to_latex[parameter]))
+            plt.legend()
+            plt.savefig('./{}/Posterior_{}_{}_prior.png'.format(self.plot_folder, parameter, prior_name))
       return
    
    def _get_fit_lines(self):
