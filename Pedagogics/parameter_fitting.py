@@ -322,7 +322,7 @@ class experiment:
          for prior_name in self.prior[parameter].keys():
             plt.clf()
             ymax = max(np.max(self.posterior[parameter]['{} prior'.format(prior_name)]), 1.0)
-            plt.vlines(self.true_values[parameter], 0, np.max(self.posterior[parameter]['{} prior'.format(prior_name)]), colors='k', linestyles='--', label = 'True value')
+            plt.vlines(self.true_values[parameter], 0, ymax, colors='k', linestyles='--', label = 'True value')
             plt.plot(self.parameter_range[parameter], self.posterior[parameter]['{} prior'.format(prior_name)], c = 'b', linestyle = '-', label = 'Posterior PDF')
             plt.plot(self.parameter_range[parameter], self.posterior_CDF[parameter]['{} prior'.format(prior_name)], c = 'r', linestyle = '-', label = 'Posterior CDF')
             plt.vlines(self.best_fits[parameter]['Maximum posterior, {} prior'.format(prior_name)], 0, ymax, colors='b', linestyles='--', label = 'Max. posterior')
