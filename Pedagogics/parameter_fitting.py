@@ -205,7 +205,7 @@ class experiment:
       
    def _median_posterior_fit(self):
       for parameter in ['alpha', 'a']:
-         where_above = np.where(self.posterior_CDF['alpha'] > 0.5)
+         where_above = np.where(self.posterior_CDF[parameter] > 0.5)
          first_above_index = where_above[0][0]
          self.best_fits[parameter]['Median posterior, flat prior'] = self.parameter_range[parameter][first_above_index]
       return
@@ -259,11 +259,15 @@ class experiment:
       for parameter in ['alpha', 'a']:
          plt.clf()
          plt.tight_layout()
-         plt.plot(self.parameter_range[parameter], self.likelihood[parameter], c = 'b', linestyle = '--')
-         plt.vlines(self.true_values[parameter], 0, np.max(self.likelihood[parameter]), colors='k', linestyles='--')
-         plt.xlim(0, np.pi/2)
+         ymax = np.max(self.likelihood[parameter]) * 1.1
+         plt.vlines(self.true_values[parameter], 0, ymax, colors='k', linestyles='--', label = 'True value')
+         plt.plot(self.parameter_range[parameter], self.likelihood[parameter], c = 'b', linestyle = '-', label = 'Likelihood')
+         plt.vlines(self.best_fits[parameter]['Maximum likelihood'], 0, ymax, colors='b', linestyles='--', label = 'Max. likelihood')
+         plt.xlim(self.parameter_range[parameter][0], 2 * self.true_values[parameter])
+         plt.ylim(0, ymax)
          plt.xlabel(r'${}$'.format(self._parameter_to_latex[parameter]))
          plt.ylabel(r'$P \left( x, y | {} \right)$'.format(self._parameter_to_latex[parameter]))
+         plt.legend()
          plt.savefig('./{}/Likelihood_{}.png'.format(self.plot_folder, parameter))
       return
       
@@ -271,13 +275,18 @@ class experiment:
       for parameter in ['alpha', 'a']:
          plt.clf()
          plt.tight_layout()
-         plt.plot(self.parameter_range[parameter], self.posterior[parameter], c = 'b', linestyle = '-')
-         plt.plot(self.parameter_range[parameter], self.posterior_CDF[parameter], c = 'b', linestyle = '--')
-         plt.vlines(self.true_values[parameter], 0, np.max(self.posterior[parameter]), colors='k', linestyles='--')
+         ymax = max(np.max(self.posterior[parameter]), 1.0)
+         plt.vlines(self.true_values[parameter], 0, np.max(self.posterior[parameter]), colors='k', linestyles='--', label = 'True value')
+         plt.plot(self.parameter_range[parameter], self.posterior[parameter], c = 'b', linestyle = '-', label = 'Posterior PDF')
+         plt.plot(self.parameter_range[parameter], self.posterior_CDF[parameter], c = 'r', linestyle = '-', label = 'Posterior CDF')
+         plt.vlines(self.best_fits[parameter]['Maximum posterior, flat prior'], 0, ymax, colors='b', linestyles='--', label = 'Max. posterior, flat prior')
+         plt.vlines(self.best_fits[parameter]['Median posterior, flat prior'], 0, ymax, colors='r', linestyles='--', label = 'Med. posterior, flat prior')
          plt.xlim(0, np.pi/2)
+         plt.ylim(0, ymax)
          plt.xlabel(r'${}$'.format(self._parameter_to_latex[parameter]))
          plt.ylabel(r'$P \left( {} | x, y \right)$'.format(self._parameter_to_latex[parameter]))
-      plt.savefig('./{}/Posterior_{}_flat_prior.png'.format(self.plot_folder, parameter))
+         plt.legend()
+         plt.savefig('./{}/Posterior_{}_flat_prior.png'.format(self.plot_folder, parameter))
       return
       
    def plot_fits(self):
