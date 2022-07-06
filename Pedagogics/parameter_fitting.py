@@ -237,7 +237,6 @@ class experiment:
    
    def plot_data(self):
       plt.clf()
-      plt.tight_layout()
       plt.scatter(self.measurements[:,0], self.measurements[:,1], s=1, marker = 's')
       plt.scatter([0, np.cos(self.true_values['alpha'])], [0, np.sin(self.true_values['alpha'])], c = 'k')
       plt.plot([0, np.cos(self.true_values['alpha'])], [0, np.sin(self.true_values['alpha'])], c = 'k', linestyle = '--')
@@ -245,6 +244,8 @@ class experiment:
       plt.ylim(-max(1, self.absmax), max(1, self.absmax))
       plt.xlabel(r'$x$')
       plt.ylabel(r'$y$') 
+      plt.gca().set_aspect('equal', adjustable='box')
+      plt.tight_layout()
       plt.savefig('./{}/Measurements.png'.format(self.plot_folder))
       return
    
@@ -331,7 +332,6 @@ class experiment:
       fit_lines = self._get_fit_lines()
          
       plt.clf()
-      plt.tight_layout()
       plt.scatter(self.measurements[:,0], self.measurements[:,1], s=1, marker = 's')
       plt.scatter([0, np.cos(self.true_values['alpha'])], [0, np.sin(self.true_values['alpha'])], c = 'k')
       for parameter in ['a', 'alpha']:
@@ -344,6 +344,8 @@ class experiment:
       plt.xlabel(r'$x$')
       plt.ylabel(r'$y$') 
       plt.legend()
+      plt.gca().set_aspect('equal', adjustable='box')
+      plt.tight_layout()
       plt.savefig('./{}/Best_fits.png'.format(self.plot_folder))
       return
       
@@ -356,7 +358,6 @@ class experiment:
       for parameter_1 in ['a', 'alpha']:
          for fit_method_1 in fit_lines[parameter_1].keys():
             plt.clf()
-            plt.tight_layout()
             plt.scatter(self.measurements[:,0], self.measurements[:,1], s=1, marker = 's')
             plt.scatter([0, np.cos(self.true_values['alpha'])], [0, np.sin(self.true_values['alpha'])], c = 'k')
             for parameter_2 in ['a', 'alpha']:
@@ -373,6 +374,8 @@ class experiment:
             plt.xlabel(r'$x$')
             plt.ylabel(r'$y$') 
             plt.legend()
+            plt.gca().set_aspect('equal', adjustable='box')
+            plt.tight_layout()
             plt.savefig(self.fit_plotpath(parameter_1, fit_method_1))
       return
 
