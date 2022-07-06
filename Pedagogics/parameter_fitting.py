@@ -223,7 +223,7 @@ class experiment:
       self.makegif_likelihood_scatter()
       self.plot_likelihood()
       self.plot_posterior()
-      self.plot_fits()
+      self.plot_all_fits()
       return
    
    def plot_data(self):
@@ -301,17 +301,29 @@ class experiment:
          plt.savefig('./{}/Posterior_{}_flat_prior.png'.format(self.plot_folder, parameter))
       return
       
-   def plot_fits(self):
+   def plot_all_fits(self):
+      fit_lines = {'a':{}, 'alpha':{}}
+      for fit_method, alpha in self.best_fits['alpha'].items():
+         fit_lines['alpha'][fit_method] = {}
+         fit_lines['alpha'][fit_method]['x'] = [0, np.cos(alpha)]
+         fit_lines['alpha'][fit_method]['y'] = [0, np.sin(alpha)]
+         fit_lines['alpha'][fit_method]['label'] = r'{}, $\alpha$'.format(fit_method)
+      for fit_method, a in self.best_fits['a'].items():
+         x_end = 1. / np.sqrt(1 + a**2)
+         y_end = a * x_end
+         fit_lines['a'][fit_method] = {}
+         fit_lines['a'][fit_method]['x'] = [0, x_end]
+         fit_lines['a'][fit_method]['y'] = [0, y_end]
+         fit_lines['a'][fit_method]['label'] =  r'{}, $a$'.format(fit_method)
+         
       plt.clf()
       plt.tight_layout()
       plt.scatter(self.measurements[:,0], self.measurements[:,1], s=1, marker = 's')
       plt.scatter([0, np.cos(self.true_values['alpha'])], [0, np.sin(self.true_values['alpha'])], c = 'k')
-      for name, alpha in self.best_fits['alpha'].items():
-         plt.plot([0, np.cos(alpha)], [0, np.sin(alpha)], linestyle = '-', label = r'{}, $\alpha$'.format(name))
-      for name, a in self.best_fits['a'].items():
-         x_end = 1. / np.sqrt(1 + a**2)
-         y_end = a * x_end
-         plt.plot([0, x_end], [0, y_end], '--', label = r'{}, $a$'.format(name))
+      for parameter in ['a', 'alpha']:
+         for fit_method in fit_lines[parameter].keys():
+             dictionary = fit_lines[parameter][fit_method]
+             plt.plot(dictionary['x'], dictionary['y'], linestyle = '-', label = dictionary['label'])
       plt.plot([0, np.cos(self.true_values['alpha'])], [0, np.sin(self.true_values['alpha'])], c = 'k', linestyle = '--', label = 'True line')
       plt.xlim(-max(1, self.absmax), max(1, self.absmax))
       plt.ylim(-max(1, self.absmax), max(1, self.absmax))
