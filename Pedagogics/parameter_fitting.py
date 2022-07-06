@@ -327,7 +327,7 @@ class experiment:
             plt.plot(self.parameter_range[parameter], self.posterior_CDF[parameter]['{} prior'.format(prior_name)], c = 'r', linestyle = '-', label = 'Posterior CDF')
             plt.vlines(self.best_fits[parameter]['Maximum posterior, {} prior'.format(prior_name)], 0, ymax, colors='b', linestyles='--', label = 'Max. posterior')
             plt.vlines(self.best_fits[parameter]['Median posterior, {} prior'.format(prior_name)], 0, ymax, colors='r', linestyles='--', label = 'Med. posterior')
-            plt.xlim(0, np.pi/2)
+            plt.xlim(self.parameter_range[parameter][0], 2 * self.true_values[parameter])
             plt.ylim(0, ymax)
             plt.xlabel(r'${}$'.format(self._parameter_to_latex[parameter]))
             plt.ylabel(r'$P \left( {} | x, y \right)$'.format(self._parameter_to_latex[parameter]))
