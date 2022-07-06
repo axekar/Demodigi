@@ -19,6 +19,7 @@ https://github.com/Alvin-Gavel/Demodigi
 import numpy as np
 import numpy.random as rd
 import matplotlib.pyplot as plt
+import imageio
 
 
 
@@ -219,6 +220,7 @@ class experiment:
       """
       self.plot_data()
       self.plot_likelihood_scatter()
+      self.makegif_likelihood_scatter()
       self.plot_likelihood()
       self.plot_posterior()
       self.plot_fits()
@@ -237,6 +239,9 @@ class experiment:
       plt.savefig('./{}/Measurements.png'.format(self.plot_folder))
       return
    
+   def likelihood_scatter_plotpath(self, i):
+      return './{}/Likelihood_scatter_{}.png'.format(self.plot_folder, i)
+   
    def plot_likelihood_scatter(self):
       x_true_grid, y_true_grid = np.meshgrid(np.linspace(0, 1, int(np.sqrt(self.n_steps))), np.linspace(0, 1, int(np.sqrt(self.n_steps))))
       
@@ -252,9 +257,16 @@ class experiment:
          plt.ylim(0, 1)
          plt.xlabel(r'$x$')
          plt.ylabel(r'$y$')         
-         plt.savefig('./{}/Likelihood_scatter_{}.png'.format(self.plot_folder, i))
+         plt.savefig(self.likelihood_scatter_plotpath(i))
       return
       
+   def makegif_likelihood_scatter(self):
+      plots = []
+      for i in range(self.n):
+         plots.append(imageio.imread(self.likelihood_scatter_plotpath(i)))
+      imageio.mimsave('./{}/Likelihood_scatter.gif'.format(self.plot_folder), plots, duration=2)
+      return
+   
    def plot_likelihood(self):
       for parameter in ['alpha', 'a']:
          plt.clf()
@@ -300,7 +312,7 @@ class experiment:
          x_end = 1. / np.sqrt(1 + a**2)
          y_end = a * x_end
          plt.plot([0, x_end], [0, y_end], '--', label = r'{}, $a$'.format(name))
-      plt.plot([0, np.cos(self.true_values['alpha'])], [0, np.sin(self.true_values['alpha'])], c = 'k', linestyle = '--', label = 'True')
+      plt.plot([0, np.cos(self.true_values['alpha'])], [0, np.sin(self.true_values['alpha'])], c = 'k', linestyle = '--', label = 'True line')
       plt.xlim(-max(1, self.absmax), max(1, self.absmax))
       plt.ylim(-max(1, self.absmax), max(1, self.absmax))
       plt.xlabel(r'$x$')
