@@ -97,6 +97,7 @@ class experiment:
       self.run()
       return
 
+
    ### Convenience functions
  
    def a_to_alpha(self, a):
@@ -105,6 +106,16 @@ class experiment:
    def alpha_to_a(self, alpha):
       return np.tan(alpha)
 
+   def _calculate_CDF(self, variable, PDF):
+      """
+      This is *not* computationally efficient
+      """
+      n_points = len(variable)
+      CDF = np.zeros(n_points)
+      for i in range(n_points-1):
+         CDF[i+1] = np.trapz(PDF[0:i], x=variable[0:i])
+      return CDF
+      
 
    ### Statistics functions
    
@@ -163,12 +174,14 @@ class experiment:
       return
       
    def _calculate_posterior_alpha(self):
-      self.posterior_alpha = self.likelihood_alpha * np.ones(self.n_steps) * np.trapz(self.likelihood_alpha, x=self.alpha_range)
+      self.posterior_alpha = self.likelihood_alpha * np.ones(self.n_steps) / np.trapz(self.likelihood_alpha, x=self.alpha_range)
+      self.posterior_alpha_CDF = self._calculate_CDF(self.alpha_range, self.posterior_alpha)
       return
       
    def _maximum_posterior_fit_alpha(self):
       self.alpha_fits['Maximum posterior, flat prior'] = self.alpha_range[np.argmax(self.posterior_alpha)]
       return
+      
       
    # Fitting procedure using the parametrisation with a
    
@@ -194,7 +207,8 @@ class experiment:
       return
       
    def _calculate_posterior_a(self):
-      self.posterior_a = self.likelihood_a * np.ones(self.n_steps) * np.trapz(self.likelihood_a, x=self.a_range)
+      self.posterior_a = self.likelihood_a * np.ones(self.n_steps) / np.trapz(self.likelihood_a, x=self.a_range)
+      self.posterior_a_CDF = self._calculate_CDF(self.a_range, self.posterior_a)
       return
       
    def _maximum_posterior_fit_a(self):
@@ -283,6 +297,7 @@ class experiment:
       plt.clf()
       plt.tight_layout()
       plt.plot(self.alpha_range, self.posterior_alpha, c = 'b', linestyle = '-')
+      plt.plot(self.alpha_range, self.posterior_alpha_CDF, c = 'b', linestyle = '--')
       plt.vlines(self.alpha, 0, np.max(self.posterior_alpha), colors='k', linestyles='--')
       plt.xlim(0, np.pi/2)
       plt.xlabel(r'$\alpha$')
@@ -306,6 +321,7 @@ class experiment:
       plt.clf()
       plt.tight_layout()
       plt.plot(self.a_range, self.posterior_a, c = 'r', linestyle = '-')
+      plt.plot(self.a_range, self.posterior_a_CDF, c = 'r', linestyle = '--')
       plt.vlines(self.a, 0, np.max(self.posterior_a), colors='k', linestyles='--')
       index_max = np.argmax(self.posterior_a)
       plt.xlim(0, self.a_range[min(index_max * 2, self.n_steps - 1)])
