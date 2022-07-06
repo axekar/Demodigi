@@ -7,6 +7,11 @@ defined at https://ec.europa.eu/jrc/en/digcomp - of people working at
 Arbetsförmedlingen and by extension also job seekers. This will be
 done by learning modules at KTH using OLI-Torus.
 
+--- About this Python module ---
+
+This Python module implements a toy model that demonstrates the results
+of a couple of different fitting procedures.
+
 Written by Alvin Gavel
 https://github.com/Alvin-Gavel/Demodigi
 """
@@ -22,8 +27,8 @@ class experiment:
    This represents the experiment and the following fitting of a model to
    the observed data.
    
-   Attributes
-   ----------
+   User-defined attributes
+   --------------------------------------
    alpha : float
    \tThe angle of the line with respect to the x-axis.
    n : int
@@ -35,8 +40,41 @@ class experiment:
    \tThe number of steps to use in numerical calculations
    plot_folder : str
    \tPath to the folder where all plots should be placed.
+   
+   Attributes defined automatically, which should not be changed
+   -------------------------------------------------------------
+   alpha_range : float ndarray
+   \tRange of values of the parameter alpha used when fitting
+   r_range : float ndarray
+   \tRange of values of radial distance r used when estimating
+   \talpha
+   a_range : float ndarray
+   \tRange of values of the parameter a used when fitting
+   
+   Attributes defined when experiment in run
+   -----------------------------------------
+   measurements : float ndarray
+   \tSimulated measurements made in the experiment
+   x_absmax : float
+   \tLargest deviation from the origin along the x-axis
+   y_absmax : float
+   \tLargest deviation from the origin along the y-axis
+   \tabsmax : float
+   \tLargest deviation from the origin along either axis
+   likelihood_alpha : float ndarray
+   \tLikelihood of data as a function of the alphas stored in alpha_range
+   alpha_frequentist_best_fit : float
+   \tMaximum-likelihood best estimate of alpha
+   posterior_alpha : float ndarray
+   \tPosterior probability of the alphas stored in alpha_range
+   likelihood_a : float ndarray
+   \tLikelihood of data as a function of the as stored in alpha_range
+   a_frequentist_best_fit : float
+   \tMaximum-likelihood best estimate of a
+   posterior_a : float ndarray
+   \tPosterior probability of the as stored in a_range
    """
-   def __init__(self, alpha, n, sigma, n_steps = 1000, plot_folder = 'priors_plots'):
+   def __init__(self, alpha, n, sigma, n_steps = 1000, plot_folder = 'parameter_fitting_plots'):
       self.alpha = alpha
       self.a = np.tan(alpha)
       self.n = n
@@ -55,22 +93,27 @@ class experiment:
       self.plot_folder = plot_folder
       self.run()
       return
-      
+
+
    ### Statistics functions
    
    def run(self):
-      self.generate_measurements()
-      self.calculate_likelihood_alpha()
-      self.calculate_posterior_alpha()
-      self.frequentist_fit_alpha()
-      self.bayesian_fit_alpha()
-      self.calculate_likelihood_a()
-      self.calculate_posterior_a()
-      self.frequentist_fit_a()
-      self.bayesian_fit_a()
+      """
+      Run the simulated experiment and run the different fits to the
+      simulated data
+      """
+      self._generate_measurements()
+      self._calculate_likelihood_alpha()
+      self._calculate_posterior_alpha()
+      self._frequentist_fit_alpha()
+      self._bayesian_fit_alpha()
+      self._calculate_likelihood_a()
+      self._calculate_posterior_a()
+      self._frequentist_fit_a()
+      self._bayesian_fit_a()
       return
    
-   def generate_measurements(self):
+   def _generate_measurements(self):
       r = rd.uniform(low = 0., high = 1., size = self.n)
       x = r * np.cos(self.alpha) + rd.normal(loc=0.0, scale=self.sigma, size=self.n)
       y = r * np.sin(self.alpha) + rd.normal(loc=0.0, scale=self.sigma, size=self.n)
@@ -87,10 +130,9 @@ class experiment:
       d2 = self.distance_squared(x_true, y_true, x, y)
       return (1. / (self.sigma * np.sqrt(2 * np.pi))) * np.exp(- d2 / (2 * self.sigma**2))
 
-
    # Fitting procedure using the parametrisation with alpha
    
-   def calculate_likelihood_alpha(self):
+   def _calculate_likelihood_alpha(self):
       # Note to self: I may rewrite this as a n_steps x n matrix, so that
       # we can easily check the effect of analysing subsets of the data.
       self.likelihood_alpha = np.ones(self.n_steps)
@@ -107,21 +149,21 @@ class experiment:
             self.likelihood_alpha[i] *= P
       return
       
-   def frequentist_fit_alpha(self):
+   def _frequentist_fit_alpha(self):
       self.alpha_frequentist_best_fit = self.alpha_range[np.argmax(self.likelihood_alpha)]
       return
       
-   def calculate_posterior_alpha(self):
+   def _calculate_posterior_alpha(self):
       self.posterior_alpha = self.likelihood_alpha * np.ones(self.n_steps) * np.trapz(self.likelihood_alpha, x=self.alpha_range)
       return
       
-   def bayesian_fit_alpha(self):
+   def _bayesian_fit_alpha(self):
       self.alpha_bayesian_best_fit = self.alpha_range[np.argmax(self.posterior_alpha)]
       return
       
    # Fitting procedure using the parametrisation with a
    
-   def calculate_likelihood_a(self):
+   def _calculate_likelihood_a(self):
       self.likelihood_a = np.ones(self.n_steps)
       
       for i in range(self.n_steps):
@@ -138,15 +180,15 @@ class experiment:
             self.likelihood_a[i] *= P
       return
       
-   def frequentist_fit_a(self):
+   def _frequentist_fit_a(self):
       self.a_frequentist_best_fit = self.a_range[np.argmax(self.likelihood_a)]
       return
       
-   def calculate_posterior_a(self):
+   def _calculate_posterior_a(self):
       self.posterior_a = self.likelihood_a * np.ones(self.n_steps) * np.trapz(self.likelihood_a, x=self.a_range)
       return
       
-   def bayesian_fit_a(self):
+   def _bayesian_fit_a(self):
       self.a_bayesian_best_fit = self.a_range[np.argmax(self.posterior_a)]
       return
 
@@ -154,6 +196,9 @@ class experiment:
    ### Plotting functions
       
    def plot(self):
+      """
+      Plot the simulated data, and the different fits to the data
+      """
       self.plot_data()
       self.plot_likelihood_scatter()
       self.plot_likelihood_alpha()
