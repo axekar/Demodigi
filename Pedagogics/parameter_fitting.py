@@ -78,7 +78,7 @@ class experiment:
       self.n_steps = n_steps
       
       self.parameter_range = {'alpha':np.linspace(0., np.pi/2., num = self.n_steps),
-      				'a':np.linspace(0., 10., num = self.n_steps)}
+      				'a':np.linspace(0., self.true_values['a'] * 10, num = self.n_steps)}
       self.r_range = np.linspace(0., 1., num = self.n_steps)
 
       self.likelihood = {}
