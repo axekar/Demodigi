@@ -132,10 +132,9 @@ class experiment:
       self.best_fits = {'alpha':{}, 'a':{}}
       
       self.plot_folder = plot_folder
-      self.run()
-
       self._parameter_to_latex = {'a':r'a', 'alpha':r'\alpha'}
 
+      self.run()
       return
 
 
@@ -146,8 +145,6 @@ class experiment:
       
    def alpha_to_a(self, alpha):
       return np.tan(alpha)
-
-   
 
    def _calculate_CDF(self, parameter_range, PDF):
       """
