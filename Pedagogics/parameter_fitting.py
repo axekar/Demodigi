@@ -260,13 +260,14 @@ class experiment:
          y = self.measurements[i,1]
          P_scatter = self.P_scatter_given_true(x_true_grid, y_true_grid, x, y)
          plt.clf()
-         plt.tight_layout()
          plt.pcolormesh(x_true_grid, y_true_grid, P_scatter, shading = 'nearest')
          plt.scatter(self.measurements[:,0], self.measurements[:,1], c = 'w', edgecolors = 'k')
          plt.xlim(0, 1)
          plt.ylim(0, 1)
          plt.xlabel(r'$x$')
          plt.ylabel(r'$y$')         
+         plt.gca().set_aspect('equal', adjustable='box')
+         plt.tight_layout()
          plt.savefig(self.likelihood_scatter_plotpath(i))
       return
       
@@ -280,7 +281,6 @@ class experiment:
    def plot_likelihood(self):
       for parameter in ['alpha', 'a']:
          plt.clf()
-         plt.tight_layout()
          ymax = np.max(self.likelihood[parameter]) * 1.1
          plt.vlines(self.true_values[parameter], 0, ymax, colors='k', linestyles='--', label = 'True value')
          plt.plot(self.parameter_range[parameter], self.likelihood[parameter], c = 'b', linestyle = '-', label = 'Likelihood')
@@ -290,6 +290,7 @@ class experiment:
          plt.xlabel(r'${}$'.format(self._parameter_to_latex[parameter]))
          plt.ylabel(r'$P \left( x, y | {} \right)$'.format(self._parameter_to_latex[parameter]))
          plt.legend()
+         plt.tight_layout()
          plt.savefig('./{}/Likelihood_{}.png'.format(self.plot_folder, parameter))
       return
       
@@ -297,7 +298,6 @@ class experiment:
       for parameter in ['alpha', 'a']:
          for prior_name in self.prior[parameter].keys():
             plt.clf()
-            plt.tight_layout()
             ymax = max(np.max(self.posterior[parameter]['{} prior'.format(prior_name)]), 1.0)
             plt.vlines(self.true_values[parameter], 0, np.max(self.posterior[parameter]['{} prior'.format(prior_name)]), colors='k', linestyles='--', label = 'True value')
             plt.plot(self.parameter_range[parameter], self.posterior[parameter]['{} prior'.format(prior_name)], c = 'b', linestyle = '-', label = 'Posterior PDF')
@@ -309,6 +309,7 @@ class experiment:
             plt.xlabel(r'${}$'.format(self._parameter_to_latex[parameter]))
             plt.ylabel(r'$P \left( {} | x, y \right)$'.format(self._parameter_to_latex[parameter]))
             plt.legend()
+            plt.tight_layout()
             plt.savefig('./{}/Posterior_{}_{}_prior.png'.format(self.plot_folder, parameter, prior_name))
       return
    
