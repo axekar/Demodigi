@@ -63,18 +63,18 @@ class experiment:
    \tLargest deviation from the origin along either axis
    likelihood_alpha : float ndarray
    \tLikelihood of data as a function of the alphas stored in alpha_range
-   alpha_frequentist_best_fit : float
-   \tMaximum-likelihood best estimate of alpha
    posterior_alpha : float ndarray
    \tPosterior probability of the alphas stored in alpha_range
+   alpha_fits : dict of floats
+   \tDictionary containing the best fits of alpha using different methods
    likelihood_a : float ndarray
    \tLikelihood of data as a function of the as stored in alpha_range
-   a_frequentist_best_fit : float
-   \tMaximum-likelihood best estimate of a
    posterior_a : float ndarray
    \tPosterior probability of the as stored in a_range
+   a_fits : dict of floats
+   \tDictionary containing the best fits of a using different methods
    """
-   def __init__(self, alpha, n, sigma, n_steps = 1000, plot_folder = 'parameter_fitting_plots'):
+   def __init__(self, alpha, n, sigma, n_steps = 10000, plot_folder = 'parameter_fitting_plots'):
       self.alpha = alpha
       self.a = np.tan(alpha)
       self.n = n
@@ -85,14 +85,25 @@ class experiment:
       # angle alpha
       self.alpha_range = np.linspace(0., np.pi/2., num = self.n_steps)
       self.r_range = np.linspace(0., 1., num = self.n_steps)
+      self.alpha_fits = {}
       
       # These are used in the fit that describes the line in terms of the
       # slope a
       self.a_range = np.linspace(0., 10., num = self.n_steps)
+      self.a_fits = {}
+      
       
       self.plot_folder = plot_folder
       self.run()
       return
+
+   ### Convenience functions
+ 
+   def a_to_alpha(self, a):
+      return np.arctan(a)
+      
+   def alpha_to_a(self, alpha):
+      return np.tan(alpha)
 
 
    ### Statistics functions
@@ -105,12 +116,12 @@ class experiment:
       self._generate_measurements()
       self._calculate_likelihood_alpha()
       self._calculate_posterior_alpha()
-      self._frequentist_fit_alpha()
-      self._bayesian_fit_alpha()
+      self._maximum_likelihood_fit_alpha()
+      self._maximum_posterior_fit_alpha()
       self._calculate_likelihood_a()
       self._calculate_posterior_a()
-      self._frequentist_fit_a()
-      self._bayesian_fit_a()
+      self._maximum_likelihood_fit_a()
+      self._maximum_posterior_fit_a()
       return
    
    def _generate_measurements(self):
@@ -133,8 +144,6 @@ class experiment:
    # Fitting procedure using the parametrisation with alpha
    
    def _calculate_likelihood_alpha(self):
-      # Note to self: I may rewrite this as a n_steps x n matrix, so that
-      # we can easily check the effect of analysing subsets of the data.
       self.likelihood_alpha = np.ones(self.n_steps)
       
       for i in range(self.n_steps):
@@ -149,16 +158,16 @@ class experiment:
             self.likelihood_alpha[i] *= P
       return
       
-   def _frequentist_fit_alpha(self):
-      self.alpha_frequentist_best_fit = self.alpha_range[np.argmax(self.likelihood_alpha)]
+   def _maximum_likelihood_fit_alpha(self):
+      self.alpha_fits['Maximum likelihood'] = self.alpha_range[np.argmax(self.likelihood_alpha)]
       return
       
    def _calculate_posterior_alpha(self):
       self.posterior_alpha = self.likelihood_alpha * np.ones(self.n_steps) * np.trapz(self.likelihood_alpha, x=self.alpha_range)
       return
       
-   def _bayesian_fit_alpha(self):
-      self.alpha_bayesian_best_fit = self.alpha_range[np.argmax(self.posterior_alpha)]
+   def _maximum_posterior_fit_alpha(self):
+      self.alpha_fits['Maximum posterior, flat prior'] = self.alpha_range[np.argmax(self.posterior_alpha)]
       return
       
    # Fitting procedure using the parametrisation with a
@@ -180,16 +189,16 @@ class experiment:
             self.likelihood_a[i] *= P
       return
       
-   def _frequentist_fit_a(self):
-      self.a_frequentist_best_fit = self.a_range[np.argmax(self.likelihood_a)]
+   def _maximum_likelihood_fit_a(self):
+      self.a_fits['Maximum likelihood'] = self.a_range[np.argmax(self.likelihood_a)]
       return
       
    def _calculate_posterior_a(self):
       self.posterior_a = self.likelihood_a * np.ones(self.n_steps) * np.trapz(self.likelihood_a, x=self.a_range)
       return
       
-   def _bayesian_fit_a(self):
-      self.a_bayesian_best_fit = self.a_range[np.argmax(self.posterior_a)]
+   def _maximum_posterior_fit_a(self):
+      self.a_fits['Maximum posterior, flat prior'] = self.a_range[np.argmax(self.posterior_a)]
       return
 
       
@@ -224,13 +233,15 @@ class experiment:
    def plot_fits(self):
       plt.clf()
       plt.tight_layout()
-      plt.plot([0, np.cos(self.alpha)], [0, np.sin(self.alpha)], c = 'k', linestyle = '--', label = 'Sann')
       plt.scatter(self.measurements[:,0], self.measurements[:,1], s=1, marker = 's')
       plt.scatter([0, np.cos(self.alpha)], [0, np.sin(self.alpha)], c = 'k')
-      plt.plot([0, np.cos(self.alpha_bayesian_best_fit)], [0, np.sin(self.alpha_bayesian_best_fit)], c = 'b', linestyle = '-', label = r'Bayesiansk, $\alpha$')
-      plt.plot([0, np.cos(self.alpha_frequentist_best_fit)], [0, np.sin(self.alpha_frequentist_best_fit)], c = 'b', linestyle = '--', label = r'Frekventistisk, $\alpha$')
-      plt.plot([0, 1. / np.sqrt(1. + self.a_bayesian_best_fit**2)], [0, self.a_bayesian_best_fit / np.sqrt(1. + self.a_bayesian_best_fit**2)], c = 'r', linestyle = '-', label = r'Bayesiansk, $a$')
-      plt.plot([0, 1. / np.sqrt(1. + self.a_frequentist_best_fit**2)], [0, self.a_frequentist_best_fit / np.sqrt(1. + self.a_frequentist_best_fit**2)], c = 'r', linestyle = '--', label = r'Frekventistisk, $a$')
+      for name, alpha in self.alpha_fits.items():
+         plt.plot([0, np.cos(alpha)], [0, np.sin(alpha)], linestyle = '-', label = r'{}, $\alpha$'.format(name))
+      for name, a in self.a_fits.items():
+         x_end = 1. / np.sqrt(1 + a**2)
+         y_end = a * x_end
+         plt.plot([0, x_end], [0, y_end], '--', label = r'{}, $a$'.format(name))
+      plt.plot([0, np.cos(self.alpha)], [0, np.sin(self.alpha)], c = 'k', linestyle = '--', label = 'Sann')
       plt.xlim(-max(1, self.absmax), max(1, self.absmax))
       plt.ylim(-max(1, self.absmax), max(1, self.absmax))
       plt.xlabel(r'$x$')
@@ -240,7 +251,7 @@ class experiment:
       return
    
    def plot_likelihood_scatter(self):
-      x_true_grid, y_true_grid = np.meshgrid(np.linspace(0, 1, self.n_steps), np.linspace(0, 1, self.n_steps))
+      x_true_grid, y_true_grid = np.meshgrid(np.linspace(0, 1, int(np.sqrt(self.n_steps))), np.linspace(0, 1, int(np.sqrt(self.n_steps))))
       
       for i in range(self.n):
          x = self.measurements[i,0]
