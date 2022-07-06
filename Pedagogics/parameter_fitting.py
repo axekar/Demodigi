@@ -28,11 +28,18 @@ equation y = ax. When fitting, three procedures are used:
  - Maximum-posterior estimation
  - Median-posterior estimation
  
-When calculating the posterior, three different priors are used. For
-the parametrisation using alpha, only a flat prior on alpha is used.
-For the parametrisation using a, a flat prior and a non-informative
-prior are used. One point of this is to demonstrate that flat priors
-and non-informative priors are not in general the same thing.
+When calculating the posterior, two choices of prior are used:
+
+ - Flat prior
+ - Non-informative prior
+ 
+For the parametrisation using alpha, these are the same, but not for
+the parametrisation using a. This is one of the things the toy model is
+intended to illustrate: There is a tendency to assume that it is
+possible to avoid making assumptions by using a flat prior. This is not
+true in general, as what counts as a flat prior is an artefact of the
+parametrisation, and in some cases it might encode fairly strong
+assumptions.
 
 
 Written by Alvin Gavel
