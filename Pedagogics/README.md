@@ -11,4 +11,4 @@ av kvalitetsskillnader`.
 
 `parameter_fitting.py`: A module implementing a toy model that demonstrates the difference between a number of different methods of parameter fitting.
 
-`pf_illustration_script.py`: A script that runs the `parameter_fitting` with some convenient starting values.
+`pf_illustration_script.py`: A script that runs the `parameter_fitting` module with some convenient starting values.
