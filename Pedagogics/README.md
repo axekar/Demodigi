@@ -9,4 +9,6 @@ The current contents of this directory are:
 `df_illustration_script.py`: A script that uses the `differences` module to generate the plots used in the internal _Demokratisk Digitalisering_ document `Statistisk analys
 av kvalitetsskillnader`.
 
-`priors.py`: A module implementing a toy model that demonstrates a common misconception in Bayesian analysis: That it is possible to avoid making assumptions by choosing a flat prior. In reality, what is a flat prior depends on the choice of parametrisation of the underlying problem.
+`parameter_fitting.py`: A module implementing a toy model that demonstrates the difference between a number of different methods of parameter fitting.
+
+`pf_illustration_script.py`: A script that runs the `parameter_fitting` with some convenient starting values.
