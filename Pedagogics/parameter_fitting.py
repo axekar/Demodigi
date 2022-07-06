@@ -224,6 +224,8 @@ class experiment:
       self.plot_likelihood()
       self.plot_posterior()
       self.plot_all_fits()
+      self.plot_fits_with_highlight()
+      self.makegif_fits()
       return
    
    def plot_data(self):
@@ -300,8 +302,8 @@ class experiment:
          plt.legend()
          plt.savefig('./{}/Posterior_{}_flat_prior.png'.format(self.plot_folder, parameter))
       return
-      
-   def plot_all_fits(self):
+   
+   def _get_fit_lines(self):
       fit_lines = {'a':{}, 'alpha':{}}
       for fit_method, alpha in self.best_fits['alpha'].items():
          fit_lines['alpha'][fit_method] = {}
@@ -315,6 +317,10 @@ class experiment:
          fit_lines['a'][fit_method]['x'] = [0, x_end]
          fit_lines['a'][fit_method]['y'] = [0, y_end]
          fit_lines['a'][fit_method]['label'] =  r'{}, $a$'.format(fit_method)
+      return fit_lines
+   
+   def plot_all_fits(self):
+      fit_lines = self._get_fit_lines()
          
       plt.clf()
       plt.tight_layout()
@@ -331,4 +337,41 @@ class experiment:
       plt.ylabel(r'$y$') 
       plt.legend()
       plt.savefig('./{}/Best_fits.png'.format(self.plot_folder))
+      return
+      
+   def fit_plotpath(self, parameter, fit_method):
+      return './{}/Best_fit_{}_{}.png'.format(self.plot_folder, parameter, fit_method)
+      
+   def plot_fits_with_highlight(self):
+      fit_lines = self._get_fit_lines()
+         
+      for parameter_1 in ['a', 'alpha']:
+         for fit_method_1 in fit_lines[parameter_1].keys():
+            plt.clf()
+            plt.tight_layout()
+            plt.scatter(self.measurements[:,0], self.measurements[:,1], s=1, marker = 's')
+            plt.scatter([0, np.cos(self.true_values['alpha'])], [0, np.sin(self.true_values['alpha'])], c = 'k')
+            for parameter_2 in ['a', 'alpha']:
+               for fit_method_2 in fit_lines[parameter_2].keys():
+                  dictionary = fit_lines[parameter_2][fit_method_2]
+                  if parameter_1 == parameter_2 and fit_method_1 == fit_method_2:
+                     plt.plot(dictionary['x'], dictionary['y'], linestyle = '-', c = 'red', label = dictionary['label'], zorder=10)
+                  else:
+                     plt.plot(dictionary['x'], dictionary['y'], linestyle = '--', c = 'gray', label = dictionary['label'])
+
+            plt.plot([0, np.cos(self.true_values['alpha'])], [0, np.sin(self.true_values['alpha'])], c = 'k', linestyle = '--', label = 'True line')
+            plt.xlim(-max(1, self.absmax), max(1, self.absmax))
+            plt.ylim(-max(1, self.absmax), max(1, self.absmax))
+            plt.xlabel(r'$x$')
+            plt.ylabel(r'$y$') 
+            plt.legend()
+            plt.savefig(self.fit_plotpath(parameter_1, fit_method_1))
+      return
+
+   def makegif_fits(self):
+      plots = []
+      for parameter in ['a', 'alpha']:
+         for fit_method in self.best_fits[parameter].keys():
+            plots.append(imageio.imread(self.fit_plotpath(parameter, fit_method)))
+      imageio.mimsave('./{}/Best_fits.gif'.format(self.plot_folder), plots, duration=2)
       return
