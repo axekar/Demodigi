@@ -61,43 +61,36 @@ class experiment:
    \tLargest deviation from the origin along the y-axis
    \tabsmax : float
    \tLargest deviation from the origin along either axis
-   likelihood_alpha : float ndarray
-   \tLikelihood of data as a function of the alphas stored in alpha_range
-   posterior_alpha : float ndarray
-   \tPosterior probability of the alphas stored in alpha_range
-   posterior_alpha_CDF : float ndarray
-   \tCumulative distribution function of the posterior probability over alpha
-   alpha_fits : dict of floats
-   \tDictionary containing the best fits of alpha using different methods
-   likelihood_a : float ndarray
-   \tLikelihood of data as a function of the as stored in alpha_range
-   posterior_a : float ndarray
-   \tPosterior probability of the as stored in a_range
-   posterior_a_CDF : float ndarray
-   \tCumulative distribution function of the posterior probability over a
-   a_fits : dict of floats
-   \tDictionary containing the best fits of a using different methods
+   likelihood : dict of float ndarray
+   \tLikelihood of data as a function of the parameter values
+   posterior : dict of float ndarray
+   \tPosterior of parameter values
+   posterior_CDF : dict of float ndarray
+   \tCumulative distribution function of the posterior probability
+   best_fits : dict of dicts of floats
+   \tDictionaries containing the best fits of alpha and a using different
+   \tmethods
    """
    def __init__(self, alpha, n, sigma, n_steps = 10000, plot_folder = 'parameter_fitting_plots'):
-      self.alpha = alpha
-      self.a = np.tan(alpha)
+      self.true_values = {'alpha': alpha, 'a':np.tan(alpha)}
       self.n = n
       self.sigma = sigma
       self.n_steps = n_steps
       
-      # These are used in the fit that describes the line in terms of the
-      # angle alpha
-      self.alpha_range = np.linspace(0., np.pi/2., num = self.n_steps)
+      self.parameter_range = {'alpha':np.linspace(0., np.pi/2., num = self.n_steps),
+      				'a':np.linspace(0., 10., num = self.n_steps)}
       self.r_range = np.linspace(0., 1., num = self.n_steps)
-      self.alpha_fits = {}
-      
-      # These are used in the fit that describes the line in terms of the
-      # slope a
-      self.a_range = np.linspace(0., 10., num = self.n_steps)
-      self.a_fits = {}
+
+      self.likelihood = {}
+      self.posterior = {}
+      self.posterior_CDF = {}
+      self.best_fits = {'alpha':{}, 'a':{}}
       
       self.plot_folder = plot_folder
       self.run()
+
+      self._parameter_to_latex = {'a':r'a', 'alpha':r'\alpha'}
+
       return
 
 
@@ -109,14 +102,16 @@ class experiment:
    def alpha_to_a(self, alpha):
       return np.tan(alpha)
 
-   def _calculate_CDF(self, variable, PDF):
+   
+
+   def _calculate_CDF(self, parameter_range, PDF):
       """
       This is *not* computationally efficient
       """
-      n_points = len(variable)
+      n_points = len(parameter_range)
       CDF = np.zeros(n_points)
       for i in range(n_points-1):
-         CDF[i+1] = np.trapz(PDF[0:i], x=variable[0:i])
+         CDF[i+1] = np.trapz(PDF[0:i], x=parameter_range[0:i])
       return CDF
       
 
@@ -129,21 +124,17 @@ class experiment:
       """
       self._generate_measurements()
       self._calculate_likelihood_alpha()
-      self._calculate_posterior_alpha()
-      self._maximum_likelihood_fit_alpha()
-      self._maximum_posterior_fit_alpha()
-      self._median_posterior_fit_alpha()
       self._calculate_likelihood_a()
-      self._calculate_posterior_a()
-      self._maximum_likelihood_fit_a()
-      self._maximum_posterior_fit_a()
-      self._median_posterior_fit_a()
+      self._calculate_posteriors()
+      self._maximum_likelihood_fit()
+      self._maximum_posterior_fit()
+      self._median_posterior_fit()
       return
    
    def _generate_measurements(self):
       r = rd.uniform(low = 0., high = 1., size = self.n)
-      x = r * np.cos(self.alpha) + rd.normal(loc=0.0, scale=self.sigma, size=self.n)
-      y = r * np.sin(self.alpha) + rd.normal(loc=0.0, scale=self.sigma, size=self.n)
+      x = r * np.cos(self.true_values['alpha']) + rd.normal(loc=0.0, scale=self.sigma, size=self.n)
+      y = r * np.sin(self.true_values['alpha']) + rd.normal(loc=0.0, scale=self.sigma, size=self.n)
       self.measurements = np.asarray(list(zip(x, y)))
       self.x_absmax = np.max(np.absolute(x))
       self.y_absmax = np.max(np.absolute(y))
@@ -157,13 +148,14 @@ class experiment:
       d2 = self.distance_squared(x_true, y_true, x, y)
       return (1. / (self.sigma * np.sqrt(2 * np.pi))) * np.exp(- d2 / (2 * self.sigma**2))
 
-   # Fitting procedure using the parametrisation with alpha
+
+   ### Calculations of likelihoods and posteriors
    
    def _calculate_likelihood_alpha(self):
-      self.likelihood_alpha = np.ones(self.n_steps)
+      self.likelihood['alpha'] = np.ones(self.n_steps)
       
       for i in range(self.n_steps):
-         alpha = self.alpha_range[i]
+         alpha = self.parameter_range['alpha'][i]
          x_true_range = self.r_range * np.cos(alpha)
          y_true_range = self.r_range * np.sin(alpha)
          for j in range(self.n):
@@ -171,35 +163,14 @@ class experiment:
             y = self.measurements[j,1]
             integrand = self.P_scatter_given_true(x_true_range, y_true_range, x, y)
             P = np.trapz(integrand, x=self.r_range)
-            self.likelihood_alpha[i] *= P
+            self.likelihood['alpha'][i] *= P
       return
       
-   def _maximum_likelihood_fit_alpha(self):
-      self.alpha_fits['Maximum likelihood'] = self.alpha_range[np.argmax(self.likelihood_alpha)]
-      return
-      
-   def _calculate_posterior_alpha(self):
-      self.posterior_alpha = self.likelihood_alpha * np.ones(self.n_steps) / np.trapz(self.likelihood_alpha, x=self.alpha_range)
-      self.posterior_alpha_CDF = self._calculate_CDF(self.alpha_range, self.posterior_alpha)
-      return
-      
-   def _maximum_posterior_fit_alpha(self):
-      self.alpha_fits['Maximum posterior, flat prior'] = self.alpha_range[np.argmax(self.posterior_alpha)]
-      return
-      
-   def _median_posterior_fit_alpha(self):
-      where_above = np.where(self.posterior_alpha_CDF > 0.5)
-      first_above_index = where_above[0][0]
-      self.alpha_fits['Median posterior, flat prior'] = self.alpha_range[first_above_index]
-      return
-      
-   # Fitting procedure using the parametrisation with a
-   
    def _calculate_likelihood_a(self):
-      self.likelihood_a = np.ones(self.n_steps)
+      self.likelihood['a'] = np.ones(self.n_steps)
       
       for i in range(self.n_steps):
-         a = self.a_range[i]
+         a = self.parameter_range['a'][i]
          x_end = 1. / np.sqrt(1. + a**2)
          x_true_range = np.linspace(0., x_end)
          y_true_range = a * x_true_range
@@ -209,29 +180,37 @@ class experiment:
             P_xy_a = self.P_scatter_given_true(x_true_range, y_true_range, x, y)
             P_x = np.sqrt(1. + a**2)
             P = np.trapz(P_xy_a * P_x, x=x_true_range)
-            self.likelihood_a[i] *= P
-      return
-      
-   def _maximum_likelihood_fit_a(self):
-      self.a_fits['Maximum likelihood'] = self.a_range[np.argmax(self.likelihood_a)]
-      return
-      
-   def _calculate_posterior_a(self):
-      self.posterior_a = self.likelihood_a * np.ones(self.n_steps) / np.trapz(self.likelihood_a, x=self.a_range)
-      self.posterior_a_CDF = self._calculate_CDF(self.a_range, self.posterior_a)
-      return
-      
-   def _maximum_posterior_fit_a(self):
-      self.a_fits['Maximum posterior, flat prior'] = self.a_range[np.argmax(self.posterior_a)]
+            self.likelihood['a'][i] *= P
       return
 
-   def _median_posterior_fit_a(self):
-      where_above = np.where(self.posterior_a_CDF > 0.5)
-      first_above_index = where_above[0][0]
-      self.a_fits['Median posterior, flat prior'] = self.a_range[first_above_index]
+   def _calculate_posteriors(self):
+      for parameter in ['alpha', 'a']:
+         self.posterior[parameter] = self.likelihood[parameter] * np.ones(self.n_steps) / np.trapz(self.likelihood[parameter], x=self.parameter_range[parameter])
+         self.posterior_CDF[parameter] = self._calculate_CDF(self.parameter_range[parameter], self.posterior[parameter])
       return
 
+
+   ### Fitting procedures
       
+   def _maximum_likelihood_fit(self):
+      for parameter in ['alpha', 'a']:
+         self.best_fits[parameter]['Maximum likelihood'] = self.parameter_range[parameter][np.argmax(self.likelihood[parameter])]
+      return
+      
+
+   def _maximum_posterior_fit(self):
+      for parameter in ['alpha', 'a']:
+         self.best_fits[parameter]['Maximum posterior, flat prior'] = self.parameter_range[parameter][np.argmax(self.posterior[parameter])]
+      return
+      
+   def _median_posterior_fit(self):
+      for parameter in ['alpha', 'a']:
+         where_above = np.where(self.posterior_CDF['alpha'] > 0.5)
+         first_above_index = where_above[0][0]
+         self.best_fits[parameter]['Median posterior, flat prior'] = self.parameter_range[parameter][first_above_index]
+      return
+      
+
    ### Plotting functions
       
    def plot(self):
@@ -240,10 +219,8 @@ class experiment:
       """
       self.plot_data()
       self.plot_likelihood_scatter()
-      self.plot_likelihood_alpha()
-      self.plot_posterior_alpha()
-      self.plot_likelihood_a()
-      self.plot_posterior_a()
+      self.plot_likelihood()
+      self.plot_posterior()
       self.plot_fits()
       return
    
@@ -251,33 +228,13 @@ class experiment:
       plt.clf()
       plt.tight_layout()
       plt.scatter(self.measurements[:,0], self.measurements[:,1], s=1, marker = 's')
-      plt.scatter([0, np.cos(self.alpha)], [0, np.sin(self.alpha)], c = 'k')
-      plt.plot([0, np.cos(self.alpha)], [0, np.sin(self.alpha)], c = 'k', linestyle = '--')
+      plt.scatter([0, np.cos(self.true_values['alpha'])], [0, np.sin(self.true_values['alpha'])], c = 'k')
+      plt.plot([0, np.cos(self.true_values['alpha'])], [0, np.sin(self.true_values['alpha'])], c = 'k', linestyle = '--')
       plt.xlim(-max(1, self.absmax), max(1, self.absmax))
       plt.ylim(-max(1, self.absmax), max(1, self.absmax))
       plt.xlabel(r'$x$')
       plt.ylabel(r'$y$') 
       plt.savefig('./{}/Measurements.png'.format(self.plot_folder))
-      return
-      
-   def plot_fits(self):
-      plt.clf()
-      plt.tight_layout()
-      plt.scatter(self.measurements[:,0], self.measurements[:,1], s=1, marker = 's')
-      plt.scatter([0, np.cos(self.alpha)], [0, np.sin(self.alpha)], c = 'k')
-      for name, alpha in self.alpha_fits.items():
-         plt.plot([0, np.cos(alpha)], [0, np.sin(alpha)], linestyle = '-', label = r'{}, $\alpha$'.format(name))
-      for name, a in self.a_fits.items():
-         x_end = 1. / np.sqrt(1 + a**2)
-         y_end = a * x_end
-         plt.plot([0, x_end], [0, y_end], '--', label = r'{}, $a$'.format(name))
-      plt.plot([0, np.cos(self.alpha)], [0, np.sin(self.alpha)], c = 'k', linestyle = '--', label = 'True')
-      plt.xlim(-max(1, self.absmax), max(1, self.absmax))
-      plt.ylim(-max(1, self.absmax), max(1, self.absmax))
-      plt.xlabel(r'$x$')
-      plt.ylabel(r'$y$') 
-      plt.legend()
-      plt.savefig('./{}/Best_fits.png'.format(self.plot_folder))
       return
    
    def plot_likelihood_scatter(self):
@@ -298,50 +255,47 @@ class experiment:
          plt.savefig('./{}/Likelihood_scatter_{}.png'.format(self.plot_folder, i))
       return
       
-   def plot_likelihood_alpha(self):
-      plt.clf()
-      plt.tight_layout()
-      plt.plot(self.alpha_range, self.likelihood_alpha, c = 'b', linestyle = '--')
-      plt.vlines(self.alpha, 0, np.max(self.likelihood_alpha), colors='k', linestyles='--')
-      plt.xlim(0, np.pi/2)
-      plt.xlabel(r'$\alpha$')
-      plt.ylabel(r'$P \left( x, y | \alpha \right)$')
-      plt.savefig('./{}/Likelihood_alpha.png'.format(self.plot_folder))
+   def plot_likelihood(self):
+      for parameter in ['alpha', 'a']:
+         plt.clf()
+         plt.tight_layout()
+         plt.plot(self.parameter_range[parameter], self.likelihood[parameter], c = 'b', linestyle = '--')
+         plt.vlines(self.true_values[parameter], 0, np.max(self.likelihood[parameter]), colors='k', linestyles='--')
+         plt.xlim(0, np.pi/2)
+         plt.xlabel(r'${}$'.format(self._parameter_to_latex[parameter]))
+         plt.ylabel(r'$P \left( x, y | {} \right)$'.format(self._parameter_to_latex[parameter]))
+         plt.savefig('./{}/Likelihood_{}.png'.format(self.plot_folder, parameter))
       return
       
-   def plot_posterior_alpha(self):
-      plt.clf()
-      plt.tight_layout()
-      plt.plot(self.alpha_range, self.posterior_alpha, c = 'b', linestyle = '-')
-      plt.plot(self.alpha_range, self.posterior_alpha_CDF, c = 'b', linestyle = '--')
-      plt.vlines(self.alpha, 0, np.max(self.posterior_alpha), colors='k', linestyles='--')
-      plt.xlim(0, np.pi/2)
-      plt.xlabel(r'$\alpha$')
-      plt.ylabel(r'$P \left( \alpha | x, y \right)$')
-      plt.savefig('./{}/Posterior_alpha_flat_prior.png'.format(self.plot_folder))
+   def plot_posterior(self):
+      for parameter in ['alpha', 'a']:
+         plt.clf()
+         plt.tight_layout()
+         plt.plot(self.parameter_range[parameter], self.posterior[parameter], c = 'b', linestyle = '-')
+         plt.plot(self.parameter_range[parameter], self.posterior_CDF[parameter], c = 'b', linestyle = '--')
+         plt.vlines(self.true_values[parameter], 0, np.max(self.posterior[parameter]), colors='k', linestyles='--')
+         plt.xlim(0, np.pi/2)
+         plt.xlabel(r'${}$'.format(self._parameter_to_latex[parameter]))
+         plt.ylabel(r'$P \left( {} | x, y \right)$'.format(self._parameter_to_latex[parameter]))
+      plt.savefig('./{}/Posterior_{}_flat_prior.png'.format(self.plot_folder, parameter))
       return
       
-   def plot_likelihood_a(self):
+   def plot_fits(self):
       plt.clf()
       plt.tight_layout()
-      plt.plot(self.a_range, self.likelihood_a, c = 'r', linestyle = '--')
-      plt.vlines(self.a, 0, np.max(self.likelihood_a), colors='k', linestyles='--')
-      index_max = np.argmax(self.likelihood_a)
-      plt.xlim(0, self.a_range[min(index_max * 2, self.n_steps - 1)])
-      plt.xlabel(r'$a$')
-      plt.ylabel(r'$P \left( x, y | a \right)$')
-      plt.savefig('./{}/Likelihood_a.png'.format(self.plot_folder))
-      return
-      
-   def plot_posterior_a(self):
-      plt.clf()
-      plt.tight_layout()
-      plt.plot(self.a_range, self.posterior_a, c = 'r', linestyle = '-')
-      plt.plot(self.a_range, self.posterior_a_CDF, c = 'r', linestyle = '--')
-      plt.vlines(self.a, 0, np.max(self.posterior_a), colors='k', linestyles='--')
-      index_max = np.argmax(self.posterior_a)
-      plt.xlim(0, self.a_range[min(index_max * 2, self.n_steps - 1)])
-      plt.xlabel(r'$a$')
-      plt.ylabel(r'$P \left( a | x, y \right)$')
-      plt.savefig('./{}/Posterior_a_flat_prior.png'.format(self.plot_folder))
+      plt.scatter(self.measurements[:,0], self.measurements[:,1], s=1, marker = 's')
+      plt.scatter([0, np.cos(self.true_values['alpha'])], [0, np.sin(self.true_values['alpha'])], c = 'k')
+      for name, alpha in self.best_fits['alpha'].items():
+         plt.plot([0, np.cos(alpha)], [0, np.sin(alpha)], linestyle = '-', label = r'{}, $\alpha$'.format(name))
+      for name, a in self.best_fits['a'].items():
+         x_end = 1. / np.sqrt(1 + a**2)
+         y_end = a * x_end
+         plt.plot([0, x_end], [0, y_end], '--', label = r'{}, $a$'.format(name))
+      plt.plot([0, np.cos(self.true_values['alpha'])], [0, np.sin(self.true_values['alpha'])], c = 'k', linestyle = '--', label = 'True')
+      plt.xlim(-max(1, self.absmax), max(1, self.absmax))
+      plt.ylim(-max(1, self.absmax), max(1, self.absmax))
+      plt.xlabel(r'$x$')
+      plt.ylabel(r'$y$') 
+      plt.legend()
+      plt.savefig('./{}/Best_fits.png'.format(self.plot_folder))
       return
