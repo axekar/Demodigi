@@ -65,12 +65,16 @@ class experiment:
    \tLikelihood of data as a function of the alphas stored in alpha_range
    posterior_alpha : float ndarray
    \tPosterior probability of the alphas stored in alpha_range
+   posterior_alpha_CDF : float ndarray
+   \tCumulative distribution function of the posterior probability over alpha
    alpha_fits : dict of floats
    \tDictionary containing the best fits of alpha using different methods
    likelihood_a : float ndarray
    \tLikelihood of data as a function of the as stored in alpha_range
    posterior_a : float ndarray
    \tPosterior probability of the as stored in a_range
+   posterior_a_CDF : float ndarray
+   \tCumulative distribution function of the posterior probability over a
    a_fits : dict of floats
    \tDictionary containing the best fits of a using different methods
    """
@@ -91,7 +95,6 @@ class experiment:
       # slope a
       self.a_range = np.linspace(0., 10., num = self.n_steps)
       self.a_fits = {}
-      
       
       self.plot_folder = plot_folder
       self.run()
@@ -129,10 +132,12 @@ class experiment:
       self._calculate_posterior_alpha()
       self._maximum_likelihood_fit_alpha()
       self._maximum_posterior_fit_alpha()
+      self._median_posterior_fit_alpha()
       self._calculate_likelihood_a()
       self._calculate_posterior_a()
       self._maximum_likelihood_fit_a()
       self._maximum_posterior_fit_a()
+      self._median_posterior_fit_a()
       return
    
    def _generate_measurements(self):
@@ -182,6 +187,11 @@ class experiment:
       self.alpha_fits['Maximum posterior, flat prior'] = self.alpha_range[np.argmax(self.posterior_alpha)]
       return
       
+   def _median_posterior_fit_alpha(self):
+      where_above = np.where(self.posterior_alpha_CDF > 0.5)
+      first_above_index = where_above[0][0]
+      self.alpha_fits['Median posterior, flat prior'] = self.alpha_range[first_above_index]
+      return
       
    # Fitting procedure using the parametrisation with a
    
@@ -213,6 +223,12 @@ class experiment:
       
    def _maximum_posterior_fit_a(self):
       self.a_fits['Maximum posterior, flat prior'] = self.a_range[np.argmax(self.posterior_a)]
+      return
+
+   def _median_posterior_fit_a(self):
+      where_above = np.where(self.posterior_a_CDF > 0.5)
+      first_above_index = where_above[0][0]
+      self.a_fits['Median posterior, flat prior'] = self.a_range[first_above_index]
       return
 
       
@@ -255,7 +271,7 @@ class experiment:
          x_end = 1. / np.sqrt(1 + a**2)
          y_end = a * x_end
          plt.plot([0, x_end], [0, y_end], '--', label = r'{}, $a$'.format(name))
-      plt.plot([0, np.cos(self.alpha)], [0, np.sin(self.alpha)], c = 'k', linestyle = '--', label = 'Sann')
+      plt.plot([0, np.cos(self.alpha)], [0, np.sin(self.alpha)], c = 'k', linestyle = '--', label = 'True')
       plt.xlim(-max(1, self.absmax), max(1, self.absmax))
       plt.ylim(-max(1, self.absmax), max(1, self.absmax))
       plt.xlabel(r'$x$')
