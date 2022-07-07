@@ -631,14 +631,11 @@ class boundaries:
       \tDescribed under attributes
       """
       if poor > good:
-         print("Poor results are higher than good!")
-         return
+         raise ValueError("Poor results are higher than good!")
       if good > 1.0:
-         print("It is not possible to have more than 100% correct results")
-         return
+         raise ValueError("It is not possible to have more than 100% correct results")
       if poor < 0.0:
-         print("It is not possible to have less than 0% correct results")
-         return
+         raise ValueError("It is not possible to have less than 0% correct results")
       self.poor = poor
       self.good = good
       self.minimum_quality_difference = minimum_quality_difference

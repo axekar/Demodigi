@@ -63,7 +63,7 @@ if not all_fail:
 if all_fail:
    print('simulated_learning_module passed tests!')
    
-print('Testing methods of simulated_CBV class...')
+print('Testing simulated_CBV class...')
 null_transformation = lambda digicomp, cbv_value : digicomp
 flat_PDF = lambda n : rd.uniform(low=18, high=65, size=n)
 test_CBV = fe.simulated_CBV('test', null_transformation, null_transformation, flat_PDF)
@@ -80,7 +80,7 @@ if not post_transform_does_nothing:
 if pre_transform_does_nothing and post_transform_does_nothing:
    print('simulated_CBV passed tests!')
    
-print('Testing methods of simulated_BBV class...')
+print('Testing simulated_BBV class...')
 test_BBV = fe.simulated_BBV('test', fe.standard_transformations["no effect"], fe.standard_transformations["no effect"], 0.5)
 n_participants = 100
 random_digicomp = rd.uniform(low=0.0, high=1.0, size=n_participants)
@@ -94,3 +94,28 @@ if not post_transform_does_nothing:
    print('Null post-transform still changes digital competence!')
 if pre_transform_does_nothing and post_transform_does_nothing:
    print('simulated_BBV passed tests!')
+
+print('Testing boundaries class...')
+try:
+   fe.boundaries(-0.1, 1.0, minimum_quality_difference = 0.)
+   caught_too_low = False
+except ValueError:
+   caught_too_low = True
+try:
+   fe.boundaries(0.0, 1.1, minimum_quality_difference = 0.)
+   caught_too_high = False
+except ValueError:
+   caught_too_high = True
+try:
+   fe.boundaries(1.0, 0.0, minimum_quality_difference = 0.)
+   caught_transposed = False
+except ValueError:
+   caught_transposed = True
+if not caught_too_low:
+   print('boundaries class accepts lower boundary below zero!')
+if not caught_too_high:
+   print('boundaries class accepts upper boundary above one!')
+if not caught_transposed:
+   print('boundaries class accepts upper boundary lower than lower boundary!')
+if caught_too_low and caught_too_high and caught_transposed:
+   print('boundaries passed tests!')
