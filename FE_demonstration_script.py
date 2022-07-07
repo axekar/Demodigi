@@ -102,6 +102,7 @@ bounds = fe.boundaries(0.5, 0.75, minimum_quality_difference = 0.1)
 # out with a digital competence of 0.5, meaning that they have a 50%
 # chance of answering a question correctly. They are taught 40 different
 # skills over the course of 5 sessions.
+
 n_participants = 1000
 n_skills = 40
 n_sessions = 5
@@ -110,6 +111,7 @@ initial_digital_competence = 0.5
 
 # Define the effect that the learning module has, in the absence of any
 # manipulations
+
 default_effect = fe.standard_transformations["large improvement"]
 
 demo_group = fe.simulated_learning_module(n_skills, n_sessions, n_participants, initial_digital_competence, default_effect, known_BBVs = known_BBVs, discovered_BBVs = discovered_BBVs, unknown_BBVs = unknown_BBVs, CBVs = CBVs, boundaries = bounds)

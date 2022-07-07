@@ -79,3 +79,18 @@ if not post_transform_does_nothing:
    print('Null post-transform still changes digital competence!')
 if pre_transform_does_nothing and post_transform_does_nothing:
    print('simulated_CBV passed tests!')
+   
+print('Testing methods of simulated_BBV class...')
+test_BBV = fe.simulated_BBV('test', fe.standard_transformations["no effect"], fe.standard_transformations["no effect"], 0.5)
+n_participants = 100
+random_digicomp = rd.uniform(low=0.0, high=1.0, size=n_participants)
+pre_transform = test_BBV.pre_transformation(random_digicomp)
+post_transform = test_BBV.post_transformation(random_digicomp)
+pre_transform_does_nothing = np.all(random_digicomp == pre_transform)
+post_transform_does_nothing = np.all(random_digicomp == post_transform)
+if not pre_transform_does_nothing:
+   print('Null pre-transform still changes digital competence!')
+if not post_transform_does_nothing:
+   print('Null post-transform still changes digital competence!')
+if pre_transform_does_nothing and post_transform_does_nothing:
+   print('simulated_BBV passed tests!')
