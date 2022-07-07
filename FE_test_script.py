@@ -150,8 +150,14 @@ default_digicomp = 0
 no_skill_no_effect = fe.simulated_learning_module(n_skills, n_sessions, n_participants, default_digicomp, fe.standard_transformations['no effect'])
 no_skill_no_effect.run_simulation()
 all_fail = np.sum(no_skill_no_effect.results[:,0]) == 0
+default_digicomp = 1.0
+full_skill_no_effect = fe.simulated_learning_module(n_skills, n_sessions, n_participants, default_digicomp, fe.standard_transformations['no effect'])
+full_skill_no_effect.run_simulation()
+all_succeed = np.all(full_skill_no_effect.results[:,0] == n_skills)
 if not all_fail:
    print('Participants are succeeding even when their digital competence is zero!')
-if all_fail:
+if not all_succeed:
+   print('Participants are failing even when their digital competence is one!')
+if all_fail and all_succeed:
    print('simulated_learning_module passed tests!')
 
