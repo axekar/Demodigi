@@ -8,6 +8,7 @@ import numpy.random as rd
 
 import factorial_experiment as fe
 
+
 # ordinalise
 
 print('Testing ordinalise...')
@@ -24,6 +25,7 @@ if not reverses:
 if stays_same and reverses:
    print('ordinalise passed tests!')
 
+
 # logB
 
 print('Testing logB...')
@@ -39,6 +41,7 @@ if not logB_symmetry:
 if logB_one_handling and logB_symmetry:
    print('logB passed tests!')
 
+
 # simulated_manipulation
 
 print('Testing simulated_manipulation class...')
@@ -51,6 +54,7 @@ if not transform_does_nothing:
    print('Null transform still changes digital competence!')
 if transform_does_nothing:
    print('simulated_manipulation passed tests!')
+
 
 # simulated_CBV
 
@@ -71,6 +75,7 @@ if not post_transform_does_nothing:
 if pre_transform_does_nothing and post_transform_does_nothing:
    print('simulated_CBV passed tests!')
 
+
 # simulated_BBV
 
 print('Testing simulated_BBV class...')
@@ -87,6 +92,7 @@ if not post_transform_does_nothing:
    print('Null post-transform still changes digital competence!')
 if pre_transform_does_nothing and post_transform_does_nothing:
    print('simulated_BBV passed tests!')
+
 
 # boundaries
 
@@ -115,6 +121,7 @@ if not caught_transposed:
 if caught_too_low and caught_too_high and caught_transposed:
    print('boundaries passed tests!')
 
+
 # simulated_participant
 
 print('Testing methods of simulated_participant class...')
@@ -132,6 +139,7 @@ if not always_succeed:
 if always_fail and always_succeed:
    print('simulated_participant passed tests!')
 
+
 # simulated_learning_module
 
 print('Testing methods of simulated_learning_module class...')
@@ -139,7 +147,7 @@ n_sessions = 13
 n_skills = 7
 n_participants = 127
 default_digicomp = 0
-no_skill_no_effect = fe.simulated_learning_module(n_skills, n_sessions, n_participants, 0.3, fe.standard_transformations['no effect'])
+no_skill_no_effect = fe.simulated_learning_module(n_skills, n_sessions, n_participants, default_digicomp, fe.standard_transformations['no effect'])
 no_skill_no_effect.run_simulation()
 all_fail = np.sum(no_skill_no_effect.results[:,0]) == 0
 if not all_fail:
