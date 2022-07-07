@@ -39,3 +39,4 @@ skrattmås
 pingvin
 trana
 flamingo
+papegoja

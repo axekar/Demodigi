@@ -1,3 +1,5 @@
+leddjur
+insekt
 fjäril
 mal
 slända
@@ -5,7 +7,6 @@ trollslända
 skalbagge
 ekoxe
 nyckelpiga
-insekt
 mygga
 myggmedel
 knott
@@ -24,6 +25,7 @@ nät
 krabba
 eremitkräfta
 kräfta
+kräftdjur
 räka
 mångfoting
 tusenfoting

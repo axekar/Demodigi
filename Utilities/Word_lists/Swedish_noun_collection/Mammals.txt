@@ -5,12 +5,14 @@ rovdjur
 katt
 tamkatt
 vildkatt
+kattunge
 lodjur
 tiger
 gepard
 lejon
 hyena
 hund
+hundvalp
 vakthund
 polishund
 jakthund
@@ -68,3 +70,7 @@ utter
 grävling
 skunk
 mårddjur
+val
+valfisk
+delfin
+räv

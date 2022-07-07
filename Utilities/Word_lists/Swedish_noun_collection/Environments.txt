@@ -12,9 +12,6 @@ berg
 bergskedja
 bergsmassiv
 klippor
-hav
-innanhav
-sjö
 slätt
 stepp
 tundra

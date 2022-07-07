@@ -19,3 +19,5 @@ rötter
 stjälk
 stam
 pollen
+knopp
+blomblad

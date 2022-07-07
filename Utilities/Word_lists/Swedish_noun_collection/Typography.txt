@@ -23,3 +23,15 @@ kolon
 siffra
 symbol
 dollartecken
+fotnot
+anteckning
+kommentar
+bisats
+litteraturförteckning
+källhänvisning
+bibliografi
+marginal
+marginalanteckning
+sidnummer
+sidhuvud
+sidfot

@@ -5,3 +5,5 @@ magma
 lava
 jordbävning
 förkastning
+land
+grotta

@@ -1,5 +1,12 @@
 sköldpadda
+sköldpaddsskal
+sköldpaddsägg
 groda
+grodyngel
+grodtunga
+grodägg
+grodhopp
+pilgiftsgroda
 padda
 ödla
 kopparödla
@@ -8,3 +15,5 @@ komodovaran
 dinosaurie
 skräcködla
 tyrannosaurus
+velociraptor
+brontosaurus

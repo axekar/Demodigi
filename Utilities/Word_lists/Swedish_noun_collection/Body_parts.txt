@@ -96,3 +96,8 @@ hud
 underhud
 underhudsfett
 fettvävnad
+nagel
+tånagel
+fingernagel
+tumnagel
+nageltrång

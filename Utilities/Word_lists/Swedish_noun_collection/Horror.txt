@@ -1,6 +1,10 @@
 skräckfilm
 vampyr
 mord
+dubbelmord
+trippelmord
+seriemord
+mördare
 seriemördare
 kannibal
 zombie
