@@ -407,7 +407,7 @@ class feedback_connection(SharePointConnection):
       text_field.send_keys(participant.feedback_text)
       sleep(2)
       save_button = self.driver.find_element(By.NAME, "Save and close")
-      save_button_click()
+      save_button.click()
       sleep(2)
       
       self.set_read_privileges(participant, real_data)
