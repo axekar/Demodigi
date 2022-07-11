@@ -6,7 +6,7 @@ The current contents of this directory are:
 
 `differences.py`: A module demonstrating the idea behind looking at the difference between two distributions that describe the effectiveness of two interventions
 
-`DF_illustration_script.py`: A script that uses the `differences` module to generate the plots used in the internal _Demokratisk Digitalisering_ document `Statistisk analys
+`D_illustration_script.py`: A script that uses the `differences` module to generate the plots used in the internal _Demokratisk Digitalisering_ document `Statistisk analys
 av kvalitetsskillnader`.
 
 `parameter_fitting.py`: A module implementing a toy model that demonstrates the difference between a number of different methods of parameter fitting.
