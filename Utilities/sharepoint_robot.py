@@ -404,7 +404,7 @@ class feedback_connection(SharePointConnection):
       sleep(2)
       text_field = self.driver.find_element(By.CSS_SELECTOR, "[aria-label='Text editor. Use Alt+F10 to go to toolbars.']")
       text_field.click()
-      text_field.send_keys(participant.feedback)
+      text_field.send_keys(participant.feedback_text)
       sleep(2)
       save_button = self.driver.find_element(By.NAME, "Save and close")
       save_button_click()
