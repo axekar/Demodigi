@@ -24,6 +24,12 @@ automatic way of creating pages in SharePoint. Hence, our solution is
 to use Selenium to implement a "robot" that creates the SharePoint
 lists.
 
+In addition to the passwords, we also want to deliver feedback to the
+participants. It is not yet fully defined what that feedback will look
+like, but this module contains a skeleton of functions for doing that.
+
+--- About getting the module to run
+
 Running the module currently requires Chrome/Chromium, although it is
 probably trivial to modify it to use Firefox. By default the module
 assumes that the drivers are stored in a directory named "Drivers".
@@ -32,6 +38,7 @@ NOTE: If you are on Windows, running this code with a script, and
 running the exact same instructions interactively in Ipython, is not
 guaranteed to give identical results. In some cases, using a script
 will cause a crash as letters with umlauts end up being garbled.
+
 
 Written by Alvin Gavel,
 https://github.com/Alvin-Gavel/Demodigi
@@ -47,10 +54,18 @@ import csv
 from datetime import datetime
 from time import sleep
 
+
 class participant():
+   def __init__(self, name, email):
+      self.name = name
+      self.email = email
+      return
+
+
+class participant_info(participant):
    """
    A person who participates in a learning module, to whom we want to
-   deliver Canvas account information to.
+   deliver Canvas account information.
    
    Attributes
    ----------
@@ -65,17 +80,39 @@ class participant():
    \tPassword to Canvas account
    """
    def __init__(self, name, email, username, password):
-      self.name = name
-      self.email = email
+      participant.__init__(self, name, email)
       self.username = username
       self.password = password
       return
 
+
+class participant_feedback(participant):
+   """
+   A person who has participated in a learning module, to whom we want to
+   deliver feedback on how well they did
+   
+   Attributes
+   ----------
+   name : str
+   \tName of the particpant. This may be replaced with the 5-character code
+   \tused at AF
+   email : str
+   \tJob e-mail address
+   feedback_text : str
+   \tThe feedback that we want to deliver. NB: This is preliminary, we will
+   \tmost likely instead have a list of flags for which of a number of text
+   \ttemplates to use.
+   """
+   def __init__(self, name, email, feedback_text):
+      participant.__init__(self, name, email)
+      self.feedback_text = feedback_text
+      return
+
+
 class clicker:
    """
-   A device that reads lists of our participants and writes them to the
-   SharePoint page - or instead reads an already finished SharePoint page
-   and compares it to a list of participants.
+   A device that reads lists of our participants and writes information to
+   a SharePoint page.
    
    Attributes
    ----------
@@ -92,6 +129,15 @@ class clicker:
       self.participants = []
       self.real_data = False
       return
+
+
+class password_clicker(clicker):
+   """
+   A device for writing passwords to a SharePoint page
+   """
+   def __init__(self, connection):
+      clicker.__init__(self, connection)
+      return
    
    def read_participant_list(self, path):
       """
@@ -106,7 +152,7 @@ class clicker:
          email = line[1].strip()
          username = line[2].strip()
          password = line[3].strip()
-         self.participants.append(participant(name, email, username, password))
+         self.participants.append(participant_info(name, email, username, password))
       f.close()
       
       self.real_data = True
@@ -118,7 +164,7 @@ class clicker:
       """
       self.participants = []
       for i in range(n_participants):
-         self.participants.append(participant('Robot {}'.format(i), 'rob{}@skynet.com'.format(i), 'usr{}'.format(i), '123456'))
+         self.participants.append(participant_info('Robot {}'.format(i), 'rob{}@skynet.com'.format(i), 'usr{}'.format(i), '123456'))
       self.real_data = False
       return
    
@@ -152,7 +198,26 @@ class clicker:
       return
 
 
-class SharepointConnection(object):
+class feedback_clicker(clicker):
+   """
+   A device for writing feedback to a SharePoint page
+   """
+   def __init__(self, connection):
+      clicker.__init__(self, connection)
+      return
+
+   def simulate_participant_list(self, n_participants):
+      """
+      Generate a list of pretended particpants
+      """
+      self.participants = []
+      for i in range(n_participants):
+         self.participants.append(participant_feedback('Robot {}'.format(i), 'rob{}@skynet.com'.format(i), 'Bra jobbat!'))
+      self.real_data = False
+      return
+
+
+class SharePointConnection(object):
    """
    Used for communicating with SharePoint
    
@@ -168,7 +233,7 @@ class SharepointConnection(object):
    driver_directory_path : str
    \tPath to the directory where the drivers are kept
    """
-   def __init__(self, start_page_path, start_page_name, browser = 'Chrome', driver_directory_path = './Drivers'):
+   def __init__(self, start_page_path, start_page_name, browser, driver_directory_path):
       self.start_page_path = start_page_path
       self.start_page_name = start_page_name
       self.browser = browser
@@ -206,27 +271,16 @@ class SharepointConnection(object):
       self.go_to_page(self.start_page_path)
       return
 
-   def check_id_pwd_list(self, participant):
-      """
-      Verify that an already existing list for a participant has been written
-      correctly.
-      """
-      print('Began work at {}'.format(datetime.now().strftime('%X')))
-      self.go_to_start()
-      try:
-         sleep(5)
-         list_button = self.driver.find_element(By.XPATH, "//*[text()='{}']".format(participant.name))
-         list_button.click()
-         sleep(5)
-         self.driver.find_element(By.XPATH, "//*[text()='{}']".format(participant.username))
-         self.driver.find_element(By.XPATH, "//*[text()='{}']".format(participant.password))
-         verified = True
-      except NoSuchElementException:
-         verified = False
-      print('Completed work at {}'.format(datetime.now().strftime('%X')))
-      return verified
 
-   def make_feedback(self, participant, real_data):
+class feedback_connection(SharePointConnection):
+   """
+   Used for writing passwords to SharePoint
+   """
+   def __init__(self, start_page_path, start_page_name, browser = 'Chrome', driver_directory_path = './Drivers'):
+      SharePointConnection.__init__(self, start_page_path, start_page_name, browser = browser, driver_directory_path = driver_directory_path)
+      return
+
+   def deliver_feedback(self, participant, real_data):
       """
       This should make a page giving feedback to the participant, based on
       their results.
@@ -234,6 +288,15 @@ class SharepointConnection(object):
       pass
       return
 
+
+class password_connection(SharePointConnection):
+   """
+   Used for writing passwords to SharePoint
+   """
+   def __init__(self, start_page_path, start_page_name, browser = 'Chrome', driver_directory_path = './Drivers'):
+      SharePointConnection.__init__(self, start_page_path, start_page_name, browser = browser, driver_directory_path = driver_directory_path)
+      return
+      
    def make_id_pwd_list(self, participant, real_data):
       """
       This should make a page with the user ID and password for one
@@ -397,3 +460,23 @@ class SharepointConnection(object):
       sleep(2)
       print('Completed work at {}'.format(datetime.now().strftime('%X')))
       return
+
+   def check_id_pwd_list(self, participant):
+      """
+      Verify that an already existing list for a participant has been written
+      correctly.
+      """
+      print('Began work at {}'.format(datetime.now().strftime('%X')))
+      self.go_to_start()
+      try:
+         sleep(5)
+         list_button = self.driver.find_element(By.XPATH, "//*[text()='{}']".format(participant.name))
+         list_button.click()
+         sleep(5)
+         self.driver.find_element(By.XPATH, "//*[text()='{}']".format(participant.username))
+         self.driver.find_element(By.XPATH, "//*[text()='{}']".format(participant.password))
+         verified = True
+      except NoSuchElementException:
+         verified = False
+      print('Completed work at {}'.format(datetime.now().strftime('%X')))
+      return verified
