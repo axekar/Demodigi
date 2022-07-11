@@ -306,7 +306,33 @@ class SharePointConnection(object):
       sleep(2)
       return
       
+   def create_list(self, description):
+      self.go_to_start()
+      sleep(20)
+      new_button = self.driver.find_element(By.NAME, "New")
+      new_button.click()
+      sleep(2)
+      list_choice = self.driver.find_element(By.NAME, "List")
+      list_choice.click()
+      sleep(2)
+      name_field = self.driver.find_element(By.XPATH, "//*[text()='Name']/following::input[@type='text']")
+      name_field.send_keys("{}".format(participant.name))
+      sleep(2)
+      desc_field = self.driver.find_element(By.XPATH, "//*[text()='Description']/following::textarea")
+      desc_field.send_keys(description)
+      sleep(2)
+      create_button = self.driver.find_element(By.CSS_SELECTOR, "[aria-label=Create]")
+      create_button.click()
+      sleep(20)
+      return
+      
    def set_read_privileges(self, participant, real_data):
+      """
+      This sets the read privileges for a list of a SharePoint page.
+      Unfortunately, this is much less trivial to do for anything other than
+      lists. Hence, we implement feedback as a list even though this is not
+      the most obvious choice of format.
+      """
       settings_menu = self.driver.find_element(By.CSS_SELECTOR, "[aria-label='Open the Settings menu to access personal and app settings']")
       settings_menu.click()
       sleep(2)
@@ -386,27 +412,36 @@ class feedback_connection(SharePointConnection):
       # Create a new page
       self.go_to_start()
       sleep(20)
-      new_button = self.driver.find_element(By.NAME, "New")
+      self.create_list("Feedback till {}".format(participant.name))
+      
+      # Write feedback
+      column_button = self.driver.find_element(By.XPATH, "//*[text()='Add column']")
+      column_button.click()
+      sleep(2)
+      multiple_line_choice = self.driver.find_element(By.XPATH, "//*[text()='Multiple lines of text']")
+      multiple_line_choice.click()
+      sleep(2)
+      name_field = self.driver.find_element(By.XPATH, "//*[text()='Name']/following::input[@type='text']")
+      name_field.send_keys("Feedback")
+      sleep(2)
+      desc_field = self.driver.find_element(By.XPATH, "//*[text()='Description']/following::textarea")
+      desc_field.send_keys("Feedback på de digitala kompetenserna")
+      sleep(2)
+      save_button = self.driver.find_element(By.CLASS_NAME, "ms-ColumnManagementPanel-saveButton")
+      save_button.click()
+      sleep(2)
+      
+      # Add entry for participant
+      new_button = self.driver.find_element(By.XPATH, "//*[text()='New']")
       new_button.click()
       sleep(2)
-      list_choice = self.driver.find_element(By.NAME, "Page")
-      list_choice.click()
+      title_field = self.driver.find_element(By.XPATH, "//*[text()='Title']/following::input[@type='text'][position()=1]")
+      title_field.send_keys('Hela kartläggningen')
       sleep(2)
-      name_field = self.driver.find_element(By.CSS_SELECTOR, "[aria-label='Page title.']")
-      name_field.click()
-      name_field.send_keys("Feedback till {}".format(participant.name))
+      userid_field = self.driver.find_element(By.XPATH, "//*[text()='Title']/following::input[@type='text'][position()=2]")
+      userid_field.send_keys(participant.feedback_test)
       sleep(2)
-      add_button = self.driver.find_element(By.CSS_SELECTOR, "[aria-label='Add a new web part in column one']")
-      add_button.click()
-      sleep(2)
-      text_choice = self.driver.find_element(By.CSS_SELECTOR, "[aria-label='Text']")
-      text_choice.click()
-      sleep(2)
-      text_field = self.driver.find_element(By.CSS_SELECTOR, "[aria-label='Text editor. Use Alt+F10 to go to toolbars.']")
-      text_field.click()
-      text_field.send_keys(participant.feedback_text)
-      sleep(2)
-      save_button = self.driver.find_element(By.NAME, "Save and close")
+      save_button = self.driver.find_element(By.XPATH, "//*[text()='Save']")
       save_button.click()
       sleep(2)
       
@@ -434,23 +469,7 @@ class password_connection(SharePointConnection):
       self.add_participant_as_member(participant, real_data)
 
       # Create a new list
-      self.go_to_start()
-      sleep(20)
-      new_button = self.driver.find_element(By.NAME, "New")
-      new_button.click()
-      sleep(2)
-      list_choice = self.driver.find_element(By.NAME, "List")
-      list_choice.click()
-      sleep(2)
-      name_field = self.driver.find_element(By.XPATH, "//*[text()='Name']/following::input[@type='text']")
-      name_field.send_keys("{}".format(participant.name))
-      sleep(2)
-      desc_field = self.driver.find_element(By.XPATH, "//*[text()='Description']/following::textarea")
-      desc_field.send_keys("Canvas-användarnamn och lösenord till {}".format(participant.name))
-      sleep(2)
-      create_button = self.driver.find_element(By.CSS_SELECTOR, "[aria-label=Create]")
-      create_button.click()
-      sleep(20)
+      self.create_list("Canvas-användarnamn och lösenord till {}".format(participant.name))
       
       # Make columns in the new page
       column_button = self.driver.find_element(By.XPATH, "//*[text()='Add column']")
