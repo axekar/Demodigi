@@ -216,7 +216,17 @@ class feedback_clicker(clicker):
       self.real_data = False
       return
 
-
+   def deliver_feedback(self):
+      """
+      Construct pages on SharePoint which contain feedback for each
+      participant.
+      """
+      self.connection.start_driver()
+      for participant in self.participants:
+         self.connection.deliver_feedback(participant, self.real_data)
+      self.connection.stop_driver()
+      return
+      
 class SharePointConnection(object):
    """
    Used for communicating with SharePoint
