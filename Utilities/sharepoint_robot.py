@@ -281,43 +281,7 @@ class SharePointConnection(object):
       self.go_to_page(self.start_page_path)
       return
 
-
-class feedback_connection(SharePointConnection):
-   """
-   Used for writing passwords to SharePoint
-   """
-   def __init__(self, start_page_path, start_page_name, browser = 'Chrome', driver_directory_path = './Drivers'):
-      SharePointConnection.__init__(self, start_page_path, start_page_name, browser = browser, driver_directory_path = driver_directory_path)
-      return
-
-   def deliver_feedback(self, participant, real_data):
-      """
-      This should make a page giving feedback to the participant, based on
-      their results.
-      """
-      pass
-      return
-
-
-class password_connection(SharePointConnection):
-   """
-   Used for writing passwords to SharePoint
-   """
-   def __init__(self, start_page_path, start_page_name, browser = 'Chrome', driver_directory_path = './Drivers'):
-      SharePointConnection.__init__(self, start_page_path, start_page_name, browser = browser, driver_directory_path = driver_directory_path)
-      return
-      
-   def make_id_pwd_list(self, participant, real_data):
-      """
-      This should make a page with the user ID and password for one
-      participant. However, note that this code is *very brittle* It could
-      stop working at any moment due to some change of state in SharePoint
-      that I do not understand.
-      """
-      print('Began work at {}'.format(datetime.now().strftime('%X')))
-      self.go_to_start()
-      
-      # Give user permission to the start page
+   def add_participant_as_member(self, participant, real_data):
       settings_menu = self.driver.find_element(By.CSS_SELECTOR, "[aria-label='Open the Settings menu to access personal and app settings']")
       settings_menu.click()
       sleep(2)
@@ -340,6 +304,134 @@ class password_connection(SharePointConnection):
       add_button = self.driver.find_element(By.XPATH, "//*[text()='Add']")
       add_button.click()
       sleep(2)
+      return
+      
+   def set_read_privileges(self, participant, real_data):
+      settings_menu = self.driver.find_element(By.CSS_SELECTOR, "[aria-label='Open the Settings menu to access personal and app settings']")
+      settings_menu.click()
+      sleep(2)
+      settings_button = self.driver.find_element(By.CSS_SELECTOR, "[aria-label='List settings']")
+      settings_button.click()
+      sleep(5)
+      permissions_link = self.driver.find_element(By.XPATH, "//*[text()='Permissions for this list']")
+      permissions_link.click()
+      sleep(5)
+      stopinherit_button = self.driver.find_element(By.ID, "Ribbon.Permission.Manage.StopInherit-Large")
+      stopinherit_button.click()
+      sleep(2)
+      self.driver.switch_to.alert.accept()
+      sleep(2)
+      visitor_checkbox = self.driver.find_element(By.XPATH, "//*[@title='Besökare på {}']".format(self.start_page_name))
+      visitor_checkbox.click()
+      removeperm_button = self.driver.find_element(By.ID, "Ribbon.Permission.Modify.RemovePerms-Large")
+      removeperm_button.click()
+      self.driver.switch_to.alert.accept()
+      sleep(5)
+      member_checkbox = self.driver.find_element(By.XPATH, "//*[@title='Medlemmar på {}']".format(self.start_page_name))
+      member_checkbox.click()
+      removeperm_button = self.driver.find_element(By.ID, "Ribbon.Permission.Modify.RemovePerms-Large")
+      removeperm_button.click()
+      self.driver.switch_to.alert.accept()
+      sleep(5)
+      giveperm_button = self.driver.find_element(By.ID, "Ribbon.Permission.Add.AddUser-Large")
+      giveperm_button.click()
+      sleep(2)      
+      name_field = self.driver.find_element(By.XPATH, "//*[text()='Enter names or email addresses...']/following::input[@type='text']")
+      if not real_data:
+         address = 'alvin.gavel@arbetsförmedlingen.se'
+      else:
+         address = participant.email
+      name_field.send_keys(address)
+      name_field.send_keys(Keys.RETURN)
+      sleep(2)
+      #invite_field = self.driver.find_element(By.ID, "TxtEmailBody")  
+      #if not real_data:
+      #   invite_field.send_keys("Om detta inte varit ett simulerat test så skulle en text ha skrivits här och skickats till mailadressen {}. Nu skickas den till dig, för att bekräfta att mailandet fungerar.".format(participant.email))
+      #else:
+      #   invite_field.send_keys("Hej! Detta är ett test utfört av Alvin inom Demokratisk Digitalisering, för att testa om det går att överföra Canvas-användarnamn och lösenord via en SharePoint-sida, där varje deltagare får se en lista som innehåller deras eget användarnamn och lösenord. Nedan finns en länk till en sida som heter '{}' som innehåller ditt användarnamn och lösenord.".format(participant.name))
+      #sleep(2)
+      options_button = self.driver.find_element(By.ID, "Share_ShowHideMoreOptions")
+      options_button.click()
+      sleep(2)
+      sendmail_button = self.driver.find_element(By.ID, "chkSendEmailv15")
+      sendmail_button.click()
+      sleep(2)
+      options_list = self.driver.find_element(By.ID, "DdlGroup")
+      options_list.click()
+      sleep(2)
+      read_choice = self.driver.find_element(By.XPATH, "//*[text()='Read']")
+      read_choice.click()
+      sleep(2)
+      share_button = self.driver.find_element(By.ID, "btnShare")
+      share_button.click()
+      sleep(2)
+
+class feedback_connection(SharePointConnection):
+   """
+   Used for writing passwords to SharePoint
+   """
+   def __init__(self, start_page_path, start_page_name, browser = 'Chrome', driver_directory_path = './Drivers'):
+      SharePointConnection.__init__(self, start_page_path, start_page_name, browser = browser, driver_directory_path = driver_directory_path)
+      return
+
+   def deliver_feedback(self, participant, real_data):
+      """
+      This should make a page giving feedback to the participant, based on
+      their results.
+      """
+      print('Began work at {}'.format(datetime.now().strftime('%X')))
+      self.go_to_start()
+      self.add_participant_as_member(participant, real_data)
+
+      # Create a new page
+      self.go_to_start()
+      sleep(20)
+      new_button = self.driver.find_element(By.NAME, "New")
+      new_button.click()
+      sleep(2)
+      list_choice = self.driver.find_element(By.NAME, "Page")
+      list_choice.click()
+      sleep(2)
+      name_field = self.driver.find_element(By.CSS_SELECTOR, "[aria-label='Page title.']")
+      name_field.click()
+      name_field.send_keys("Feedback till {}".format(participant.name))
+      sleep(2)
+      add_button = self.driver.find_element(By.CSS_SELECTOR, "[aria-label='Add a new web part in column one']")
+      add_button.click()
+      sleep(2)
+      text_choice = self.driver.find_element(By.CSS_SELECTOR, "[aria-label='Text']")
+      text_choice.click()
+      sleep(2)
+      text_field = self.driver.find_element(By.CSS_SELECTOR, "[aria-label='Text editor. Use Alt+F10 to go to toolbars.']")
+      text_field.click()
+      text_field.send_keys(participant.feedback)
+      sleep(2)
+      save_button = self.driver.find_element(By.NAME, "Save and close")
+      save_button_click()
+      sleep(2)
+      
+      self.set_read_privileges(participant, real_data)
+      return
+
+
+class password_connection(SharePointConnection):
+   """
+   Used for writing passwords to SharePoint
+   """
+   def __init__(self, start_page_path, start_page_name, browser = 'Chrome', driver_directory_path = './Drivers'):
+      SharePointConnection.__init__(self, start_page_path, start_page_name, browser = browser, driver_directory_path = driver_directory_path)
+      return
+      
+   def make_id_pwd_list(self, participant, real_data):
+      """
+      This should make a page with the user ID and password for one
+      participant. However, note that this code is *very brittle* It could
+      stop working at any moment due to some change of state in SharePoint
+      that I do not understand.
+      """
+      print('Began work at {}'.format(datetime.now().strftime('%X')))
+      self.go_to_start()      
+      self.add_participant_as_member(participant, real_data)
 
       # Create a new list
       self.go_to_start()
@@ -409,65 +501,7 @@ class password_connection(SharePointConnection):
       save_button.click()
       sleep(2)
       
-      # Set read privileges
-      settings_menu = self.driver.find_element(By.CSS_SELECTOR, "[aria-label='Open the Settings menu to access personal and app settings']")
-      settings_menu.click()
-      sleep(2)
-      settings_button = self.driver.find_element(By.CSS_SELECTOR, "[aria-label='List settings']")
-      settings_button.click()
-      sleep(5)
-      permissions_link = self.driver.find_element(By.XPATH, "//*[text()='Permissions for this list']")
-      permissions_link.click()
-      sleep(5)
-      stopinherit_button = self.driver.find_element(By.ID, "Ribbon.Permission.Manage.StopInherit-Large")
-      stopinherit_button.click()
-      sleep(2)
-      self.driver.switch_to.alert.accept()
-      sleep(2)
-      visitor_checkbox = self.driver.find_element(By.XPATH, "//*[@title='Besökare på {}']".format(self.start_page_name))
-      visitor_checkbox.click()
-      removeperm_button = self.driver.find_element(By.ID, "Ribbon.Permission.Modify.RemovePerms-Large")
-      removeperm_button.click()
-      self.driver.switch_to.alert.accept()
-      sleep(5)
-      member_checkbox = self.driver.find_element(By.XPATH, "//*[@title='Medlemmar på {}']".format(self.start_page_name))
-      member_checkbox.click()
-      removeperm_button = self.driver.find_element(By.ID, "Ribbon.Permission.Modify.RemovePerms-Large")
-      removeperm_button.click()
-      self.driver.switch_to.alert.accept()
-      sleep(5)
-      giveperm_button = self.driver.find_element(By.ID, "Ribbon.Permission.Add.AddUser-Large")
-      giveperm_button.click()
-      sleep(2)      
-      name_field = self.driver.find_element(By.XPATH, "//*[text()='Enter names or email addresses...']/following::input[@type='text']")
-      if not real_data:
-         address = 'alvin.gavel@arbetsförmedlingen.se'
-      else:
-         address = participant.email
-      name_field.send_keys(address)
-      name_field.send_keys(Keys.RETURN)
-      sleep(2)
-      #invite_field = self.driver.find_element(By.ID, "TxtEmailBody")  
-      #if not real_data:
-      #   invite_field.send_keys("Om detta inte varit ett simulerat test så skulle en text ha skrivits här och skickats till mailadressen {}. Nu skickas den till dig, för att bekräfta att mailandet fungerar.".format(participant.email))
-      #else:
-      #   invite_field.send_keys("Hej! Detta är ett test utfört av Alvin inom Demokratisk Digitalisering, för att testa om det går att överföra Canvas-användarnamn och lösenord via en SharePoint-sida, där varje deltagare får se en lista som innehåller deras eget användarnamn och lösenord. Nedan finns en länk till en sida som heter '{}' som innehåller ditt användarnamn och lösenord.".format(participant.name))
-      #sleep(2)
-      options_button = self.driver.find_element(By.ID, "Share_ShowHideMoreOptions")
-      options_button.click()
-      sleep(2)
-      sendmail_button = self.driver.find_element(By.ID, "chkSendEmailv15")
-      sendmail_button.click()
-      sleep(2)
-      options_list = self.driver.find_element(By.ID, "DdlGroup")
-      options_list.click()
-      sleep(2)
-      read_choice = self.driver.find_element(By.XPATH, "//*[text()='Read']")
-      read_choice.click()
-      sleep(2)
-      share_button = self.driver.find_element(By.ID, "btnShare")
-      share_button.click()
-      sleep(2)
+      self.set_read_privileges(participant, real_data)
       print('Completed work at {}'.format(datetime.now().strftime('%X')))
       return
 
