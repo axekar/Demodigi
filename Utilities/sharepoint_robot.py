@@ -306,7 +306,7 @@ class SharePointConnection(object):
       sleep(2)
       return
       
-   def create_list(self, description):
+   def create_list(self, description, participant):
       self.go_to_start()
       sleep(20)
       new_button = self.driver.find_element(By.NAME, "New")
@@ -412,7 +412,7 @@ class feedback_connection(SharePointConnection):
       # Create a new page
       self.go_to_start()
       sleep(20)
-      self.create_list("Feedback till {}".format(participant.name))
+      self.create_list("Feedback till {}".format(participant.name), participant)
       
       # Write feedback
       column_button = self.driver.find_element(By.XPATH, "//*[text()='Add column']")
@@ -469,7 +469,7 @@ class password_connection(SharePointConnection):
       self.add_participant_as_member(participant, real_data)
 
       # Create a new list
-      self.create_list("Canvas-användarnamn och lösenord till {}".format(participant.name))
+      self.create_list("Canvas-användarnamn och lösenord till {}".format(participant.name), participant)
       
       # Make columns in the new page
       column_button = self.driver.find_element(By.XPATH, "//*[text()='Add column']")
