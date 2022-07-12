@@ -441,12 +441,16 @@ class feedback_connection(SharePointConnection):
       edit_button = self.driver.find_element(By.CSS_SELECTOR, "[aria-label='Edit']")
       edit_button.click()
       sleep(2)
+      iframe = self.driver.find_element(By.TAG_NAME, "iframe")
+      self.driver.switch_to.frame(iframe)
+      sleep(2)
       text_field = self.driver.find_element(By.CSS_SELECTOR, "[aria-label='Rich text editor Feedback']")
-      edit_button.click()
-      
+      text_field.send_keys(participant.feedback_text)
+      sleep(2)
       save_button = self.driver.find_element(By.XPATH, "//*[text()='Save']")
       save_button.click()
       sleep(2)
+      
       
       self.set_read_privileges(participant, real_data)
       return
