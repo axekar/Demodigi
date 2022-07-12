@@ -453,9 +453,13 @@ class feedback_connection(SharePointConnection):
       save_button = self.driver.find_element(By.XPATH, "//*[text()='Save']")
       save_button.click()
       sleep(2)
-      self.driver.switch_to().defaultContent()
-      
-      #self.set_read_privileges(participant, real_data)
+      # Exit the iframe again
+      self.driver.switch_to.default_content()
+      sleep(2)
+      save_button = self.driver.find_element(By.XPATH, "//*[text()='Save']")
+      save_button.click()
+            
+      self.set_read_privileges(participant, real_data)
       return
 
 
