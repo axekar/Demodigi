@@ -384,7 +384,7 @@ class learning_module:
       self.plot_results_by_time(folder_path)
       return
    
-   ### Funktion for inferring parameters when they are not available
+   ### Function for inferring parameters when they are not available
    ### (as a rule, you should not need to use these unless something has
    ### gone wrong)
    
