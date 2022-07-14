@@ -118,7 +118,38 @@ for key in sub_to_subsub.keys():
       for subsub_org in subsub_orgs:
          subsub_to_sub[key][subsub_org] = sub_org
 
-## Functions for identifying organisational position
+### Function for making LaTeX graph of organisation
+
+def graph():
+   """
+   Make a graph of the organisation, which can be plotted in LaTeX.
+   
+   This requires the packages forest and adjustbox
+   """
+   LaTeX_code = "\\begin{figure}[p]\n"
+   LaTeX_code += "\\centering\n"
+   LaTeX_code += "\\begin{adjustbox}{max size={\\textwidth}{\\textheight}}\n"
+   LaTeX_code += "\\begin{forest}\n"
+   LaTeX_code += "for tree={fit=band, grow=0, reversed, align=left, anchor=west, s sep=0, inner sep=0},\n"
+   LaTeX_code += "forked edges,\n"
+   LaTeX_code += '[{Arbetsförmedlingen}\n'
+   for node, subnodes in super_to_sub.items():
+      LaTeX_code += '  [{{{}}}\n'.format(node)
+      for subnode in subnodes:
+         LaTeX_code += '    [{{{}}}'.format(subnode)
+         if subnode in sub_to_subsub.keys():
+            for subsubnode in sub_to_subsub[subnode]:
+               LaTeX_code += '      [{{{}}}]\n'.format(subsubnode)
+         LaTeX_code += ']\n'
+      LaTeX_code += '  ]\n'
+   LaTeX_code += ']\n'
+   LaTeX_code += '\\end{forest}\n'
+   LaTeX_code += '\\end{adjustbox}'
+   LaTeX_code += '\\caption{[enter text here]}\\label{graph_organisational_structure}\n'
+   LaTeX_code += '\\end{figure}\n'
+   return LaTeX_code
+
+### Functions for identifying organisational position
 
 def compare_parts(parts_1, parts_2):
    """
