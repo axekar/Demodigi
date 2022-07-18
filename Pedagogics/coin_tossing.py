@@ -47,8 +47,27 @@ def posterior(p, n, k):
    """
    The posterior probability over p after observing k successes in n trials,
    assuming a flat prior over p.
+   
+   P(p | n, k)
    """
    def B(alpha, beta):
       return sp.gamma(alpha) * sp.gamma(beta) / sp.loggamma(alpha + beta)
    return p**k * (1-p)**(n-k) / B(1 + k, 1 + n - k)
-   
+
+
+def plot_posterior(p_vector, posterior_vector, plot_folder = 'coin_tossing_plots'):
+   """
+   Plot the posterior distribution P(p | n, k)
+   """
+   fig, axs = plt.subplots()
+   axs.plot(p_vector, posterior_vector)
+   axs.set(xlabel=r'$p$', ylabel=r'$P\left( p | n, k \right)$', title = r'Sannolikhetsfördelning över $p$')
+   top = axs.get_ylim()[1]
+   axs.vlines(0.5, 0, top, linestyles = 'dashed', color = 'black')
+   axs.set_xlim(0, 1)
+   axs.set_ylim(0, top)
+   fig.set_size_inches(12, 4)
+   fig.tight_layout()
+   plt.savefig('./{}/posterior.png'.format(plot_folder))
+   plt.close()
+   return
