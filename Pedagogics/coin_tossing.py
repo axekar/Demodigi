@@ -151,16 +151,22 @@ def frequentist_analysis(n, k, epsilon = 0.01, plot = False):
    right_index = find_nearest(p_vector, right_bound)
    
    max_index = np.argmax(likelihood_as_function_of_p[left_index:right_index])
-   p_hat = likelihood_as_function_of_p[left_index:right_index][max_index]
-   
+   p_hat = p_vector[left_index:right_index][max_index]
    print('Maximum-likelihood estimate of p: {:.2f}'.format(p_hat))
+      
+   k_vector = np.arange(0, n + 1)
+   k_exp = int(np.rint(p_hat * n))
+   print('Expectation value of k: {}'.format(k_exp))
+
+   delta_k = abs(k_exp - k)
+   print('Discrepancy from expectation value: {}'.format(delta_k))
    
-   k_vector = np.linspace(0, n, n_steps)
    likelihood_as_function_of_k = likelihood(n, k_vector, p_hat)
+
+
+   p_value = (np.sum(likelihood_as_function_of_k[:k - delta_k]) + np.sum(likelihood_as_function_of_k[k + delta_k:])) / np.sum(likelihood_as_function_of_k)
    
-   extreme_index = find_nearest(k_vector, k)
-   p_value = np.trapz(likelihood_as_function_of_k[extreme_index:], x=likelihood_as_function_of_k[extreme_index:])
-   print('p-value of null hypothesis that coin is even: {:.3f}'.format(p_value))
+   print('p-value: {:.2}'.format(p_value))
    
    if plot:
       plot_likelihood_as_function_of_p(p_vector, likelihood_as_function_of_p)
