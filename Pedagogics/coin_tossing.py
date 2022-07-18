@@ -18,8 +18,13 @@ https://github.com/Alvin-Gavel/Demodigi
 
 import numpy as np
 import numpy.random as rd
+import scipy.special as sp
 import matplotlib.pyplot as plt
 
+# This ensured that the results will be the same from one run to the
+# next. Turn this on when making plots for the document, and off if
+# you want to play around with the model in a more realistic way.
+rd.seed(1729)
 
 
 def toss(n, p):
@@ -27,3 +32,23 @@ def toss(n, p):
    Take a coin with weight p and toss it n times.
    """
    return np.sum(rd.rand(n) < p)
+   
+   
+def likelihood(n, k, p):
+   """
+   The likelihood of getting k successes after n trials given a success
+   probability p
+   
+   P(k | n, p)
+   """
+   return sp.binom(n, k)* p**k * (1-p)**(n-k)
+   
+def posterior(p, n, k):
+   """
+   The posterior probability over p after observing k successes in n trials,
+   assuming a flat prior over p.
+   """
+   def B(alpha, beta):
+      return sp.gamma(alpha) * sp.gamma(beta) / sp.loggamma(alpha + beta)
+   return p**k * (1-p)**(n-k) / B(1 + k, 1 + n - k)
+   
