@@ -55,19 +55,26 @@ def posterior(p, n, k):
    return p**k * (1-p)**(n-k) / B(1 + k, 1 + n - k)
 
 
-def plot_posterior(p_vector, posterior_vector, plot_folder = 'coin_tossing_plots'):
-   """
-   Plot the posterior distribution P(p | n, k)
-   """
-   fig, axs = plt.subplots()
-   axs.plot(p_vector, posterior_vector)
-   axs.set(xlabel=r'$p$', ylabel=r'$P\left( p | n, k \right)$', title = r'Sannolikhetsfördelning över $p$')
-   top = axs.get_ylim()[1]
-   axs.vlines(0.5, 0, top, linestyles = 'dashed', color = 'black')
-   axs.set_xlim(0, 1)
-   axs.set_ylim(0, top)
-   fig.set_size_inches(12, 4)
-   fig.tight_layout()
-   plt.savefig('./{}/posterior.png'.format(plot_folder))
-   plt.close()
+
+def bayesian_analysis(n, k, plot = False):
+   def plot_posterior(p_vector, posterior_vector, plot_folder = 'coin_tossing_plots'):
+      """
+      Plot the posterior distribution P(p | n, k)
+      """
+      fig, axs = plt.subplots()
+      axs.plot(p_vector, posterior_vector)
+      axs.set(xlabel=r'$p$', ylabel=r'$P\left( p | n, k \right)$', title = r'$n = {}$, $k = {}$'.format(n, k))
+      top = axs.get_ylim()[1]
+      #axs.vlines(0.5, 0, top, linestyles = 'dashed', color = 'black')
+      axs.set_xlim(0, 1)
+      axs.set_ylim(0, top)
+      fig.set_size_inches(12, 4)
+      fig.tight_layout()
+      plt.savefig('./{}/posterior.png'.format(plot_folder))
+      plt.close()
+      return
+
+   p_vector = np.linspace(0, 1, 1000)
+   posterior_vector = posterior(p_vector, n, k) 
+   plot_posterior(p_vector, posterior_vector)
    return
