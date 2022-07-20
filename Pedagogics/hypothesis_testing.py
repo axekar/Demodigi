@@ -175,136 +175,63 @@ def test_catapult(mu, sigma, epsilon, n_throws, plotting = True, plot_folder = '
 
    ### Frequentist analysis
    
-   # Maximum-likelihood estimation
+   # Maximum-likelihood estimation, within the bounds
 
    return
 
 
 ### Everything below here will be absorbed into a test_coin function ###
-
-def toss(n, p):
-   """
-   Take a coin with weight p and toss it n times.
-   """
-   return np.sum(rd.rand(n) < p)
-   
-   
-def likelihood(n, k, p):
-   """
-   The likelihood of getting k successes after n trials given a success
-   probability p
-   
-   P(k | n, p)
-   """
-   return sp.binom(n, k)* p**k * (1-p)**(n-k)
-   
-
-def posterior(p, n, k):
-   """
-   The posterior probability over p after observing k successes in n trials,
-   assuming a flat prior over p.
-   
-   P(p | n, k)
-   """
-   def B(alpha, beta):
-      return sp.gamma(alpha) * sp.gamma(beta) / sp.gamma(alpha + beta)
-   return p**k * (1-p)**(n-k) / B(k + 1, n - k + 1)
-
-
-def bayesian_analysis(n, k, epsilon = 0.01, plot = False):
-   def plot_posterior(p_vector, posterior_vector, plot_folder = 'hypothesis_testing_plots'):
+def compare_coins(P, epsilon, n_tosses, verbose = True, plotting = True, plot_folder = 'hypothesis_testing_plots', plot_main_name = 'Coins'):
+   def logB(alpha, beta):
       """
-      Plot the posterior distribution P(p | n, k)
+      The logarithm of the normalisation factor to the binomial likelihood
       """
-      fig, axs = plt.subplots()
-      axs.plot(p_vector, posterior_vector)
-      axs.set(xlabel=r'$p$', ylabel=r'$P\left( p | n, k \right)$', title = r'$n = {}$, $k = {}$'.format(n, k))
-      top = axs.get_ylim()[1]
-      #axs.vlines(0.5, 0, top, linestyles = 'dashed', color = 'black')
-      axs.set_xlim(0, 1)
-      axs.set_ylim(0, top)
-      fig.set_size_inches(12, 4)
-      fig.tight_layout()
-      plt.savefig('./{}/posterior.png'.format(plot_folder))
-      plt.close()
+      return sp.loggamma(alpha) + sp.loggamma(beta) - sp.loggamma(alpha + beta)
+
+   if P > 1:
+      print('Probabilities cannot be larger than one!')
+      print('Value input was {}'.format(P))
+      return
+   if P < 0:
+      print('Probabilities cannot be smaller than zero!')
+      print('Value input was {}'.format(P))
       return
 
-   n_steps = 1000
-   p_vector = np.linspace(0, 1, n_steps)
-   posterior_vector = posterior(p_vector, n, k)
-   
-   left_bound = 0.5 - epsilon
-   left_index = find_nearest(p_vector, left_bound)
-   right_bound = 0.5 + epsilon
-   right_index = find_nearest(p_vector, right_bound)
-   
-   P_even = np.trapz(posterior_vector[left_index:right_index], x=p_vector[left_index:right_index])
-   print('Probability that coin is even: {:.3f}'.format(P_even))
-   
-   if plot:
-      plot_posterior(p_vector, posterior_vector)
-   return
-   
-def frequentist_analysis(n, k, epsilon = 0.01, plot = False):
-   def plot_likelihood_as_function_of_p(p_vector, likelihood_as_function_of_p, plot_folder = 'hypothesis_testing_plots'):
-      """
-      Plot the likelihood distribution P(k | n, p), as a function of p
-      """
-      fig, axs = plt.subplots()
-      axs.plot(p_vector, likelihood_as_function_of_p)
-      axs.set(xlabel=r'$p$', ylabel=r'$P\left( k | n, p \right)$', title = r'$n = {}$, $k = {}$'.format(n, k))
-      top = axs.get_ylim()[1]
-      #axs.vlines(0.5, 0, top, linestyles = 'dashed', color = 'black')
-      axs.set_xlim(0, 1)
-      axs.set_ylim(0, top)
-      fig.set_size_inches(12, 4)
-      fig.tight_layout()
-      plt.savefig('./{}/likelihood_as_function_of_p.png'.format(plot_folder))
-      plt.close()
-      return
-   
-   def plot_likelihood_as_function_of_k(k_vector, likelihood_as_function_of_k, plot_folder = 'hypothesis_testing_plots'):
-      """
-      Plot the likelihood distribution P(k | n, p), as a function of k
-      """
-      fig, axs = plt.subplots()
-      axs.plot(k_vector, likelihood_as_function_of_k)
-      axs.set(xlabel=r'$k$', ylabel=r'$P\left( k | n, p \right)$', title = r'$n = {}$, $k = {}$'.format(n, k))
-      top = axs.get_ylim()[1]
-      #axs.vlines(0.5, 0, top, linestyles = 'dashed', color = 'black')
-      axs.set_xlim(0, n)
-      axs.set_ylim(0, top)
-      fig.set_size_inches(12, 4)
-      fig.tight_layout()
-      plt.savefig('./{}/likelihood_as_function_of_k.png'.format(plot_folder))
-      plt.close()
-      return
-
-   n_steps = 1000
-   p_vector = np.linspace(0, 1, n_steps)
-   likelihood_as_function_of_p = likelihood(n, k, p_vector)
-   
-   left_bound = 0.5 - epsilon
-   left_index = find_nearest(p_vector, left_bound)
-   right_bound = 0.5 + epsilon
-   right_index = find_nearest(p_vector, right_bound)
-   
-   max_index = np.argmax(likelihood_as_function_of_p[left_index:right_index])
-   p_hat = p_vector[left_index:right_index][max_index]
-   print('Maximum-likelihood estimate of p: {:.2f}'.format(p_hat))
+   heads = np.sum(rd.uniform(0., 1., size = n_tosses) < P)
+   if verbose:
+      print('Scored {} heads'.format(heads))
       
-   k_vector = np.arange(0, n + 1)
-   k_exp = int(np.rint(p_hat * n))
-   print('Expectation value of k: {}'.format(k_exp))
+   # Make a vector of the possible values of P
+   n_steps = 1000
+   P_vector = np.linspace(0., 1., num = n_steps)
 
-   delta_k = abs(k_exp - k)
-   print('Discrepancy from expectation value: {}'.format(delta_k))
+   # Calculate the log-likelihood
    
-   likelihood_as_function_of_k = likelihood(n, k_vector, p_hat)
-   p_value = (np.sum(likelihood_as_function_of_k[:k - delta_k]) + np.sum(likelihood_as_function_of_k[k + delta_k:])) / np.sum(likelihood_as_function_of_k)
-   print('p-value: {:.2}'.format(p_value))
-   
-   if plot:
-      plot_likelihood_as_function_of_p(p_vector, likelihood_as_function_of_p)
-      plot_likelihood_as_function_of_k(k_vector, likelihood_as_function_of_k)
+   # The log-likelihood P(successes|P)
+   tails = n_tosses - heads
+   with np.errstate(all = 'ignore'):
+      log_L = heads * np.log(P_vector) + tails * np.log(1 - P_vector) - logB(heads + 1, tails + 1)
+      if heads > 0:
+         log_L[0] = - np.inf
+      else:
+         log_L[0] = - logB(heads + 1, tails + 1)
+      if tails > 0:
+         log_L[-1] = - np.inf
+      else:
+         log_L[-1] = - logB(heads + 1, tails + 1)
+
+   L = np.exp(log_L)
+   maxL = np.max(L)
+
+   if plotting:
+      fig, axs = plt.subplots(1)
+      axs.plot(P_vector, L)
+      axs.vlines(P, 0, maxL * 1.1, linestyles = 'dashed')
+      axs.set_xlim(left = 0, right = 1)
+      axs.set_ylim(bottom = 0, top = maxL * 1.1)
+      axs.set(xlabel=r'$P$', ylabel=r'$L\left( P \right)$', title = r'$p(kast|P)$')
+      fig.set_size_inches(12, 4)
+      fig.tight_layout()
+      plt.savefig('./{}/{}_likelihood.png'.format(plot_folder, plot_main_name))
+      plt.close()
    return
