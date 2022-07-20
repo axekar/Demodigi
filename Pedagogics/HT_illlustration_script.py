@@ -1,12 +1,8 @@
 import hypothesis_testing as ht                                              
 
-n = 10
-p = 0.4
-k = ht.toss(n, p)
-epsilon = 0.01
+mu = 1.1
+sigma = 10.0
+epsilon = 1.0
+n_throws = 50
 
-print('n: {}'.format(n))
-print('k: {}'.format(k))
-
-ht.bayesian_analysis(n, k, epsilon = epsilon, plot=True)
-ht.frequentist_analysis(n, k, epsilon = epsilon, plot=True)
+ht.test_catapult(mu, sigma, epsilon, n_throws, plotting = True, plot_folder = 'hypothesis_testing_plots', plot_main_name = 'Catapult')

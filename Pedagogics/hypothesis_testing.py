@@ -12,22 +12,21 @@ done by learning modules at KTH using OLI-Torus.
 This module demonstrates how a Bayesian and a frequentist might
 tackle the question of whether a coin is weighted.
 
+Note that the code is partly based on that in the differences module
+
 Written by Alvin Gavel
 https://github.com/Alvin-Gavel/Demodigi
 """
 
 import numpy as np
 import numpy.random as rd
+import scipy.stats as st
 import scipy.special as sp
 import matplotlib.pyplot as plt
 
-# This ensured that the results will be the same from one run to the
-# next. Turn this on when making plots for the document, and off if
-# you want to play around with the model in a more realistic way.
-rd.seed(1729)
 
 
-### Functions for finding values in arrays
+### Convenient functions
 
 def find_nearest(array, value):
    """
@@ -42,6 +41,125 @@ def find_nearest(array, value):
    
 
 ### Statistics functions
+
+def test_catapult(mu, sigma, epsilon, n_throws, plotting = True, plot_folder = 'hypothesis_testing_plots', plot_main_name = 'Catapult'):
+   
+   ### Generate data
+   
+   throws = sigma * rd.randn(n_throws) + mu
+
+   # This is my best guess for a sensible number of bins in a histogram
+   n_bins = int(np.floor(np.sqrt(n_throws)))
+
+   if plotting:
+      fig, axs = plt.subplots(1)
+      zoom_width = 3 * sigma
+      axs.hist(throws, bins = n_bins, label = r'Observerat')
+      axs.set(xlabel=r'Kaststräcka', ylabel=r'Antal')
+      axs.set_xlim(left = mu - zoom_width, right = mu + zoom_width)
+      fig.set_size_inches(12, 4)
+      fig.tight_layout()
+      plt.savefig('./{}/{}_histogram.png'.format(plot_folder, plot_main_name))
+      plt.close()
+
+   ### Calculate likelihood
+
+   # Grid of possible mu and sigma
+   n_steps = 1000
+   delta_steps = 2 * n_steps - 1
+
+   min_sigma = 0      
+   min_mu = - 3 * sigma / np.sqrt(n_throws)
+   max_sigma = 2 * sigma
+   max_mu = 3 * sigma / np.sqrt(n_throws)
+
+   mu_step_width = (max_mu - min_mu) / n_steps
+   sigma_step_width = (max_sigma - min_sigma) / n_steps
+   
+   mu_vector = np.linspace(min_mu, max_mu, num = n_steps)
+   sigma_vector = np.flip(np.linspace(max_sigma, min_sigma, num = n_steps, endpoint = False))
+   mu_grid, sigma_grid = np.meshgrid(mu_vector, sigma_vector)
+
+   # Calculate the log-likelihood
+   log_L_by_throw = np.zeros((n_steps, n_steps, n_throws))
+   for i in range(n_throws):
+      log_L_by_throw[:,:,i] = np.log(1. / (sigma_grid * np.sqrt(2 * np.pi))) + ( - (1./2.) * ((throws[i] - mu_grid) / (sigma_grid))**2)
+   log_L = np.sum(log_L_by_throw, axis = 2)
+   L = np.exp(log_L)
+
+   if plotting:
+      fig, axs = plt.subplots(1)
+      axs.pcolormesh(mu_grid, sigma_grid, L, shading = 'nearest')
+      axs.scatter(mu, sigma, c = 'white', edgecolors = 'black')
+      axs.vlines(-epsilon, min_sigma, max_sigma, colors = 'white', linestyles = 'dashed')
+      axs.vlines(epsilon, min_sigma, max_sigma, colors = 'white', linestyles = 'dashed')
+      axs.set(xlabel=r'$\mu$', ylabel=r'$\sigma$', title = r'Likelihood')     
+      fig.set_size_inches(12, 4)
+      fig.tight_layout()
+      plt.savefig('./{}/{}_likelihood.png'.format(plot_folder, plot_main_name))
+      plt.close()
+      
+   ### Bayesian analysis
+   
+   # Calculate posterior
+   log_prior = np.zeros((n_steps, n_steps))
+   log_p = log_prior + log_L
+   p = np.exp(log_p)
+
+   if plotting:
+      fig, axs = plt.subplots(1)
+      axs.pcolormesh(mu_grid, sigma_grid, p, shading = 'nearest')
+      axs.scatter(mu, sigma, c = 'white', edgecolors = 'black')
+      axs.vlines(-epsilon, min_sigma, max_sigma, colors = 'white', linestyles = 'dashed')
+      axs.vlines(epsilon, min_sigma, max_sigma, colors = 'white', linestyles = 'dashed')
+      axs.set(xlabel=r'$\mu$', ylabel=r'$\sigma$', title = r'Posterior')     
+      fig.set_size_inches(12, 4)
+      fig.tight_layout()
+      plt.savefig('./{}/{}_posterior.png'.format(plot_folder, plot_main_name))
+      plt.close()
+   
+   # The flattened posterior over mu and sigma   
+   unnormalised_p_mu = np.sum(p, axis = 0)
+   p_mu = unnormalised_p_mu / np.sum(unnormalised_p_mu * mu_step_width)
+   max_p_mu = np.max(p_mu)     
+   unnormalised_p_sigma = np.sum(p, axis = 1)
+   p_sigma = unnormalised_p_sigma / np.sum(unnormalised_p_sigma * sigma_step_width)
+   
+   max_index = np.argmax(p)
+   best_fit = st.norm.pdf(mu_vector, loc = mu_grid.flatten()[max_index], scale = sigma_grid.flatten()[max_index])
+
+   left_epsilon_index = np.searchsorted(mu_vector, -epsilon, side='left')
+   right_epsilon_index = np.searchsorted(mu_vector, epsilon, side='left')
+
+   P_between = np.sum(p_sigma[left_epsilon_index:right_epsilon_index] * mu_step_width)
+   
+   if plotting:
+      fig, axs = plt.subplots(1)
+      axs.plot(mu_vector, p_mu)
+      
+      axs.fill_between(mu_vector[left_epsilon_index:right_epsilon_index], p_mu[left_epsilon_index:right_epsilon_index])      
+      
+      mu_index = np.searchsorted(mu_vector, mu, side='left')
+      if left_epsilon_index < mu_index < right_epsilon_index:
+         axs.vlines(mu, 0, p_mu[mu_index], linestyles = 'dashed', colors = 'white')
+      else:
+         axs.vlines(mu, 0, p_mu[mu_index], linestyles = 'dashed')
+      axs.vlines(mu, p_mu[mu_index], max_p_mu * 1.1, linestyles = 'dashed')
+      
+      axs.set_xlim(left = min_mu, right = max_mu)
+      axs.set_ylim(bottom = 0, top = max_p_mu * 1.1)
+      axs.set(xlabel=r'$\mu$', ylabel=r'$p\left( \mu | kast \right)$', title = r'$P\left( kalib. \right) = {:.2f}$'.format(P_between))
+      fig.set_size_inches(12, 4)
+      fig.tight_layout()
+      plt.savefig('./{}/{}_mu_posterior.png'.format(plot_folder, plot_main_name))
+      plt.close()
+
+   ### Frequentist analysis
+
+   return
+
+
+### Everything below here will be absorbed into a test_coin function ###
 
 def toss(n, p):
    """
