@@ -55,7 +55,7 @@ def test_catapult(mu, sigma, epsilon, n_throws, plotting = True, plot_folder = '
       fig, axs = plt.subplots(1)
       zoom_width = 3 * sigma
       axs.hist(throws, bins = n_bins, label = r'Observerat')
-      axs.set(xlabel=r'Kaststräcka', ylabel=r'Antal')
+      axs.set(xlabel=r'$\Delta s$', ylabel=r'Antal', title = 'Kastlängder')
       axs.set_xlim(left = mu - zoom_width, right = mu + zoom_width)
       fig.set_size_inches(12, 4)
       fig.tight_layout()
@@ -125,8 +125,6 @@ def test_catapult(mu, sigma, epsilon, n_throws, plotting = True, plot_folder = '
    unnormalised_p_sigma = np.sum(p, axis = 1)
    p_sigma = unnormalised_p_sigma / np.sum(unnormalised_p_sigma * sigma_step_width)
    
-   max_index = np.argmax(p)
-   best_fit = st.norm.pdf(mu_vector, loc = mu_grid.flatten()[max_index], scale = sigma_grid.flatten()[max_index])
 
    left_epsilon_index = np.searchsorted(mu_vector, -epsilon, side='left')
    right_epsilon_index = np.searchsorted(mu_vector, epsilon, side='left')
@@ -154,7 +152,30 @@ def test_catapult(mu, sigma, epsilon, n_throws, plotting = True, plot_folder = '
       plt.savefig('./{}/{}_mu_posterior.png'.format(plot_folder, plot_main_name))
       plt.close()
 
+   # Plot histogram with overplotted best-fit
+   if plotting:
+
+      fig, axs = plt.subplots(1)
+      axs.hist(throws, bins = n_bins, label = r'Observerat')
+      bin_width = (max(throws) - min(throws)) / n_bins
+      
+      max_index = np.argmax(p)
+      wide_mu_vector = np.linspace(mu - zoom_width, mu + zoom_width, num = n_steps)
+      best_fit = st.norm.pdf(wide_mu_vector, loc = mu_grid.flatten()[max_index], scale = sigma_grid.flatten()[max_index])    
+      axs.plot(wide_mu_vector, best_fit * n_throws * bin_width, label = r'Förväntat')
+
+      axs.set_xlim(left = mu - zoom_width, right = mu + zoom_width)
+     # axs.set_ylim(bottom = 0, top = histogram_y_max*1.1)
+      axs.set(xlabel=r'$\Delta s$', ylabel=r'Antal kast', title = r'Bästa anpassning')
+      axs.legend()
+      fig.set_size_inches(12, 4)
+      fig.tight_layout()
+      plt.savefig('./{}/{}_best_fit.png'.format(plot_folder, plot_main_name))
+      plt.close()
+
    ### Frequentist analysis
+   
+   # Maximum-likelihood estimation
 
    return
 
