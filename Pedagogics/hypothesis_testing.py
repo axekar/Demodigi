@@ -234,4 +234,38 @@ def compare_coins(P, epsilon, n_tosses, verbose = True, plotting = True, plot_fo
       fig.tight_layout()
       plt.savefig('./{}/{}_likelihood.png'.format(plot_folder, plot_main_name))
       plt.close()
+      
+   ### Bayesian analysis
+   
+   log_prior = np.zeros(n_steps)
+   log_pP = log_prior + log_L
+   pP = np.exp(log_pP)
+   max_pP = np.max(pP)
+
+   left_epsilon_index = np.searchsorted(P_vector, -epsilon, side='left')
+   right_epsilon_index = np.searchsorted(P_vector, epsilon, side='left')
+
+   P_between = np.sum(pP[left_epsilon_index:right_epsilon_index]) / np.sum(pP)
+
+   if plotting:
+      fig, axs = plt.subplots(1)
+      axs.plot(P_vector, pP)
+      
+      axs.fill_between(P_vector[left_epsilon_index:right_epsilon_index], pP[left_epsilon_index:right_epsilon_index])      
+      
+      P_index = np.searchsorted(P_vector, P, side='left')
+      if left_epsilon_index < P_index < right_epsilon_index:
+         axs.vlines(P, 0, pP[P_index], linestyles = 'dashed', colors = 'white')
+      else:
+         axs.vlines(P, 0, pP[P_index], linestyles = 'dashed')
+      axs.vlines(P, pP[P_index], max_pP * 1.1, linestyles = 'dashed')
+
+      axs.set_xlim(left = 0, right = 1)
+      axs.set_ylim(bottom = 0, top = max_pP * 1.1)
+      axs.set(xlabel=r'$P$', ylabel=r'$p\left( P | kast \right)$', title = r'Bayesiansk posterior')
+      fig.set_size_inches(12, 4)
+      fig.tight_layout()
+      plt.savefig('./{}/{}_posterior.png'.format(plot_folder, plot_main_name))
+      plt.close()
+
    return
