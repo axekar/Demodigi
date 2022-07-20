@@ -73,7 +73,7 @@ def posterior(p, n, k):
 
 
 def bayesian_analysis(n, k, epsilon = 0.01, plot = False):
-   def plot_posterior(p_vector, posterior_vector, plot_folder = 'coin_tossing_plots'):
+   def plot_posterior(p_vector, posterior_vector, plot_folder = 'hypothesis_testing_plots'):
       """
       Plot the posterior distribution P(p | n, k)
       """
@@ -107,7 +107,7 @@ def bayesian_analysis(n, k, epsilon = 0.01, plot = False):
    return
    
 def frequentist_analysis(n, k, epsilon = 0.01, plot = False):
-   def plot_likelihood_as_function_of_p(p_vector, likelihood_as_function_of_p, plot_folder = 'coin_tossing_plots'):
+   def plot_likelihood_as_function_of_p(p_vector, likelihood_as_function_of_p, plot_folder = 'hypothesis_testing_plots'):
       """
       Plot the likelihood distribution P(k | n, p), as a function of p
       """
@@ -124,7 +124,7 @@ def frequentist_analysis(n, k, epsilon = 0.01, plot = False):
       plt.close()
       return
    
-   def plot_likelihood_as_function_of_k(k_vector, likelihood_as_function_of_k, plot_folder = 'coin_tossing_plots'):
+   def plot_likelihood_as_function_of_k(k_vector, likelihood_as_function_of_k, plot_folder = 'hypothesis_testing_plots'):
       """
       Plot the likelihood distribution P(k | n, p), as a function of k
       """
@@ -162,10 +162,7 @@ def frequentist_analysis(n, k, epsilon = 0.01, plot = False):
    print('Discrepancy from expectation value: {}'.format(delta_k))
    
    likelihood_as_function_of_k = likelihood(n, k_vector, p_hat)
-
-
    p_value = (np.sum(likelihood_as_function_of_k[:k - delta_k]) + np.sum(likelihood_as_function_of_k[k + delta_k:])) / np.sum(likelihood_as_function_of_k)
-   
    print('p-value: {:.2}'.format(p_value))
    
    if plot:
