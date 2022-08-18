@@ -125,10 +125,9 @@ def test_catapult(mu, sigma, epsilon, n_throws, plotting = True, plot_folder = '
    unnormalised_p_sigma = np.sum(p, axis = 1)
    p_sigma = unnormalised_p_sigma / np.sum(unnormalised_p_sigma * sigma_step_width)
    
-
+   # Calculate probability that mu is within the bounds.
    left_epsilon_index = np.searchsorted(mu_vector, -epsilon, side='left')
    right_epsilon_index = np.searchsorted(mu_vector, epsilon, side='left')
-
    P_between = np.sum(p_sigma[left_epsilon_index:right_epsilon_index] * mu_step_width)
    
    if plotting:
@@ -154,7 +153,6 @@ def test_catapult(mu, sigma, epsilon, n_throws, plotting = True, plot_folder = '
 
    # Plot histogram with overplotted best-fit
    if plotting:
-
       fig, axs = plt.subplots(1)
       axs.hist(throws, bins = n_bins, label = r'Observerat')
       bin_width = (max(throws) - min(throws)) / n_bins
@@ -176,7 +174,50 @@ def test_catapult(mu, sigma, epsilon, n_throws, plotting = True, plot_folder = '
    ### Frequentist analysis
    
    # Maximum-likelihood estimation, within the bounds
+   L_max = np.amax(L[left_epsilon_index:right_epsilon_index,:])
+   
+   mu_hat_index, sigma_hat_index = np.where(L == L_max)
+   mu_hat = mu_vector[mu_hat_index][0]
+   sigma_hat = sigma_vector[sigma_hat_index][0]
 
+   Ds_mean = np.mean(throws)
+   Ds_mean_distribution = st.norm(loc = mu_hat, scale = sigma_hat / np.sqrt(n_throws))
+   
+   L_Ds_mean = Ds_mean_distribution.pdf(mu_vector)
+   max_L_Ds_mean = np.max(L_Ds_mean)
+
+   if Ds_mean > mu_hat:
+      left_Ds_index = np.searchsorted(mu_vector, 2 * mu_hat - Ds_mean, side='left')
+      right_Ds_index = np.searchsorted(mu_vector, Ds_mean, side='left')
+   else:
+      left_Ds_index = np.searchsorted(mu_vector, Ds_mean, side='left')
+      right_Ds_index = np.searchsorted(mu_vector, 2 * mu_hat + Ds_mean, side='left')
+   left_Ds = mu_vector[left_Ds_index]
+   right_Ds = mu_vector[right_Ds_index]
+
+   pvalue = Ds_mean_distribution.cdf(left_Ds) + (1 - Ds_mean_distribution.cdf(right_Ds) )
+
+   if plotting:
+      fig, axs = plt.subplots(1)
+      axs.plot(mu_vector, L_Ds_mean)
+
+      axs.fill_between(mu_vector[0:left_Ds_index], L_Ds_mean[0:left_Ds_index]) 
+      axs.fill_between(mu_vector[right_Ds_index:-1], L_Ds_mean[right_Ds_index:-1], color = 'C0')  
+      
+      mu_index = np.searchsorted(mu_vector, mu, side='left')
+      if mu_index < left_Ds_index or right_Ds_index < mu_index:
+         axs.vlines(mu, 0, L_Ds_mean[mu_index], linestyles = 'dashed', colors = 'white')
+      else:
+         axs.vlines(mu, 0, L_Ds_mean[mu_index], linestyles = 'dashed')
+      axs.vlines(mu, L_Ds_mean[mu_index], max_L_Ds_mean * 1.1, linestyles = 'dashed')
+      
+      axs.set_xlim(left = min_mu, right = max_mu)
+      axs.set_ylim(bottom = 0, top = max_L_Ds_mean * 1.1)
+      axs.set(xlabel=r'$\overline{\Delta s}$', ylabel=r'$p\left( \Delta s | \hat{\mu}, \hat{\sigma} \right)$', title = r'p-värde: ${:.2f}$'.format(pvalue))
+      fig.set_size_inches(12, 4)
+      fig.tight_layout()
+      plt.savefig('./{}/{}_mu_pvalue.png'.format(plot_folder, plot_main_name))
+      plt.close()
    return
 
 
@@ -267,5 +308,7 @@ def compare_coins(P, epsilon, n_tosses, verbose = True, plotting = True, plot_fo
       fig.tight_layout()
       plt.savefig('./{}/{}_posterior.png'.format(plot_folder, plot_main_name))
       plt.close()
+      
+   ### Frequentist analysis
 
    return
