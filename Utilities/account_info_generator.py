@@ -213,9 +213,9 @@ class participant_list:
       self.ID_generator = ID_generator()
       self.password_wordlist = password_wordlist
       self.password_generator = password_generator(password_length, 'xkcd', wordlist = self.password_wordlist)
-      self.participant_data = pd.DataFrame(columns = ['name', 'email'])
+      self.participant_data = pd.DataFrame(columns = ['name', 'code'])
       self.account_data = pd.DataFrame(columns = ['user_id', 'login_id', 'password', 'status'])
-      self.sharepoint_data = pd.DataFrame(columns = ['name', 'email', 'user_id', 'password'])
+      self.sharepoint_data = pd.DataFrame(columns = ['name', 'code', 'user_id', 'password'])
       self.n_participants = np.nan
       self.participant_info_read = False
       return
@@ -228,23 +228,23 @@ class participant_list:
       """
       self.n_participants = n_participants
       names = []
-      emails = []
+      codes = []
       for i in range(self.n_participants):
          names.append('Robot {}'.format(i))
-         emails.append('robot_{}@skynet.gov'.format(i))
+         codes.append('rbt{}'.format(i))
       self.participant_data['name'] = names
-      self.participant_data['email'] = emails
+      self.participant_data['code'] = codes
       self.participant_info_read = True
       return
       
    def read_participant_data(self, filepath):
       """
-      Read names and email addresses from a csv-file of participants
+      Read names and codes from a csv-file of participants
       """
       participant_data = pd.read_csv(filepath)
       self.n_participants = len(participant_data) 
       self.participant_data['name'] = participant_data['name']
-      self.participant_data['email'] = participant_data['email']
+      self.participant_data['code'] = participant_data['code']
       self.participant_info_read = True
       return
       
@@ -263,7 +263,7 @@ class participant_list:
          self.account_data['password'] = passwords
          self.account_data['status'] = 'active'
          self.sharepoint_data['name'] = self.participant_data['name']
-         self.sharepoint_data['email'] = self.participant_data['name']
+         self.sharepoint_data['code'] = self.participant_data['code']
          self.sharepoint_data['user_id'] = IDs
          self.sharepoint_data['password'] = passwords
       else:

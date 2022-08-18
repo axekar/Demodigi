@@ -20,7 +20,7 @@ load_results = True
 # Name of the directory where saved files will be put
 save_directory = 'AIG_demo_files'
 
-wordlist = aig.read_wordlist('Word_lists/Full_Swedish_noun_list.txt')
+wordlist = aig.read_wordlist('Word_lists/Swedish_diceware_list.txt')
 
 account_info = aig.participant_list(wordlist, password_length = 5)
 
