@@ -130,6 +130,9 @@ def test_catapult(mu, sigma, epsilon, n_throws, plotting = True, plot_folder = '
    right_epsilon_index = np.searchsorted(mu_vector, epsilon, side='left')
    P_between = np.sum(p_sigma[left_epsilon_index:right_epsilon_index] * mu_step_width)
    
+   print('Bayesian analysis')
+   print('\tPosterior probability that mu is between bounds: {:.2f}'.format(P_between))
+   
    if plotting:
       fig, axs = plt.subplots(1)
       axs.plot(mu_vector, p_mu)
@@ -145,7 +148,7 @@ def test_catapult(mu, sigma, epsilon, n_throws, plotting = True, plot_folder = '
       
       axs.set_xlim(left = min_mu, right = max_mu)
       axs.set_ylim(bottom = 0, top = max_p_mu * 1.1)
-      axs.set(xlabel=r'$\mu$', ylabel=r'$p\left( \mu | kast \right)$', title = r'$P\left( kalib. \right) = {:.2f}$'.format(P_between))
+      axs.set(xlabel=r'$\mu$', ylabel=r'$p\left( \mu | kast \right)$')
       fig.set_size_inches(12, 4)
       fig.tight_layout()
       plt.savefig('./{}/{}_mu_posterior.png'.format(plot_folder, plot_main_name))
@@ -194,8 +197,12 @@ def test_catapult(mu, sigma, epsilon, n_throws, plotting = True, plot_folder = '
       right_Ds_index = np.searchsorted(mu_vector, 2 * mu_hat + Ds_mean, side='left')
    left_Ds = mu_vector[left_Ds_index]
    right_Ds = mu_vector[right_Ds_index]
-
    pvalue = Ds_mean_distribution.cdf(left_Ds) + (1 - Ds_mean_distribution.cdf(right_Ds) )
+
+   print('Frequentist analysis')
+   print('\tMean Delta s: {:.2f}'.format(Ds_mean))
+   print('\tBest-fit value of mu between bounds: {:.2f}'.format(mu_hat))
+   print('\tp-value of null hypothesis: {:.2f}'.format(pvalue))
 
    if plotting:
       fig, axs = plt.subplots(1)
@@ -213,7 +220,7 @@ def test_catapult(mu, sigma, epsilon, n_throws, plotting = True, plot_folder = '
       
       axs.set_xlim(left = min_mu, right = max_mu)
       axs.set_ylim(bottom = 0, top = max_L_Ds_mean * 1.1)
-      axs.set(xlabel=r'$\overline{\Delta s}$', ylabel=r'$p\left( \Delta s | \hat{\mu}, \hat{\sigma} \right)$', title = r'p-värde: ${:.2f}$'.format(pvalue))
+      axs.set(xlabel=r'$\overline{\Delta s}$', ylabel=r'$p\left( \Delta s | \hat{\mu}, \hat{\sigma} \right)$')
       fig.set_size_inches(12, 4)
       fig.tight_layout()
       plt.savefig('./{}/{}_mu_pvalue.png'.format(plot_folder, plot_main_name))
