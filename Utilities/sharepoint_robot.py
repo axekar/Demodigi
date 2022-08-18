@@ -56,9 +56,9 @@ from time import sleep
 
 
 class participant():
-   def __init__(self, name, email):
+   def __init__(self, name, code):
       self.name = name
-      self.email = email
+      self.code = code
       return
 
 
@@ -70,17 +70,17 @@ class participant_info(participant):
    Attributes
    ----------
    name : str
-   \tName of the particpant. This may be replaced with the 5-character code
+   \tName of the particpant
    \tused at AF
-   email : str
-   \tJob e-mail address
+   code : str
+   \t5-character code used internally within AF
    username : str
    \tName of Canvas account
    password : str
    \tPassword to Canvas account
    """
-   def __init__(self, name, email, username, password):
-      participant.__init__(self, name, email)
+   def __init__(self, name, code, username, password):
+      participant.__init__(self, name, code)
       self.username = username
       self.password = password
       return
@@ -94,17 +94,16 @@ class participant_feedback(participant):
    Attributes
    ----------
    name : str
-   \tName of the particpant. This may be replaced with the 5-character code
-   \tused at AF
-   email : str
-   \tJob e-mail address
+   \tName of the particpant
+   code : str
+   \t5-character code internally within AF
    feedback_text : str
    \tThe feedback that we want to deliver. NB: This is preliminary, we will
    \tmost likely instead have a list of flags for which of a number of text
    \ttemplates to use.
    """
-   def __init__(self, name, email, feedback_text):
-      participant.__init__(self, name, email)
+   def __init__(self, name, code, feedback_text):
+      participant.__init__(self, name, code)
       self.feedback_text = feedback_text
       return
 
@@ -142,17 +141,17 @@ class password_clicker(clicker):
    def read_participant_list(self, path):
       """
       Reads a csv-file of participants, in the format
-      name, email, username, password
+      name, code, username, password
       """
       f = open(path, 'r', newline='')
       reader = csv.reader(f, delimiter = ',')
       self.participants = []
       for line in reader:
          name = line[0].strip()
-         email = line[1].strip()
+         code = line[1].strip()
          username = line[2].strip()
          password = line[3].strip()
-         self.participants.append(participant_info(name, email, username, password))
+         self.participants.append(participant_info(name, code, username, password))
       f.close()
       
       self.real_data = True
@@ -164,7 +163,7 @@ class password_clicker(clicker):
       """
       self.participants = []
       for i in range(n_participants):
-         self.participants.append(participant_info('Robot {}'.format(i), 'rob{}@skynet.com'.format(i), 'usr{}'.format(i), '123456'))
+         self.participants.append(participant_info('Robot {}'.format(i), 'rbt{}'.format(i), 'usr{}'.format(i), '123456'))
       self.real_data = False
       return
    
@@ -296,7 +295,7 @@ class SharePointConnection(object):
       if not real_data:
          address = 'alvin.gavel@arbetsförmedlingen.se'
       else:
-         address = participant.email
+         address = participant.code
       add_field.send_keys(address)
       sleep(2)
       add_field.send_keys(Keys.RETURN)
@@ -366,7 +365,7 @@ class SharePointConnection(object):
       if not real_data:
          address = 'alvin.gavel@arbetsförmedlingen.se'
       else:
-         address = participant.email
+         address = participant.code
       name_field.send_keys(address)
       name_field.send_keys(Keys.RETURN)
       sleep(2)
