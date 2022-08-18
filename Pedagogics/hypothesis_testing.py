@@ -160,49 +160,72 @@ def test_catapult(mu, sigma, epsilon, n_throws, plotting = True, plot_folder = '
       axs.hist(throws, bins = n_bins, label = r'Observerat')
       bin_width = (max(throws) - min(throws)) / n_bins
       
-      max_index = np.argmax(p)
       wide_mu_vector = np.linspace(mu - zoom_width, mu + zoom_width, num = n_steps)
+      max_index = np.argmax(p)
       best_fit = st.norm.pdf(wide_mu_vector, loc = mu_grid.flatten()[max_index], scale = sigma_grid.flatten()[max_index])    
       axs.plot(wide_mu_vector, best_fit * n_throws * bin_width, label = r'Förväntat')
 
       axs.set_xlim(left = mu - zoom_width, right = mu + zoom_width)
-     # axs.set_ylim(bottom = 0, top = histogram_y_max*1.1)
       axs.set(xlabel=r'$\Delta s$', ylabel=r'Antal kast', title = r'Bästa anpassning')
       axs.legend()
       fig.set_size_inches(12, 4)
       fig.tight_layout()
-      plt.savefig('./{}/{}_best_fit.png'.format(plot_folder, plot_main_name))
+      plt.savefig('./{}/{}_bayesian_best_fit.png'.format(plot_folder, plot_main_name))
       plt.close()
 
    ### Frequentist analysis
    
    # Maximum-likelihood estimation, within the bounds
-   L_max = np.amax(L[left_epsilon_index:right_epsilon_index,:])
-   
-   mu_hat_index, sigma_hat_index = np.where(L == L_max)
-   mu_hat = mu_vector[mu_hat_index][0]
-   sigma_hat = sigma_vector[sigma_hat_index][0]
+   limited_L_grid = L[:,left_epsilon_index:right_epsilon_index]
+   limited_mu_grid = mu_grid[:,left_epsilon_index:right_epsilon_index]
+   limited_sigma_grid = sigma_grid[:,left_epsilon_index:right_epsilon_index]
+   bounded_max_index = np.argmax(limited_L_grid)
+   mu_hat = limited_mu_grid.flatten()[bounded_max_index]
+   sigma_hat = limited_sigma_grid.flatten()[bounded_max_index]
 
    Ds_mean = np.mean(throws)
    Ds_mean_distribution = st.norm(loc = mu_hat, scale = sigma_hat / np.sqrt(n_throws))
+   Ds_std = np.std(throws)
    
    L_Ds_mean = Ds_mean_distribution.pdf(mu_vector)
    max_L_Ds_mean = np.max(L_Ds_mean)
 
+   print('Frequentist analysis')
+   print('\tMean Delta s: {:.2f}'.format(Ds_mean))
+   print('\tStdev Delta s: {:.2f}'.format(Ds_std))
+   print('\tBest-fit value of mu between bounds: {:.2f}'.format(mu_hat))
+   print('\tBest-fit value of sigma between bounds: {:.2f}'.format(sigma_hat))
+   
    if Ds_mean > mu_hat:
       left_Ds_index = np.searchsorted(mu_vector, 2 * mu_hat - Ds_mean, side='left')
       right_Ds_index = np.searchsorted(mu_vector, Ds_mean, side='left')
    else:
       left_Ds_index = np.searchsorted(mu_vector, Ds_mean, side='left')
-      right_Ds_index = np.searchsorted(mu_vector, 2 * mu_hat + Ds_mean, side='left')
+      right_Ds_index = np.searchsorted(mu_vector, 2 * mu_hat - Ds_mean, side='left')
    left_Ds = mu_vector[left_Ds_index]
    right_Ds = mu_vector[right_Ds_index]
-   pvalue = Ds_mean_distribution.cdf(left_Ds) + (1 - Ds_mean_distribution.cdf(right_Ds) )
+   pvalue = Ds_mean_distribution.cdf(left_Ds) + (1 - Ds_mean_distribution.cdf(right_Ds))
 
-   print('Frequentist analysis')
-   print('\tMean Delta s: {:.2f}'.format(Ds_mean))
-   print('\tBest-fit value of mu between bounds: {:.2f}'.format(mu_hat))
    print('\tp-value of null hypothesis: {:.2f}'.format(pvalue))
+
+   # Plot histogram with overplotted best-fit
+   if plotting:
+      fig, axs = plt.subplots(1)
+      axs.hist(throws, bins = n_bins, label = r'Observerat')
+      bin_width = (max(throws) - min(throws)) / n_bins
+      
+      wide_mu_vector = np.linspace(mu - zoom_width, mu + zoom_width, num = n_steps)
+      
+      best_fit = st.norm.pdf(wide_mu_vector, loc = mu_hat, scale = sigma_hat)    
+      axs.plot(wide_mu_vector, best_fit * n_throws * bin_width, label = r'Förväntat')
+
+      axs.set_xlim(left = mu - zoom_width, right = mu + zoom_width)
+      axs.set(xlabel=r'$\Delta s$', ylabel=r'Antal kast', title = r'Bästa anpassning')
+      axs.legend()
+      fig.set_size_inches(12, 4)
+      fig.tight_layout()
+      plt.savefig('./{}/{}_frequentist_best_fit.png'.format(plot_folder, plot_main_name))
+      plt.close()
 
    if plotting:
       fig, axs = plt.subplots(1)
