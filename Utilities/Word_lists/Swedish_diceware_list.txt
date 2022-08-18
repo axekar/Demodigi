@@ -18,6 +18,7 @@ adverb
 advokat
 affisch
 affär
+afghan
 afghanistan
 afrika
 aga
@@ -204,6 +205,7 @@ armbandsur
 armborst
 armbåge
 armenien
+armenier
 armlås
 armstöd
 armveck
@@ -373,6 +375,7 @@ begrundande
 begäran
 behörighet
 belarus
+belgare
 belgien
 belize
 belysning
@@ -655,6 +658,7 @@ bridge
 bridgeparti
 bridgespelare
 bris
+britt
 britta
 bro
 brobygge
@@ -870,6 +874,7 @@ dammsugarpåse
 dammsugarslang
 danelagen
 danmark
+dansk
 danska
 danslektion
 danslärare
@@ -1142,6 +1147,7 @@ energilagring
 energiomvandling
 engelska
 engelsklärare
+engelsman
 england
 enighet
 enkrona
@@ -1164,6 +1170,7 @@ erövringskrig
 eskader
 eskil
 eskilstuna
+est
 estet
 estetik
 estland
@@ -1289,6 +1296,8 @@ fingernagel
 finkläder
 finklänning
 finland
+finländare
+finne
 finnros
 finska
 finsmed
@@ -1428,6 +1437,9 @@ framtidsförhoppning
 framtidsvision
 frankrike
 franska
+fransman
+fransos
+fransyska
 fred
 fredag
 fredrik
@@ -2079,6 +2091,7 @@ hockeytränare
 hockeyträning
 holism
 holland
+holländare
 holländska
 homeopat
 homeopati
@@ -2276,11 +2289,13 @@ inbördeskrig
 index
 indiana
 indien
+indier
 indigo
 individ
 individualism
 individualitet
 indokina
+indokines
 indonesien
 indonesiska
 induktion
@@ -2358,12 +2373,15 @@ inversfunktion
 inåt
 iowa
 irak
+irakier
 iran
+iranier
 iridium
 iridiumatom
 iris
 iriska
 irland
+irländare
 irredentism
 is
 isberg
@@ -2374,6 +2392,7 @@ ishavet
 ishockey
 island
 israel
+israelit
 italien
 italienska
 jacka
@@ -2425,6 +2444,7 @@ jordnötsolja
 jordskalv
 jordskred
 journal
+jugoslav
 jugoslavien
 juice
 jul
@@ -2495,6 +2515,7 @@ kalmarunionen
 kalv
 kalvsvans
 kambodja
+kambodjan
 kamera
 kamerun
 kamin
@@ -2612,6 +2633,7 @@ kexchoklad
 khan
 kilt
 kina
+kines
 kinetik
 kirgizistan
 kiribati
@@ -2787,6 +2809,7 @@ korall
 korallrev
 koranen
 korea
+korean
 koriander
 korianderfrö
 korona
@@ -3135,13 +3158,16 @@ lerslänt
 lerväg
 leråker
 lesotho
+lett
 lettiska
 lettland
 lever
 leverans
+libanes
 libanon
 liberia
 libyen
+libyer
 licenciat
 lie
 lieblad
@@ -3468,6 +3494,7 @@ midnatt
 midnattstimmen
 midsommar
 midvinter
+midvinterblot
 mikael
 miklagård
 mikrob
@@ -3566,6 +3593,7 @@ monoteism
 monsun
 monsunregn
 montana
+montenegrin
 montenegro
 monument
 monumentalmålare
@@ -3751,6 +3779,7 @@ navigatör
 nebraska
 nebulosa
 nedbrytning
+nederländare
 nederländerna
 nedförsbacke
 nedkylning
@@ -3806,6 +3835,7 @@ nonsens
 nordamerika
 nordcypern
 nordkorea
+nordkorean
 nordland
 nordmakedonien
 norge
@@ -3814,6 +3844,7 @@ norr
 norrbotten
 norrköping
 norrmalm
+norrman
 norrsken
 nors
 norska
@@ -4012,6 +4043,7 @@ page
 paj
 pajala
 pakistan
+pakistanier
 pakt
 palatskupp
 palau
@@ -4553,6 +4585,7 @@ rymdturist
 rymdutforskning
 rymdvarelse
 ryska
+ryss
 ryssland
 ryttare
 ryttarrustning
@@ -4746,6 +4779,7 @@ senmedeltiden
 sent
 separatism
 separatiströrelse
+serb
 serbien
 sergeant
 serie
@@ -4919,6 +4953,7 @@ skorstenssopare
 skosnöre
 skosula
 skott
+skotte
 skottland
 skottska
 skrammel
@@ -5036,7 +5071,9 @@ slottsmur
 slottsport
 slottstorn
 slottsvägg
+slovak
 slovakien
+sloven
 slovenien
 slump
 slunga
@@ -5176,8 +5213,9 @@ sork
 sorksvans
 sot
 sotdöd
-sovietunionen
+sovjetmedborgare
 sovjettiden
+sovjetunionen
 sovrum
 sovrumsdörr
 sovstad
@@ -5503,6 +5541,7 @@ svarvare
 svavel
 svavelatom
 svek
+svensk
 svenska
 svensklärare
 sverige
@@ -5534,6 +5573,7 @@ svåger
 swaziland
 sydamerika
 sydkorea
+sydkorean
 sydossetien
 sydsydan
 syl
@@ -5561,6 +5601,7 @@ syreatom
 syremolekyl
 syrgas
 syrien
+syrier
 syrlighet
 sysax
 syskon
@@ -5634,6 +5675,7 @@ taggtråd
 taggtrådsstängsel
 taiga
 taiwan
+taiwanes
 tak
 taklucka
 takläggare
@@ -5807,6 +5849,7 @@ titan
 titanatom
 titanlegering
 titel
+tjeck
 tjeckien
 tjetjenien
 tjocktarm
@@ -6040,6 +6083,7 @@ typsnitt
 tyrann
 tyranni
 tyrannosaurus
+tysk
 tyska
 tyskland
 täcke
@@ -6287,6 +6331,7 @@ vetenskapsteori
 vett
 viadukt
 vietnam
+vietnames
 vietnamesiska
 vigsel
 vigselceremoni
@@ -6418,6 +6463,7 @@ västerås
 västmanland
 västrom
 västsahara
+västtysk
 västtyskland
 väte
 väteatom
@@ -6444,6 +6490,7 @@ vårjacka
 vårlök
 våtmark
 wales
+walesare
 washington
 whiteboard
 whiteboardpenna
@@ -6587,6 +6634,7 @@ zoologi
 österrike
 östrom
 östtimor
+östtysk
 östtyskland
 överarm
 överbefälhavare
