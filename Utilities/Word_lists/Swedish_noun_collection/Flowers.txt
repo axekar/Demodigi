@@ -1,4 +1,6 @@
 maskros
+maskrosblad
+maskrosvin
 rallarros
 vildros
 nyponros

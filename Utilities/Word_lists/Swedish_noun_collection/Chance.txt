@@ -1,6 +1,8 @@
 chans
 odds
 risk
+risktagande
+riskberäkning
 sammanträffande
 slump
 tillfällighet

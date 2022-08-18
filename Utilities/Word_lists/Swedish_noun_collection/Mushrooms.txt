@@ -32,3 +32,4 @@ svampförgiftning
 svampbuljong
 svampsporer
 svamphatt
+svampmycel

@@ -30,6 +30,10 @@ strålvapen
 strålkanon
 torped
 rymdtorped
+kloning
+klon
+livsförlängning
+organodling
 maskin
 maskininlärning
 maskinintelligens
@@ -48,6 +52,7 @@ exobiologi
 rymdbiologi
 tankekraft
 telepati
+telepat
 tankeöverföring
 utopi
 världsfred
@@ -57,3 +62,9 @@ världskrig
 verklighetsflykt
 förfall
 samhällskollaps
+tidsmaskin
+tidsresa
+tidsresenär
+tidsparadox
+hypnos
+hypnotisör

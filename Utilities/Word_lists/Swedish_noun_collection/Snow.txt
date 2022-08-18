@@ -4,8 +4,11 @@ skarsnö
 pudersnö
 nysnö
 yrsnö
+snöflinga
+flinga
 snöslask
 snödriva
+drivsnö
 snölega
 snöfall
 snöstorm
@@ -13,4 +16,8 @@ snögubbe
 snöfort
 snölykta
 snöboll
+snöbollskrig
 snöskyffel
+snöplog
+snörök
+sikt

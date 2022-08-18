@@ -14,6 +14,7 @@ brödkavel
 visp
 elvisp
 tallrik
+sopptallrik
 dricksglas
 vinglas
 skål

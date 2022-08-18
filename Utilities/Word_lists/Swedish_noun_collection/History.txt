@@ -2,6 +2,7 @@ förhistoria
 historia
 nutidshistoria
 samtidshistoria
+alternativhistoria
 forntiden
 nutiden
 framtiden
@@ -18,3 +19,7 @@ högmedeltiden
 renässansen
 reformationen
 kolonialtiden
+sovjettiden
+era
+epok
+tidsepok

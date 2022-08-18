@@ -3,6 +3,7 @@ filmstudio
 filmkamera
 filminspelning
 filmstjärna
+filmrulle
 direktör
 regissör
 bioduk
@@ -12,6 +13,7 @@ biobiljett
 biljett
 biljettförsäljning
 fiasko
+genre
 filmgenre
 actionfilm
 skräckfilm

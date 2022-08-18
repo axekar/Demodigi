@@ -58,3 +58,5 @@ tillgivenhet
 skicklighet
 putslustighet
 vitsighet
+tomhet
+enighet

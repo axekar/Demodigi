@@ -33,7 +33,6 @@ kuvert
 vykort
 lim
 klister
-runor
 tidning
 dagstidning
 kvällstidning
@@ -49,6 +48,8 @@ mikrolitografi
 runa
 runskrift
 runsten
+runristning
+runristare
 hieroglyf
 alfabete
 skrift

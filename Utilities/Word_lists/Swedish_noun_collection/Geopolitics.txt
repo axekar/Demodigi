@@ -1,0 +1,15 @@
+geopolitik
+land
+landskap
+kommun
+stat
+delstat
+nation
+nationsbygge
+storfurstendöme
+hertigdöme
+grevskap
+förbundsstat
+allians
+pakt
+försvarspakt

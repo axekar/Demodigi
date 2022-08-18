@@ -1,7 +1,11 @@
 ord
+ordklass
 verb
+adverb
 substantiv
 adjektiv
+pronomen
+preposition
 mening
 tal
 uttalande
@@ -12,6 +16,7 @@ uppmärksammande
 yttrande
 påstående
 fråga
+ifrågasättande
 påpekande
 talesätt
 ordspråk
@@ -20,3 +25,15 @@ metafor
 liknelse
 analogi
 jämförelse
+samtal
+konversation
+tankeutbyte
+sammelsurium
+svammel
+babbel
+nonsens
+begreppsförvirring
+dumheter
+mummel
+viskning
+antydan

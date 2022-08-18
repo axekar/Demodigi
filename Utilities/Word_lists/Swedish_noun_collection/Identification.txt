@@ -2,6 +2,7 @@ identifikation
 identitet
 identitetspapper
 identitetshandling
+identitetsstöld
 kännetecken
 unikum
 igenkänning
@@ -12,9 +13,13 @@ individualitet
 tillhörighet
 behörighet
 pass
+passfoto
 körkort
 fingeravtryck
 tumavtryck
+avtryck
+fotspår
+fotavtryck
 personnummer
 förnamn
 mellannamn

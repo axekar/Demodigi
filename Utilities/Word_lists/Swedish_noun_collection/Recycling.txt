@@ -10,6 +10,7 @@ glasåtervinning
 återvinningsstation
 pant
 pantautomat
+burk
 pantburk
 tomburk
 aluminiumburk
@@ -19,6 +20,8 @@ vattenflaska
 läskflaska
 ölflaska
 vinflaska
+saftflaska
+flaska
 kompost
 gödsel
 förruttnelse
@@ -34,7 +37,11 @@ skrotupplag
 skrotbil
 skrotbilsupplag
 plagiat
+plankning
 kopia
+fotokopia
 avbild
 imitation
 karikatyr
+nidbild
+klon

@@ -16,3 +16,4 @@ yrsel
 förgiftning
 tandlossning
 rivmärke
+huvudvärk

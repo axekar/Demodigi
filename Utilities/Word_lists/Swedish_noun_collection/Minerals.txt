@@ -11,3 +11,4 @@ järnmalm
 kopparmalm
 guldmalm
 silvermalm
+uranmalm

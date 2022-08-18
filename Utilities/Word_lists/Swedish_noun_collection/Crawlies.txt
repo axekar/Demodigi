@@ -1,14 +1,21 @@
 sköldpadda
 sköldpaddsskal
 sköldpaddsägg
+landsköldpadda
+havssköldpadda
 groda
 grodyngel
+yngel
 grodtunga
 grodägg
 grodhopp
+grodöga
 pilgiftsgroda
+pilgiftsgrodgift
 padda
 ödla
+ödlesvans
+ödletunga
 kopparödla
 geckoödla
 komodovaran
@@ -17,3 +24,4 @@ skräcködla
 tyrannosaurus
 velociraptor
 brontosaurus
+simhud

@@ -1,3 +1,5 @@
+form
+skepnad
 punkt
 linje
 kurva
@@ -20,16 +22,21 @@ sfär
 kub
 rätblock
 prisma
+tetraeder
+oktaeder
+dodekaeder
 pentagram
 davidsstjärna
 mönster
 rutmönster
 vågmönster
 hinna
+hölje
 yta
 volym
 innehåll
 omgivning
 hål
 hålighet
+tomrum
 raksträcka

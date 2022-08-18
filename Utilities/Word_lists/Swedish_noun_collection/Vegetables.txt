@@ -13,8 +13,11 @@ aubergine
 squash
 pumpa
 potatis
+potatisgrodd
+potatisöga
 sötpotatis
 morot
+morotsblast
 palsternacka
 rättika
 rädisa

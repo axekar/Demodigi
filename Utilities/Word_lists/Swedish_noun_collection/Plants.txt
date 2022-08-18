@@ -18,9 +18,12 @@ gran
 grankotte
 granbarr
 grankotte
+grankvist
 tall
 tallbarr
 tallkotte
+tallkvist
+tallpinnevagn
 fur
 palm
 palmblad
@@ -41,6 +44,7 @@ löv
 blad
 sav
 gren
+trädgren
 bark
 kvist
 rotsystem

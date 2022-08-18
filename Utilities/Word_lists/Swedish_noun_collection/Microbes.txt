@@ -1,11 +1,14 @@
 mikrob
 mikroorganism
 virus
+viruspartikel
 bakterie
+bakteriecell
 bacill
 blötdjur
 amöba
 cell
+celldelning
 växtcell
 djurcell
 cellkärna

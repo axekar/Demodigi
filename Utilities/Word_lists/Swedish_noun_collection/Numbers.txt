@@ -1,8 +1,12 @@
 noll
+ingenting
+inget
+intighet
 ett
 två
 tre
 fyra
+fyrtal
 fem
 sex
 sju
@@ -11,6 +15,7 @@ nio
 tio
 elva
 tolv
+dussin
 tretton
 fjorton
 femton

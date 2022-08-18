@@ -2,6 +2,7 @@ skämt
 skämtbok
 skämtlynne
 ordvits
+vits
 ordlek
 spratt
 bus
@@ -16,6 +17,9 @@ byfåne
 lyteskomik
 spelevink
 spjuver
+busfrö
+lustigkurre
+fåntratt
 clown
 humor
 humör

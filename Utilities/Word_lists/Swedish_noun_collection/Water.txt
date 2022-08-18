@@ -2,6 +2,7 @@ vatten
 saltvatten
 sötvatten
 havsbris
+kust
 hav
 sjö
 innanhav
@@ -13,6 +14,9 @@ racerbåt
 katamaran
 skepp
 fartyg
+fartygspropeller
+propeller
+fartygsmotor
 färja
 eka
 fiskebåt
@@ -24,6 +28,7 @@ containerfartyg
 lyxjakt
 isbrytare
 ubåt
+periskop
 hangarfartyg
 slagskepp
 jagare
