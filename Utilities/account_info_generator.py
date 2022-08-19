@@ -241,7 +241,7 @@ class participant_list:
       """
       Read names and codes from a csv-file of participants
       """
-      participant_data = pd.read_csv(filepath)
+      participant_data = pd.read_csv(filepath, names = ['name', 'code'])
       self.n_participants = len(participant_data) 
       self.participant_data['name'] = participant_data['name']
       self.participant_data['code'] = participant_data['code']
