@@ -22,7 +22,7 @@ wordlist = aig.read_wordlist('Word_lists/Swedish_diceware_list.txt')
 
 account_info = aig.participant_list(wordlist, password_length = 5)
 
-account_info.read_participant_data('Coacher.csv')
+account_info.read_participant_data_excel('Coacher.xlsx')
 
 account_info.fill_in_data_fields()
 
