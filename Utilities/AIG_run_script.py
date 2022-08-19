@@ -6,11 +6,17 @@ be in csv format with utf-8 encoding. It outputs four files of data,
 which can be used by the other modules.
 """
 
+import os
 import account_info_generator as aig
 
 
 # Name of the directory where saved files will be put
 save_directory = 'Participant_data'
+
+try:
+   os.mkdir(save_directory)
+except FileExistsError:
+   pass
 
 wordlist = aig.read_wordlist('Word_lists/Swedish_diceware_list.txt')
 

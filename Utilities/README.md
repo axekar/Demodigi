@@ -6,7 +6,9 @@ The current contents of this directory are:
 
 `account_info_generator.py`: A module for generating anonymous account IDs and easy to remember but hard to guess passwords
 
-`AIG_demonstration_script.py`: A script demonstrating how to use the `account_info_generator` module
+`AIG_run_script.py`: A script that runs the `account_info_generator` module on a csv-file of participant names and 5-character codes
+
+`AIG_test_script.py`: A script for testing the `account_info_generator` module
 
 `employees.py`: A module for figuring out the organisational positions of the employees at AF
 
