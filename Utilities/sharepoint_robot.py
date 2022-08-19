@@ -145,9 +145,10 @@ class password_clicker(clicker):
       """
       f = open(path, 'r', newline='', encoding='utf-8')
       reader = csv.reader(f, delimiter = ',')
-      self.participants = []
       # Skip header
-      for line in reader[1:]:
+      next(reader)
+      self.participants = []
+      for line in reader:
          name = line[0].strip()
          code = line[1].strip()
          username = line[2].strip()
