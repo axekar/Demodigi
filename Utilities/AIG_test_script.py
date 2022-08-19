@@ -1,6 +1,5 @@
 """
-This is a script for demonstrating how to use the module
-account_info_generator.
+This is a script for testing the module account_info_generator.
 
 The script simulates a group of ten participants and generates account
 names and passwords for them. It requires there to be a directory named
