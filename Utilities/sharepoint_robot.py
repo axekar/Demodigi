@@ -143,8 +143,8 @@ class password_clicker(clicker):
       Reads a csv-file of participants, in the format
       name, code, username, password
       """
-      f = open(path, 'r', newline='')
-      reader = csv.reader(f, delimiter = ',', encoding='utf-8')
+      f = open(path, 'r', newline='', encoding='utf-8')
+      reader = csv.reader(f, delimiter = ',')
       self.participants = []
       for line in reader:
          name = line[0].strip()
