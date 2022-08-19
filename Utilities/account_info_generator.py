@@ -237,11 +237,22 @@ class participant_list:
       self.participant_info_read = True
       return
       
-   def read_participant_data(self, filepath):
+   def read_participant_data(self, filepath, encoding = 'utf-8'):
       """
-      Read names and codes from a csv-file of participants
+      Read names and codes from a csv-file of participants.
       """
-      participant_data = pd.read_csv(filepath, names = ['name', 'code'])
+      participant_data = pd.read_csv(filepath, names = ['name', 'code'], encoding = encoding)
+      self.n_participants = len(participant_data) 
+      self.participant_data['name'] = participant_data['name']
+      self.participant_data['code'] = participant_data['code']
+      self.participant_info_read = True
+      return
+      
+   def read_participant_data_excel(self, filepath):
+      """
+      Read names and codes from an excel file
+      """
+      participant_data = pd.read_excel(filepath, usecols = [0, 1], names = ['name', 'code'])
       self.n_participants = len(participant_data) 
       self.participant_data['name'] = participant_data['name']
       self.participant_data['code'] = participant_data['code']
