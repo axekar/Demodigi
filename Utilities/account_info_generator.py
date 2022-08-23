@@ -333,7 +333,7 @@ class participant_list:
    
    ### Functions for saving *sensitive* data
    ### NOTE: This information is in principle secret, meaning that is must
-   ###       be stored in a place where it is accessible even to other
+   ###       be stored in a place where it is not accessible even to other
    ###       members of the project
    
    def save_account_data(self, filepath):
