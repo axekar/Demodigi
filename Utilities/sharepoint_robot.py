@@ -521,7 +521,7 @@ class password_connection(SharePointConnection):
       # Add entry for participant
       new_button = self.driver.find_element(By.XPATH, "//*[text()='New']")
       new_button.click()
-      sleep(2)
+      sleep(5)
       title_field = self.driver.find_element(By.XPATH, "//*[text()='Title']/following::input[@type='text'][position()=1]")
       title_field.send_keys(participant.name)
       sleep(2)
