@@ -31,21 +31,28 @@ class SCB_data:
    def __init__(self):
       self.preprocessed_data = pd.DataFrame(columns = ['ID', 'Startdatum', 'Avslutat läromodulen?'])
       self.account_data = pd.DataFrame(columns = ['Femställig kod', 'Startdatum', 'Uppskattad tid', 'Avslutat läromodulen?'])
-      self.full_results = pd.DataFrame([])
-      self.results_read = False
       return
    
-   def import_data(self, filepath):
+   def import_data(self, file_path):
       """
       Import a file that has been exported by the preprocessing module
       """
-      self.preprocessed_data = pd.read_csv(filepath)
+      self.preprocessed_data = pd.read_csv(file_path)
       return
       
-   def connect_ID_and_code(self, filepath):
+   def connect_ID_and_code(self, file_path):
       """
       Opens a file mapping OLI-Torus' student IDs to the five-character
       identifiers used within AF.
+      
+      *Note that this is not finished*
       """
-      pass
+      self.account_data['Startdatum'] = self.preprocessed_data['Startdatum']
+      self.account_data['Avslutat läromodulen?'] = self.preprocessed_data['Avslutat läromodulen?']
+      self.account_data['Femställig kod'] = 'Kod ej känd'
+      self.account_data['Uppskattad tid'] = '30 min'
+      return
+   
+   def export_data(self, file_path):
+      self.account_data.to_csv(file_path, index = False)
       return
