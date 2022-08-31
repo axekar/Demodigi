@@ -12,3 +12,5 @@ skills = ['WHF_Safety', 'Virus', 'TwoFactorAuthentication', 'Spam', 'SocialMedia
 mod = fe.real_learning_module(len(skills), 4, 'Utilities/Results/IT-säkerhet/IDs.json',  'Utilities/Results/IT-säkerhet/BBVs.json', 'Utilities/Results/IT-säkerhet')
 trial_study = fe.study('IT-säkerhet', mod)
 trial_study.describe()
+trial_study.do_tests()
+trial_study.summarise_results()
