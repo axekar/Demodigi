@@ -30,3 +30,4 @@ try:
 except FileExistsError:
    pass
 mod.export_results('Results/Kartläggning')
+mod.export_IDs('Results/Kartläggning/IDs.json')

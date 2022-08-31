@@ -306,6 +306,22 @@ class learning_module:
             participant.save_factorial_experiment_data(folder_path)
       return
 
+   def export_IDs(self, file_path):
+      """
+      Write a file of participant IDs, which can be read by the
+      factorial_experiment module, or by this module.
+      
+      There should not be any need to use this function, except when
+      participants have been inferred from the results file.
+      """
+      f = open(file_path, 'w')
+      # Here we do a weird thing because json can handle Python's built-in
+      # bool type but not numpy's bool_ type.
+      packed = json.dumps({'IDs':list(self.participants.keys())})
+      f.write(packed)
+      f.close()
+      return      
+
    ### Functions for handling data regarding groups of participants
    
    def _cumulative_answers_by_date(self, participants):
