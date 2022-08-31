@@ -703,9 +703,6 @@ class participant(ABC):
          print('No results to evaluate')
          return
       self.last_wrong = np.zeros(self.n_skills, dtype = np.int64)
-      #print(self.results)
-      #print(self.n_skills)
-     # print(self.last_wrong)
       for i in range(self.n_skills):
          self.last_wrong[i] = last_wrong_per_skill(self.results[:,i]) # Replace this w. something neater. I'm pretty sure you could just use index
 
