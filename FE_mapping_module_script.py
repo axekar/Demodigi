@@ -9,4 +9,4 @@ import factorial_experiment as fe
 
 skills = ['WifiProblems', 'TextFormating', 'Templates', 'SpotDeepFake', 'SolvingCrash', 'SoftwareFreeze', 'SharingPictures', 'SharingLargeFiles', 'SharingFiles', 'SharingEvents', 'SearchingForInfo', 'SafePasswords', 'Phishing', 'OrganisingFiles', 'OnlineMeetingProblems', 'MapServices', 'Malware', 'LearningAboutFunctions', 'InfoGraphics', 'ImageEditingSoftware', 'GDPR', 'FreeImages', 'FindingSolutions', 'EvaluateInformation', 'EmailFunctions', 'CreatingPresentations', 'CollaborationInDocuments', 'ChangingPDFs', 'Backup']
 
-fe.real_learning_module(len(skills), 1, 'Utilities/Results/Kartläggning/IDs.json',  'Utilities/Results/Kartläggning/BBVs.json', 'Utilities/Results/Kartläggning')
+mod = fe.real_learning_module(len(skills), 1, 'Utilities/Results/Kartläggning/IDs.json',  'Utilities/Results/Kartläggning/BBVs.json', 'Utilities/Results/Kartläggning')
