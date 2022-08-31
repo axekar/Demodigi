@@ -12,7 +12,7 @@ The current contents of this directory are:
 
 `employees.py`: Module for figuring out the organisational positions of the employees at AF
 
-`preprocessing.py`: Module for handling the data that comes out of OLI-Torus, changing it into a format suitable for the factorial_experiment module one level further up
+`preprocessing.py`: Module for handling the data that comes out of OLI-Torus, changing it into a format suitable for the `factorial_experiment` module one level further up
 
 `pp_mapping_module_script.py`: Script for handling the results of the course module `kartläggning`
 
