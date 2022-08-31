@@ -703,8 +703,11 @@ class participant(ABC):
          print('No results to evaluate')
          return
       self.last_wrong = np.zeros(self.n_skills, dtype = np.int64)
+      #print(self.results)
+      #print(self.n_skills)
+     # print(self.last_wrong)
       for i in range(self.n_skills):
-         self.last_wrong[i] = last_wrong_per_skill(self.results[i,:]) # Replace this w. something neater. I'm pretty sure you could just use index
+         self.last_wrong[i] = last_wrong_per_skill(self.results[:,i]) # Replace this w. something neater. I'm pretty sure you could just use index
 
       self.correct_onwards = np.zeros(self.n_sessions, dtype = np.int64)      
       for i in range(self.n_sessions):
@@ -793,9 +796,9 @@ class simulated_participant(participant):
       if self.digicomp_set:
          self.n_sessions = n_sessions
          self.n_skills = n_skills
-         self.results = np.zeros((n_skills, n_sessions), dtype = bool)
-         flat_random = rd.random((n_skills, n_sessions))
-         digicomp_array = np.tile(np.linspace(self.digicomp_initial, self.digicomp_final, num = n_sessions), (n_skills, 1))
+         self.results = np.zeros((n_sessions, n_skills), dtype = bool)
+         flat_random = rd.random((n_sessions, n_skills))
+         digicomp_array = np.tile(np.linspace(self.digicomp_initial, self.digicomp_final, num = n_sessions), (n_skills, 1)).T
          self.results = flat_random < digicomp_array
          self.results_read = True
          self._evaluate_results_according_to_last_wrong()
@@ -857,7 +860,7 @@ class learning_module(ABC):
    def _rank_participants(self):
       self.ranking_by_session = np.zeros((self.n_participants, self.n_sessions))
       for i in range(self.n_sessions):
-         self.ranking_by_session[:,i] = ordinalise(self.results[:,i])
+         self.ranking_by_session[:,i] = ordinalise(self.results[i,:])
          
       total_ranking = np.zeros(self.n_participants)
       
@@ -1083,13 +1086,13 @@ class learning_module(ABC):
       return
 
    def load_results(self, folder_path):
-      self.results = np.zeros((self.n_participants, self.n_sessions))
+      self.results = np.zeros((self.n_sessions, self.n_participants))
       for i in range(self.n_participants):
          participant = self.participants[i]
          participant.load_results(folder_path)
-         self.results[i,:] = participant.correct_onwards
-      self.results_initial = self.results[:,0]
-      self.results_final = self.results[:,self.n_sessions - 1]
+         self.results[:,i] = participant.correct_onwards
+      self.results_initial = self.results[0,:]
+      self.results_final = self.results[self.n_sessions - 1,:]
       self._rank_participants()
       return
 
@@ -1238,14 +1241,14 @@ class simulated_learning_module(learning_module):
    ### Methods for calculating results based on digital competence
    
    def calculate_results(self):
-      self.results = np.zeros((self.n_participants, self.n_sessions))
+      self.results = np.zeros((self.n_sessions, self.n_participants))
       for i in range(self.n_participants):
          participant, digicomp_initial, digicomp_final = self.participants[i], self.digicomp_initial[i], self.digicomp_final[i]
          participant.set_digicomp(digicomp_initial, digicomp_final)
          participant.calculate_results(self.n_sessions, self.n_skills)
-         self.results[i,:] = participant.correct_onwards
-      self.results_initial = self.results[:,0]
-      self.results_final = self.results[:,self.n_sessions - 1]
+         self.results[:,i] = participant.correct_onwards
+      self.results_initial = self.results[0,:]
+      self.results_final = self.results[self.n_sessions - 1,:]
       self._rank_participants()
       return
 
