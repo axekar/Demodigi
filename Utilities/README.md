@@ -14,7 +14,7 @@ The current contents of this directory are:
 
 `preprocessing.py`: Module for handling the data that comes out of OLI-Torus, changing it into a format suitable for the `factorial_experiment` module one level further up
 
-`pp_mapping_module_script.py`: Script for handling the results of the course module `kartläggning`
+`PP_mapping_module_script.py`: Script for handling the results of the course module `kartläggning`
 
 `SCB_data.py`: Module for generating some of the data that will need to be delivered to Statistiska Centralbyrån (SCB)
 
