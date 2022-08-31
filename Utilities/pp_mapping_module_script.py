@@ -1,5 +1,11 @@
 """
-This script is intended to take the results from the 
+This script is intended to take the results from the kartläggningsmodul
+and transform them into a format that can be handled by the module
+factorial_experiment, which is stored one directory further up.
+
+This course module is unusual in that it only has one session. Hence
+there is no point in plotting have participants improve over
+successive sessions.
 """
 
 import preprocessing as pp
