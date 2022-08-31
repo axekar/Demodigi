@@ -29,36 +29,20 @@ class SCB_data:
    This represents the data that is of interest to SCB
    """
    def __init__(self):
+      self.preprocessed_data = pd.DataFrame(columns = ['ID', 'Startdatum', 'Avslutat läromodulen?'])
       self.account_data = pd.DataFrame(columns = ['Femställig kod', 'Startdatum', 'Uppskattad tid', 'Avslutat läromodulen?'])
       self.full_results = pd.DataFrame([])
       self.results_read = False
       return
    
-   def import_oli_results(self, filepath):
+   def import_data(self, filepath):
       """
-      Import a file with the raw statistics directly out of OLI-Torus, in the
-      tab-separated values format.
+      Import a file that has been exported by the preprocessing module
       """
-      raw = pd.read_csv(filepath, sep='\t')
-      self.full_results = raw.astype({"Student ID": str}) # This sometimes gets interpreted as int
-      self.results_read = True
+      self.preprocessed_data = pd.read_csv(filepath)
       return
       
-   def find_start_date(self):
-      """
-      Figures out when a participant has started working on the module
-      """
-      pass
-      return
-      
-   def has_finished(self):
-      """
-      Figures out whether a participant has finished the module
-      """
-      pass
-      return
-      
-   def connect_ID_and_code(self, filepath)
+   def connect_ID_and_code(self, filepath):
       """
       Opens a file mapping OLI-Torus' student IDs to the five-character
       identifiers used within AF.
