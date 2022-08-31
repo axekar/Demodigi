@@ -416,9 +416,9 @@ class learning_module:
       else:
          n_sessions = {}
          for skill in self.skills:
-            n_sessions[skill] = 1
+            n_sessions[skill] = 0
             activities = self.full_results['Activity Title'].to_numpy()
-            while "{}_Q{}".format(skill, n_sessions[skill]) in activities:
+            while "{}_Q{}".format(skill, n_sessions[skill] + 1) in activities:
                n_sessions[skill] += 1
       if verbose:
          print('Number of sessions registered:')
