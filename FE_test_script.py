@@ -130,8 +130,8 @@ n_skills = 7
 test_participant = fe.simulated_participant('Alice')
 test_participant.set_digicomp(0., 1.)
 test_participant.calculate_results(n_sessions, n_skills)
-always_fail = np.sum(test_participant.results[:,0]) == 0
-always_succeed = np.sum(test_participant.results[:,n_sessions-1]) == n_skills
+always_fail = np.sum(test_participant.results[0,:]) == 0
+always_succeed = np.sum(test_participant.results[n_sessions-1,:]) == n_skills
 if not always_fail:
    print('Participant is succeeding even when her digital competence is zero!')
 if not always_succeed:
