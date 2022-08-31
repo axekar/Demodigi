@@ -14,6 +14,8 @@ The current contents of this directory are:
 
 `preprocessing.py`: A module for handling the data that comes out of OLI-Torus, changing it into a format suitable for the factorial_experiment module one level further up
 
+`pp_mapping_module_script.py`: A script for handling the results of the course module `kartläggning`
+
 `SCB_data.py`: A module for generating some of the data that will need to be delivered to Statistiska Centralbyrån (SCB)
 
 `sharepoint_robot.py`: A module for creating SharePoint pages to share passwords with participants in the project
