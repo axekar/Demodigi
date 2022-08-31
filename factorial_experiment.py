@@ -855,9 +855,9 @@ class learning_module(ABC):
    ### Method for ranking participants based on results
    
    def _rank_participants(self):
-      self.ranking_by_session = np.zeros((self.n_participants, self.n_sessions))
+      self.ranking_by_session = np.zeros((self.n_sessions, self.n_participants))
       for i in range(self.n_sessions):
-         self.ranking_by_session[:,i] = ordinalise(self.results[:,i])
+         self.ranking_by_session[i,:] = ordinalise(self.results[i,:])
          
       total_ranking = np.zeros(self.n_participants)
       
@@ -865,7 +865,7 @@ class learning_module(ABC):
          # Unless you explicitly make this a float, the type of (self.n_participants + 1)**i
          # suddenly changes once i is big enough. I do not know if this is a bug in numpy or
          # a feature so clever I cannot understand it.
-         total_ranking += self.ranking_by_session[:,-1-i] / float((self.n_participants + 1)**i)
+         total_ranking += self.ranking_by_session[-1-i,:] / float((self.n_participants + 1)**i)
       self.ranking = ordinalise(total_ranking)
       return
    
@@ -1083,13 +1083,13 @@ class learning_module(ABC):
       return
 
    def load_results(self, folder_path):
-      self.results = np.zeros((self.n_participants, self.n_sessions))
+      self.results = np.zeros((self.n_sessions, self.n_participants))
       for i in range(self.n_participants):
          participant = self.participants[i]
          participant.load_results(folder_path)
-         self.results[i,:] = participant.correct_onwards[0:self.n_sessions]# The slicing deals with the unusual case where a module formally contains more than the standard number of sessions for one skill.
-      self.results_initial = self.results[:,0]
-      self.results_final = self.results[:,self.n_sessions - 1]
+         self.results[:,i] = participant.correct_onwards[0:self.n_sessions]# The slicing deals with the unusual case where a module formally contains more than the standard number of sessions for one skill.
+      self.results_initial = self.results[0,:]
+      self.results_final = self.results[self.n_sessions - 1,:]
       self._rank_participants()
       return
 
@@ -1244,8 +1244,8 @@ class simulated_learning_module(learning_module):
          participant.set_digicomp(digicomp_initial, digicomp_final)
          participant.calculate_results(self.n_sessions, self.n_skills)
          self.results[:,i] = participant.correct_onwards
-      self.results_initial = self.results[:,0]
-      self.results_final = self.results[:,self.n_sessions - 1]
+      self.results_initial = self.results[0,:]
+      self.results_final = self.results[self.n_sessions - 1,:]
       self._rank_participants()
       return
 
