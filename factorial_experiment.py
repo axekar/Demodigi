@@ -1306,9 +1306,11 @@ class real_learning_module(learning_module):
    
    *Attributes to be added*
    """
-   def __init__(self, n_skills, n_sessions, id_path, results_folder_path, CBV_path = None, BBV_path = None, boundaries = None):
+   def __init__(self, n_skills, n_sessions, id_path, results_folder_path, manipulation_path = None, CBV_path = None, BBV_path = None, boundaries = None):
       learning_module.__init__(self, n_skills, n_sessions, boundaries)
       self.load_ids(id_path)
+      if manipulation_path != None:
+         self.load_manipulations(manipulation_path)
       if CBV_path != None:
          self.load_CBVs(CBV_path)
       if BBV_path != None:
