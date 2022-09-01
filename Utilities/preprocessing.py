@@ -238,12 +238,13 @@ class learning_module:
          self.participants[ID] = participant(ID) 
       return
 
-   def import_oli_results(self, filepath, section_slug = None):
+   def import_raw_analytics(self, filepath, section_slug = None):
       """
-      Import a file with the raw statistics directly out of OLI Torus, in the
-      tab-separated values format. Specifying section_slug means that only
-      results matching the column "Section Slug" in the OLI Torus file get
-      picked.
+      Import the raw_analytics.tsv file given by OLI Torus and pick out the 
+      relevant information.
+      
+      Specifying section_slug means that only results matching the column
+      "Section Slug" in the OLI Torus file get picked.
       """
       raw = pd.read_csv(filepath, sep='\t')
       cleaned = raw.astype({"Student ID": str}) # This sometimes gets interpreted as int
