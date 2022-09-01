@@ -1304,40 +1304,15 @@ class real_learning_module(learning_module):
    This needs to read three files of participant IDs, BBVs and
    digital competence.
    
-   Attributes
-   ----------
-   n : int
-   \tThe number of participants in the study
-   known_BBVs : list of real_BBV
-   \tBBVs that affect some subset of participants, and which are
-   \tassumed to be known to the experimenters ahead of time. This means
-   \tthat it is possible for them to divide the participants affected
-   \tby these BBV variables evenly w.r.t. the manipulations
-   discovered_BBVs : list of real_BBV
-   \tBBVs that affect some subset of participants, and which are
-   \tassumed to be discovered by the experimenters in the course of the
-   \tlearning module. This means that it is not possible for them to
-   \tdivide the participants affected by these BBV variables
-   \tevenly w.r.t. the manipulations
-   BBVs : list of real_BBV
-   \tList containing both the known and discovered BBVs
-   BBV_flags : dict of bool ndarrays
-   \tDictionary containing arrays stating which participants are
-   \taffected by which BBVs
-   subgroups : dict of int ndarrays
-   \tDictionary containing the indices of the participants in each
-   \tsubgroup
-   digicomp_initial : float ndarray
-   \tThe digital competence of the participants before taking the module
-   digicomp_final : float ndarray
-   \tThe digital competence of the participants after taking the module
-   digicomp_set : bool
-   \tWhether anything has set digicomp_initial and digicomp_final
+   *Attributes to be added*
    """
-   def __init__(self, n_skills, n_sessions, id_path, BBV_path, results_folder_path, boundaries = None):
+   def __init__(self, n_skills, n_sessions, id_path, results_folder_path, CBV_path = None, BBV_path = None, boundaries = None):
       learning_module.__init__(self, n_skills, n_sessions, boundaries)
       self.load_ids(id_path)
-      self.load_BBVs(BBV_path)
+      if CBV_path != None:
+         self.load_CBVs(CBV_path)
+      if BBV_path != None:
+         self.load_BBVs(BBV_path)
       self.load_results(results_folder_path)
       #Divide the participants into subgroups where the members are subject
       #to the same known BBVs
