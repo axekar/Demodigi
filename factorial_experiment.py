@@ -1287,7 +1287,7 @@ class simulated_learning_module(learning_module):
                for BBV in BBV_list:
                   print("{}{}: {}".format(_indent(3), BBV.name, sum(self.BBV_flags[BBV.name][subgroup_members])))
       if self.n_CBVs > 0:
-         print("\nThere {} {} CBV{}".format(_is_are(self.n_CBVs), self.n_CBV, _plural_ending(self.n_CBVs)))
+         print("\nThere {} {} CBV{}".format(_is_are(self.n_CBVs), self.n_CBVs, _plural_ending(self.n_CBVs)))
          for CBV in self.CBVs:
             print("{}CBV: {}".format(_indent(1), CBV.name))
             print("{}Median: {:.2f}".format(_indent(1), np.median(self.CBV_values[CBV.name])))
