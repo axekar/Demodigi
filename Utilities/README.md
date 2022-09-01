@@ -18,10 +18,6 @@ The current contents of this directory are:
 
 `PP_digital_safety_module_script.py`: Script for handling the results of the course module `IT-säkerhet`
 
-`SCB_data.py`: Module for generating some of the data that will need to be delivered to Statistiska Centralbyrån (SCB)
-
-`SD_mapping_module_script.py`: Script taking preprocessed data describing the learning module `kartläggning` and outputting the data required by SCB
-
 `sharepoint_robot.py`: Module for creating SharePoint pages to share passwords with participants in the project
 
 `Word_lists`: Directory containing lists of words to be used by the `account_info_generator.py` when generating user names and passwords

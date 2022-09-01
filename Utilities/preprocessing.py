@@ -46,8 +46,10 @@ class participant:
    answer_dates : pandas datetime DataFrame
    \tInitially empty DataFrame stating for each question in a learning
    \tmodule when the participant gave their first answer
-   first_answer_data : datetime
+   first_answer_date : datetime
    \tWhen the participant first gave any answer to a question
+   last_answer_date : datetime
+   \tWhen the participant last gave any answer to a question
    correct_first_try : pandas bool DataFrame
    \tInitially empty DataFrame stating for each question in a learning
    \tmodule whether the participant answered correctly on the first try.
@@ -66,6 +68,7 @@ class participant:
       self.answered = pd.DataFrame(dtype = bool)
       self.answer_date = pd.DataFrame(dtype = 'datetime64[s]')
       self.first_answer_date = None
+      self.last_answer_date = None
       self.correct_first_try = pd.DataFrame(dtype = bool)
       # I would *like* to implement this one as a DataFrame, but it turns
       # out that Pandas does not accept datetime64 objects.
@@ -264,7 +267,8 @@ class learning_module:
       participant.correct_first_try = pd.DataFrame(columns = self.skills, index = range(1, self.n_sessions + 1), dtype = bool)
       correct_participant = self.full_results[self.full_results['Student ID'] == participant.ID]
       n_answers = 0
-      participant.first_answer_date = datetime.datetime.now()
+      participant.first_answer_date = datetime.datetime.max
+      participant.last_answer_date = datetime.datetime.min
       for skill in self.skills:
          for session in range(1, self.n_sessions + 1):
             try:
@@ -277,6 +281,8 @@ class learning_module:
                n_answers += 1
                if first_try_date < participant.first_answer_date:
                   participant.first_answer_date = first_try_date
+               if first_try_date > participant.last_answer_date:
+                  participant.last_answer_date = first_try_date
             except IndexError:
                has_answered = False
                correct = False
@@ -341,12 +347,19 @@ class learning_module:
 
       sorted_IDs = sorted(self.participants.keys())
       first_answer_dates = []
-      finished = []
+      last_answer_dates = []
       for ID in sorted_IDs:
-         first_answer_dates.append(self.participants[ID].first_answer_date)
-         finished.append(self.flags.loc[ID, 'finished'])
+         first_answer_dates.append(self.participants[ID].first_answer_date.date())
+         if self.flags.loc[ID, 'finished']:
+            last_answer_dates.append(self.participants[ID].last_answer_date.date())
+         else:
+            last_answer_dates.append('Ej klar')
 
-      SCB_data = pd.DataFrame(data={'ID':sorted_IDs, 'Startdatum':first_answer_dates, 'Avslutat läromodulen?':finished})
+      SCB_data = pd.DataFrame(columns = ['Personnummer', 'Uppskattad tid', 'Startdatum', 'Avslutsdatum'])
+      SCB_data['Startdatum'] = first_answer_dates
+      SCB_data['Avslutsdatum'] = last_answer_dates
+      SCB_data['Personnummer'] = 'Ej känt'
+      SCB_data['Uppskattad tid'] = '30 min'
       SCB_data.to_csv(file_path, index = False)
       return
 
