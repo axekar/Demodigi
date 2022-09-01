@@ -341,10 +341,13 @@ class learning_module:
 
    def export_SCB_data(self, file_path):
       """
-      Write a file that can be used by the module SCB_data, which describes
-      whether each participant has 
+      Write a csv file to be delivered to Statistiska Centralbyrån (SCB), which
+      contains the columns:
+      
+      person number, estimated time, starting date, finishing date
+      
+      The estimated time is always given as 30 minutes.
       """
-
       sorted_IDs = sorted(self.participants.keys())
       first_answer_dates = []
       last_answer_dates = []
