@@ -834,7 +834,7 @@ class learning_module(ABC):
       self.BBVs = []
       self.BBV_flags = {}
       
-      self.n_CBVs = np.nan     
+      self.n_CBV = np.nan     
       self.CBVs = []
       self.CBV_values = {}
       
@@ -1014,7 +1014,7 @@ class learning_module(ABC):
             return
       self.CBVs = CBVs
       self.CBV_values = CBV_values
-      self.n_CBVs = len(CBVs)
+      self.n_CBV = len(CBVs)
       return
       
    def load_BBVs(self, path):
@@ -1193,7 +1193,7 @@ class simulated_learning_module(learning_module):
       self.CBV_values = {}
       for CBV in self.CBVs:
          self.CBV_values[CBV.name] = CBV.PDF(self.n_participants)
-      self.n_CBVs = len(self.CBVs)
+      self.n_CBV = len(self.CBVs)
       
       #Divide the participants into subgroups where the members are subject
       #to the same known BBVs
@@ -1286,8 +1286,8 @@ class simulated_learning_module(learning_module):
                print("{}Out of these, some may be affected by {} BBVs:".format(_indent(2), wording))
                for BBV in BBV_list:
                   print("{}{}: {}".format(_indent(3), BBV.name, sum(self.BBV_flags[BBV.name][subgroup_members])))
-      if self.n_CBVs > 0:
-         print("\nThere {} {} CBV{}".format(_is_are(self.n_CBVs), self.n_CBVs, _plural_ending(self.n_CBVs)))
+      if self.n_CBV > 0:
+         print("\nThere {} {} CBV{}".format(_is_are(self.n_CBV), self.n_CBV, _plural_ending(self.n_CBV)))
          for CBV in self.CBVs:
             print("{}CBV: {}".format(_indent(1), CBV.name))
             print("{}Median: {:.2f}".format(_indent(1), np.median(self.CBV_values[CBV.name])))
@@ -1711,8 +1711,8 @@ class study:
             print("{}{}".format(_indent(1), BBV.name))
          print("This may affect the study\n")
          
-      if self.learning_module.n_CBVs > 0:
-         print("There {} {} CBV{}:".format(_is_are(self.learning_module.n_CBVs), self.learning_module.n_CBVs, _plural_ending(self.learning_module.n_CBVs)))
+      if self.learning_module.n_CBV > 0:
+         print("There {} {} CBV{}:".format(_is_are(self.learning_module.n_CBV), self.learning_module.n_CBV, _plural_ending(self.learning_module.n_CBV)))
          for CBV in self.learning_module.CBVs:
             print("{}{}".format(_indent(1), CBV.name))
          print("")
