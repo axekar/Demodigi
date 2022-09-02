@@ -24,6 +24,7 @@ import json
 import matplotlib.pyplot as plt
 
 import datetime
+import xml.etree.ElementTree as et
 
 plt.style.use('tableau-colorblind10')
 
@@ -215,6 +216,7 @@ class learning_module:
          self.participants_input = True
          self.n_participants = len(participants)
       self.flags = pd.DataFrame()
+      self.raw_analytics = None
       self.full_results = None
       self.results_read = False
       self.accumulated_by_date = {}
@@ -250,7 +252,59 @@ class learning_module:
       cleaned = raw.astype({"Student ID": str}) # This sometimes gets interpreted as int
       if section_slug != None:
          cleaned = cleaned[cleaned['Section Slug'] == section_slug]
-      self.full_results = cleaned
+      self.raw_analytics = cleaned
+      
+      self.full_results = pd.DataFrame(data={'Student ID':self.raw_analytics['Student ID'], "Date Created":self.raw_analytics["Date Created"], 'Activity Title': self.raw_analytics['Activity Title'],"Attempt Number": self.raw_analytics["Attempt Number"],"Correct?": self.raw_analytics["Correct?"]})
+      self.results_read = True
+      return
+      
+   def import_datashop(self, filepath):
+      tree = et.parse(filepath)
+      root = tree.getroot()
+      
+      IDs = []
+      answer_dates = []
+      correct = []
+      activity_titles = []
+      for child in root:
+         meta = child.findall('meta')[0]
+         child_ids = meta.findall('user_id')
+         child_times = meta.findall('time') 
+     
+         problem_name = child.findall('problem_name')
+         child_evals = child.findall('action_evaluation')        
+         if len(child_ids) == len(child_times) == len(problem_name) == len(child_evals) == 1:
+            # Here we run into the problem that the Datashop file gives the names
+            # of problems in a different format than raw_analytics does
+            found = False
+            for skill in self.skills:
+               for session in range(self.n_sessions):
+                  if found:
+                     break
+                  if "Activity {}_q{}, part 1".format(skill.lower(), session) == problem_name[0].text:
+                     activity_titles.append("{}_Q{}".format(skill, session))
+                     found = True
+               if found:
+                  break
+            if found:
+               IDs.append(child_ids[0].text)
+               answer_dates.append(child_times[0].text)
+               correct.append(child_evals[0].text == 'CORRECT')
+
+      # The datashop file does not contain the attempt number. For now, we simply gamble that things
+      # are already written in the correct temporal order.
+      results_except_attempt_number = pd.DataFrame(data={'Student ID':IDs, "Date Created":answer_dates, 'Activity Title': activity_titles, "Correct?": correct})
+      attempt_number = []
+      counters = {}
+      for i in range(len(IDs)):
+         student = results_except_attempt_number['Student ID'][i]
+         activity = results_except_attempt_number['Activity Title'][i]
+         if not (student, activity) in counters.keys():
+             counters[(student, activity)] = 1
+         counters[(student, activity)] += 1
+         attempt_number.append(counters[(student, activity)])
+      
+      self.full_results = pd.DataFrame(data={'Student ID':IDs, "Date Created":answer_dates, 'Activity Title': activity_titles,"Attempt Number": attempt_number,"Correct?": correct})
       self.results_read = True
       return
       
