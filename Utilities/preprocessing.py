@@ -28,9 +28,9 @@ import xml.etree.ElementTree as et
 
 plt.style.use('tableau-colorblind10')
 
-# This is the format that I have inferred that OLI-Torus uses for dates
-_date_format = "%B %d, %Y at %I:%M %p UTC"
-
+# This is the format that I have inferred that OLI-Torus uses in the raw_analytics file
+_raw_date_format = "%B %d, %Y at %I:%M %p UTC"
+_xml_date_format = "%Y-%m-%d %H:%M:%S"
 
 class participant:
    """
@@ -181,6 +181,8 @@ class learning_module:
    \tThe results from the learning module as output by OLI-Torus
    results_read : bool
    \tWhether results have been read from a file
+   date_format : str
+   \tThe date format used in the file that results are imported from
    flags : pandas DataFrame
    \tFlags that note whether each participant has:
    \t1. Started the learning module (we cannot currently test this, so always set to true)
@@ -219,6 +221,7 @@ class learning_module:
       self.raw_analytics = None
       self.full_results = None
       self.results_read = False
+      self.date_format = ''
       self.accumulated_by_date = {}
       return
 
@@ -256,6 +259,7 @@ class learning_module:
       
       self.full_results = pd.DataFrame(data={'Student ID':self.raw_analytics['Student ID'], "Date Created":self.raw_analytics["Date Created"], 'Activity Title': self.raw_analytics['Activity Title'],"Attempt Number": self.raw_analytics["Attempt Number"],"Correct?": self.raw_analytics["Correct?"]})
       self.results_read = True
+      self.date_format = _raw_date_format
       return
       
       
@@ -310,19 +314,31 @@ class learning_module:
             answers[anon_id][problem_name][time].append(action_eval == 'CORRECT')
       
       
-      # We now try 
+      # We now put the information in a pandas dataframe
       IDs = []
       answer_dates = []
       correct = []
       activity_titles = []
       attempt_number = []
       for anon_id, problem in answers.items():
+        
          for problem_name, times in problem.items():
+            # Remove those problems that do not match any skill that we are
+            # trying to test, such as practise problems, feedback, etc
+            matched_skill = False
+            for skill in self.skills:
+               for session in range(self.n_sessions):
+                  mixedcase_name = '{}_Q{}'.format(skill, session)
+                  if problem_name == mixedcase_name.lower():
+                     matched_skill = True
+            if not matched_skill:
+               continue
+               
             i = 1
             for time, answers in sorted(times.items()):
                for is_correct in answers:
                   IDs.append(anon_id)
-                  activity_titles.append(problem_name)
+                  activity_titles.append(mixedcase_name)
                   correct.append(is_correct)
                   answer_dates.append(time)
                   attempt_number.append(i)
@@ -330,6 +346,7 @@ class learning_module:
 
       self.full_results = pd.DataFrame(data={'Student ID':IDs, "Date Created":answer_dates, 'Activity Title': activity_titles,"Attempt Number": attempt_number,"Correct?": correct})
       self.results_read = True
+      self.date_format = _xml_date_format
       return
       
    def _read_participant_results(self, participant):
@@ -354,7 +371,7 @@ class learning_module:
                correct_skill = correct_participant[correct_participant['Activity Title'] == "{}_Q{}".format(skill, session)]
                first_try_index = correct_skill["Attempt Number"] == 1
                first_try_date_string = correct_skill["Date Created"][first_try_index].to_numpy()[0]
-               first_try_date = datetime.datetime.strptime(first_try_date_string, _date_format)
+               first_try_date = datetime.datetime.strptime(first_try_date_string, self.date_format)
                has_answered = True
                correct = correct_skill["Correct?"][first_try_index].to_numpy()[0]
                n_answers += 1
