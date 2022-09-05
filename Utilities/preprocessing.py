@@ -258,52 +258,76 @@ class learning_module:
       self.results_read = True
       return
       
+      
    def import_datashop(self, filepath):
+      """
+      This imports an XML file following the format specified at
+      
+      https://pslcdatashop.web.cmu.edu/dtd/guide/tutor_message_dtd_guide_v4.pdf
+      
+      The assumption is that for each problem there will be a context_message
+      followed by one or more pairs of first tool_message and tutor_message.
+      Internally, these are ordered in time, but the whole batch of context,
+      tool and tutor messages need not be ordered with respect to others.
+      """
+
       tree = et.parse(filepath)
       root = tree.getroot()
       
+      # We make a first run to pick out the relevant information and store it
+      # in a way that will allow us to pick out the attempt number.
+      answers = {}
+      
+      # Some questions do not match the standard format for problems in the
+      # XML file. They should simply be ignored.
+      wait_for_next_context_message = False
+      
+      for child in root:
+         if child.tag == 'context_message':
+            meta = child.findall('meta')[0]
+            anon_id = meta.findall('user_id')[0].text
+            time = meta.findall('time')[0].text
+            
+            try:
+               full_problem_name = child.findall('dataset')[0].findall('level')[0].findall('level')[0].findall('problem')[0].findall('name')[0].text
+            except IndexError:
+               wait_for_next_context_message = True
+               continue
+            wait_for_next_context_message = False
+            
+            problem_name = full_problem_name.split(' ')[1][:-1]
+
+            if not (anon_id in answers.keys()):
+               answers[anon_id] = {}
+            if not (problem_name in answers[anon_id].keys()):
+               answers[anon_id][problem_name] = {}
+            answers[anon_id][problem_name][time] = []
+               
+         elif child.tag == 'tool_message' and (not wait_for_next_context_message):
+            pass
+         elif child.tag == 'tutor_message' and (not wait_for_next_context_message):
+            action_eval = child.findall('action_evaluation')[0].text
+            answers[anon_id][problem_name][time].append(action_eval == 'CORRECT')
+      
+      
+      # We now try 
       IDs = []
       answer_dates = []
       correct = []
       activity_titles = []
-      for child in root:
-         meta = child.findall('meta')[0]
-         child_ids = meta.findall('user_id')
-         child_times = meta.findall('time') 
-     
-         problem_name = child.findall('problem_name')
-         child_evals = child.findall('action_evaluation')        
-         if len(child_ids) == len(child_times) == len(problem_name) == len(child_evals) == 1:
-            # Here we run into the problem that the Datashop file gives the names
-            # of problems in a different format than raw_analytics does
-            found = False
-            for skill in self.skills:
-               for session in range(self.n_sessions):
-                  if found:
-                     break
-                  if "Activity {}_q{}, part 1".format(skill.lower(), session) == problem_name[0].text:
-                     activity_titles.append("{}_Q{}".format(skill, session))
-                     found = True
-               if found:
-                  break
-            if found:
-               IDs.append(child_ids[0].text)
-               answer_dates.append(child_times[0].text)
-               correct.append(child_evals[0].text == 'CORRECT')
-
-      # The datashop file does not contain the attempt number. For now, we simply gamble that things
-      # are already written in the correct temporal order.
-      results_except_attempt_number = pd.DataFrame(data={'Student ID':IDs, "Date Created":answer_dates, 'Activity Title': activity_titles, "Correct?": correct})
       attempt_number = []
-      counters = {}
-      for i in range(len(IDs)):
-         student = results_except_attempt_number['Student ID'][i]
-         activity = results_except_attempt_number['Activity Title'][i]
-         if not (student, activity) in counters.keys():
-             counters[(student, activity)] = 1
-         counters[(student, activity)] += 1
-         attempt_number.append(counters[(student, activity)])
-      
+      for anon_id, problem in answers.items():
+         for problem_name, times in problem.items():
+            i = 1
+            for time, answers in sorted(times.items()):
+               for is_correct in answers:
+                  IDs.append(anon_id)
+                  activity_titles.append(problem_name)
+                  correct.append(is_correct)
+                  answer_dates.append(time)
+                  attempt_number.append(i)
+                  i += 1
+
       self.full_results = pd.DataFrame(data={'Student ID':IDs, "Date Created":answer_dates, 'Activity Title': activity_titles,"Attempt Number": attempt_number,"Correct?": correct})
       self.results_read = True
       return
@@ -364,6 +388,15 @@ class learning_module:
       for participant in self.participants.values():
          self._read_participant_results(participant)
       self.accumulated_by_date = self._cumulative_answers_by_date(self.participants.values())
+      return
+
+   def export_full_results(self, file_path):
+      """
+      Export the full results dataframe as a csv file.
+      
+      This is mostly intended to make visual inspection easier.
+      """
+      self.full_results.to_csv(file_path, index = False)
       return
 
    def export_results(self, folder_path):
@@ -449,7 +482,7 @@ class learning_module:
       if not self.participants_input:
          print('No participants have been read!')
       else:
-         print('Participants in study are:')
+         print('There are {} participants:'.format(len(self.participants)))
          for ID, participant in sorted(self.participants.items()):
             if self.results_read:
                if self.flags.loc[ID, 'finished']:
