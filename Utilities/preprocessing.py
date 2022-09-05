@@ -301,6 +301,8 @@ class learning_module:
             
             problem_name = full_problem_name.split(' ')[1][:-1]
 
+            print(problem_name)
+
             if not (anon_id in answers.keys()):
                answers[anon_id] = {}
             if not (problem_name in answers[anon_id].keys()):
@@ -311,7 +313,14 @@ class learning_module:
             pass
          elif child.tag == 'tutor_message' and (not wait_for_next_context_message):
             action_eval = child.findall('action_evaluation')[0].text
-            answers[anon_id][problem_name][time].append(action_eval == 'CORRECT')
+            
+            if action_eval == 'CORRECT':
+               is_correct = True
+            elif action_eval == 'INCORRECT':
+               is_correct = False
+            else:
+               print('Cannot figure out if action was completed correctly or not')
+            answers[anon_id][problem_name][time].append(is_correct)
       
       
       # We now put the information in a pandas dataframe
@@ -325,20 +334,20 @@ class learning_module:
          for problem_name, times in problem.items():
             # Remove those problems that do not match any skill that we are
             # trying to test, such as practise problems, feedback, etc
-            matched_skill = False
+            matched_skill = ''
             for skill in self.skills:
                for session in range(self.n_sessions):
                   mixedcase_name = '{}_Q{}'.format(skill, session + 1)
                   if problem_name == mixedcase_name.lower():
-                     matched_skill = True
-            if not matched_skill:
+                     matched_skill = mixedcase_name
+            if matched_skill == '':
                continue
                
             i = 1
             for time, answers in sorted(times.items()):
                for is_correct in answers:
                   IDs.append(anon_id)
-                  activity_titles.append(mixedcase_name)
+                  activity_titles.append(matched_skill)
                   correct.append(is_correct)
                   answer_dates.append(time)
                   attempt_number.append(i)
