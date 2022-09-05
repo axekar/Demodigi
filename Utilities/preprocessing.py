@@ -328,7 +328,7 @@ class learning_module:
             matched_skill = False
             for skill in self.skills:
                for session in range(self.n_sessions):
-                  mixedcase_name = '{}_Q{}'.format(skill, session)
+                  mixedcase_name = '{}_Q{}'.format(skill, session + 1)
                   if problem_name == mixedcase_name.lower():
                      matched_skill = True
             if not matched_skill:
