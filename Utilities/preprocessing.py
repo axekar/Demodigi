@@ -582,19 +582,22 @@ class learning_module:
 
       x = []
       already_known = []
-      for i in range(n_skill_for_this_competency):
+      for i in range(n_skill_for_this_competency + 1):
          x.append(i)
          already_known.append(0)
       
       for participant in self.participants.values():
+         n_correct = 0
          for i in range(n_skill_for_this_competency):
             skill = self.competencies[competence][i]
-            already_known[i] += participant.correct_first_try.loc[1, skill]
+            n_correct += participant.correct_first_try.loc[1, skill]
+         already_known[n_correct] += 1
       plt.clf()
       plt.bar(x, already_known)
-      plt.xticks(ticks=x, labels=self.competencies[competence], rotation=90)
       plt.ylim(0, self.n_participants)
-      plt.ylabel("Rätt på första försöket")
+      plt.xlabel("Antal rätt")
+      plt.ylabel("Antal deltagare")
+      plt.title(competence)
       plt.tight_layout()
       plt.savefig('{}{}.png'.format(folder_path, competence.replace(' ', '_')))
       return
