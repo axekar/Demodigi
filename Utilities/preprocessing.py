@@ -498,6 +498,30 @@ class learning_module:
    
       ### Functions for inspecting data
 
+   def describe_module(self):
+      if not self.participants_input:
+         print('No participants have been read!')
+      else:
+         print('There are {} participants:'.format(len(self.participants)))
+         signed = 0
+         started = 0
+         finished = 0
+         for ID, participant in sorted(self.participants.items()):
+            if self.results_read:
+               if self.flags.loc[ID, 'finished']:
+                  signed += 1
+                  started += 1
+                  finished += 1
+               elif self.flags.loc[ID, 'answered once']:
+                  signed += 1
+                  started += 1
+               elif self.flags.loc[ID, 'started']:
+                  signed += 1
+         print('{} have signed up'.format(signed))
+         print('{} have started'.format(started))
+         print('{} have finished'.format(finished))
+      return
+
    def describe_participants(self):
       """
       Give a short summary of who the participants are and how far they have

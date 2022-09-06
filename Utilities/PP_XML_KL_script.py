@@ -21,7 +21,7 @@ mod = pp.learning_module(skills, n_sessions = 1)
 mod.import_datashop('OLI_analytics/Kartläggning/2022_09_06/Datashop_af_kartlggning_av_digital_komp.xml') # This is temporary. It should not actually target a specific date.
 mod.infer_participants_from_full_results()
 mod.read_participants_results()
-mod.describe_participants()
+mod.describe_module()
 
 try:
    os.mkdir('Results')
