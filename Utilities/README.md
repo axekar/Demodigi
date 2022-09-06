@@ -14,9 +14,9 @@ The current contents of this directory are:
 
 `preprocessing.py`: Module for handling the data that comes out of OLI-Torus, changing it into a format suitable for the `factorial_experiment` module one level further up
 
-`PP_mapping_module_script.py`: Script for handling the results of the course module `kartläggning`
+`PP_raw_KL_script`: Script that handles the results of the course module `kartläggning`, importing the data in the `raw_analytics` format
 
-`PP_digital_safety_module_script.py`: Script for handling the results of the course module `IT-säkerhet`
+`PP_raw_IS_script`: Script that handles the results of the course module `IT-säkerhet`, importing the data in the `raw_analytics` format
 
 `sharepoint_robot.py`: Module for creating SharePoint pages to share passwords with participants in the project
 
