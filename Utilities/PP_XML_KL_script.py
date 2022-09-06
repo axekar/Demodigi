@@ -32,6 +32,6 @@ try:
 except FileExistsError:
    pass
 mod.export_results('Results/Kartläggning')
-mod.export_IDs('Results/Kartläggning/IDs.json')
+mod.export_IDs('Results/Kartläggning/XML_IDs.json')
 mod.export_SCB_data('Results/Kartläggning/SCB_data.csv')
 mod.export_full_results('Results/Kartläggning/XML_to_csv.csv')

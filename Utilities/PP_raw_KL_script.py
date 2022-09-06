@@ -1,10 +1,12 @@
 """
 This script is intended to take the results from the learning module
-Kartläggning and transform them into a format that can be handled by the
-module factorial_experiment, which is stored one directory further up.
+Kartläggning and transform them into a format that can be handled by
+the module factorial_experiment, which is stored one directory further
+up. It assumes that the results are in the raw_analytics format, rather
+than XML.
 
 This course module is unusual in that it only has one session. Hence
-there is no point in plotting have participants improve over
+there is no point in plotting how participants improve over
 successive sessions.
 
 This will create a directory named 'Results', with another directory
@@ -30,6 +32,6 @@ try:
 except FileExistsError:
    pass
 mod.export_results('Results/Kartläggning')
-mod.export_IDs('Results/Kartläggning/IDs.json')
+mod.export_IDs('Results/Kartläggning/Raw_IDs.json')
 mod.export_SCB_data('Results/Kartläggning/SCB_data.csv')
 mod.export_full_results('Results/Kartläggning/Raw_to_csv.csv')
