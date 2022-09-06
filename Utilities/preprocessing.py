@@ -183,8 +183,6 @@ class learning_module:
    \tThe results from the learning module as output by OLI-Torus
    results_read : bool
    \tWhether results have been read from a file
-   date_format : str
-   \tThe date format used in the file that results are imported from
    flags : pandas DataFrame
    \tFlags that note whether each participant has:
    \t1. Started the learning module (we cannot currently test this, so always set to true)
@@ -226,7 +224,6 @@ class learning_module:
       self.raw_analytics = None
       self.full_results = None
       self.results_read = False
-      self.date_format = ''
       self.accumulated_by_date = {}
       return
 
@@ -272,7 +269,6 @@ class learning_module:
       
       self.full_results = pd.DataFrame(data={'Student ID':self.raw_analytics['Student ID'], "Date Created":self.raw_analytics["Date Created"], 'Activity Title': self.raw_analytics['Activity Title'],"Attempt Number": self.raw_analytics["Attempt Number"],"Correct?": self.raw_analytics["Correct?"]})
       self.results_read = True
-      self.date_format = _raw_date_format
       return
       
       
@@ -303,7 +299,8 @@ class learning_module:
          if child.tag == 'context_message':
             meta = child.findall('meta')[0]
             anon_id = meta.findall('user_id')[0].text
-            time = meta.findall('time')[0].text
+            time_str = meta.findall('time')[0].text
+            time = datetime.datetime.strptime(time_str, _xml_date_format)
             
             try:
                full_problem_name = child.findall('dataset')[0].findall('level')[0].findall('level')[0].findall('problem')[0].findall('name')[0].text
@@ -364,7 +361,6 @@ class learning_module:
 
       self.full_results = pd.DataFrame(data={'Student ID':IDs, "Date Created":answer_dates, 'Activity Title': activity_titles,"Attempt Number": attempt_number,"Correct?": correct})
       self.results_read = True
-      self.date_format = _xml_date_format
       return
       
    def _read_participant_results(self, participant):
@@ -389,8 +385,6 @@ class learning_module:
             try:
                correct_skill = correct_participant[correct_participant['Activity Title'] == "{}_Q{}".format(skill, session)]
                first_try_index = correct_skill["Attempt Number"] == 1
-               #first_try_date_string = correct_skill["Date Created"][first_try_index].to_numpy()[0]
-               #first_try_date = datetime.datetime.strptime(first_try_date_string, self.date_format)
                first_try_date = correct_skill["Date Created"][first_try_index].to_numpy()[0]
                has_answered = True
                correct = correct_skill["Correct?"][first_try_index].to_numpy()[0]
@@ -617,7 +611,32 @@ class learning_module:
       plt.ylabel("Antal deltagare")
       plt.title(competence)
       plt.tight_layout()
-      plt.savefig('{}{}.png'.format(folder_path, competence.replace(' ', '_')))
+      plt.savefig('{}{}_per_antal_rätt.png'.format(folder_path, competence.replace(' ', '_')))
+      return
+
+   def plot_per_skill_for_competence(self, folder_path, competence):
+      if folder_path[-1] != '/':
+         folder_path += '/'
+
+      n_skill_for_this_competency = len(self.competencies[competence])
+
+      x = []
+      already_known = []
+      for i in range(n_skill_for_this_competency):
+         x.append(i)
+         already_known.append(0)
+      
+      for participant in self.participants.values():
+         for i in range(n_skill_for_this_competency):
+            skill = self.competencies[competence][i]
+            already_known[i] += participant.correct_first_try.loc[1, skill]
+      plt.clf()
+      plt.bar(x, already_known)
+      plt.xticks(ticks=x, labels=self.competencies[competence], rotation=90)
+      plt.ylim(0, self.n_participants)
+      plt.ylabel("Rätt på första försöket")
+      plt.tight_layout()
+      plt.savefig('{}{}_per_skill.png'.format(folder_path, competence.replace(' ', '_')))
       return
 
    def plot_initial_performance(self, folder_path):
@@ -629,6 +648,7 @@ class learning_module:
       """
       for competence in self.competencies.keys():
          self.plot_performance_for_competence(folder_path, competence)
+         self.plot_per_skill_for_competence(folder_path, competence)
       return
 
    def plot_results(self, folder_path):
