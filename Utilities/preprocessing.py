@@ -158,8 +158,9 @@ class learning_module:
   
    Attributes
    ----------
-   skills : list of str
-   \tA list of the skills that the learning module aims to teach
+   competencies : dict of list of str
+   \tA list of the competencies that the module is intended to teach, and
+   \tthe individual skills that we divide them into
    n_skills : int
    \tThe number of skills in the learning module
    n_sessions : int
@@ -192,11 +193,11 @@ class learning_module:
    \tInitially empty dict given the number of questions answered as a
    \tfunction of time.
    """
-   def __init__(self, skills, n_sessions = np.nan, participants = None):
+   def __init__(self, competencies, n_sessions = np.nan, participants = None):
       """
       Parameters
       ----------
-      skills : list of str
+      competencies : dict of lists of str
       \tDescribed under attributes
       
       Optional parameters
@@ -206,7 +207,10 @@ class learning_module:
       participants : dict of participant or None
       \tDescribed under attributes
       """
-      self.skills = skills
+      self.competencies = competencies
+      self.skills = []
+      for competence, skills in competencies.items():
+         self.skills += skills
       self.n_skills = len(self.skills)
       self.n_sessions = n_sessions
       self.n_sessions_input = np.isfinite(self.n_sessions)
@@ -306,7 +310,6 @@ class learning_module:
             if not (problem_name in answers[anon_id].keys()):
                answers[anon_id][problem_name] = {}
             answers[anon_id][problem_name][time] = []
-               
          elif child.tag == 'tool_message' and (not wait_for_next_context_message):
             pass
          elif child.tag == 'tutor_message' and (not wait_for_next_context_message):
@@ -328,7 +331,6 @@ class learning_module:
       activity_titles = []
       attempt_number = []
       for anon_id, problem in answers.items():
-        
          for problem_name, times in problem.items():
             # Remove those problems that do not match any skill that we are
             # trying to test, such as practise problems, feedback, etc
@@ -572,12 +574,49 @@ class learning_module:
       plt.savefig('{}Resultat_över_tid.png'.format(folder_path))
       return
 
+   def plot_performance_for_competence(self, folder_path, competence):
+      if folder_path[-1] != '/':
+         folder_path += '/'
+
+      n_skill_for_this_competency = len(self.competencies[competence])
+
+      x = []
+      already_known = []
+      for i in range(n_skill_for_this_competency):
+         x.append(i)
+         already_known.append(0)
+      
+      for participant in self.participants.values():
+         for i in range(n_skill_for_this_competency):
+            skill = self.competencies[competence][i]
+            already_known[i] += participant.correct_first_try.loc[1, skill]
+      plt.clf()
+      plt.bar(x, already_known)
+      plt.xticks(ticks=x, labels=self.competencies[competence], rotation=90)
+      plt.ylim(0, self.n_participants)
+      plt.ylabel("Rätt på första försöket")
+      plt.tight_layout()
+      plt.savefig('{}{}.png'.format(folder_path, competence.replace(' ', '_')))
+      return
+
+   def plot_initial_performance(self, folder_path):
+      """
+      This makes a bar plot showing the number of participants who answered
+      right on a particular skill on their first session
+      
+      I may update this to look at first session onwards
+      """
+      for competence in self.competencies.keys():
+         self.plot_performance_for_competence(folder_path, competence)
+      return
+
    def plot_results(self, folder_path):
       """
       This plots everything that can be plotted
       """
       self.plot_individual_results(folder_path)
       self.plot_results_by_time(folder_path)
+      self.plot_initial_performance(folder_path)
       return
    
    ### Function for inferring parameters when they are not available
