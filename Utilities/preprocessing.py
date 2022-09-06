@@ -301,8 +301,6 @@ class learning_module:
             
             problem_name = full_problem_name.split(' ')[1][:-1]
 
-            print(problem_name)
-
             if not (anon_id in answers.keys()):
                answers[anon_id] = {}
             if not (problem_name in answers[anon_id].keys()):
