@@ -582,9 +582,15 @@ class learning_module:
 
       x = []
       already_known = []
+      colors = []
       for i in range(n_skill_for_this_competency + 1):
          x.append(i)
          already_known.append(0)
+         
+         if i / n_skill_for_this_competency <= 4/6:
+            colors.append('orange')
+         else:
+            colors.append('green')
       
       for participant in self.participants.values():
          n_correct = 0
@@ -593,7 +599,7 @@ class learning_module:
             n_correct += participant.correct_first_try.loc[1, skill]
          already_known[n_correct] += 1
       plt.clf()
-      plt.bar(x, already_known)
+      plt.bar(x, already_known, color = colors, edgecolor='black')
       plt.ylim(0, self.n_participants)
       plt.xlabel("Antal rätt")
       plt.ylabel("Antal deltagare")
