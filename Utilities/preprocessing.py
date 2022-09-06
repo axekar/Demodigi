@@ -24,6 +24,7 @@ import json
 import matplotlib.pyplot as plt
 
 import datetime
+import pytz
 import xml.etree.ElementTree as et
 
 plt.style.use('tableau-colorblind10')
@@ -93,7 +94,7 @@ class participant:
    def _cumulative_answers_by_date(self):
       dates_when_something_happened = {}
       for date in self.answer_date.values.flatten():
-         if not np.isnan(date):
+         if not pd.isnull(date):
             if not (date in dates_when_something_happened.keys()):
                dates_when_something_happened[date] = 1
             else:
@@ -247,7 +248,7 @@ class learning_module:
          self.participants[ID] = participant(ID) 
       return
 
-   def import_raw_analytics(self, filepath, section_slug = None):
+   def import_raw_analytics(self, filepath, start_date = None, end_date = None, section_slug = None):
       """
       Import the raw_analytics.tsv file given by OLI Torus and pick out the 
       relevant information.
@@ -256,9 +257,17 @@ class learning_module:
       "Section Slug" in the OLI Torus file get picked.
       """
       raw = pd.read_csv(filepath, sep='\t')
+      
+      raw['Date Created']= pd.to_datetime(raw['Date Created'])
       cleaned = raw.astype({"Student ID": str}) # This sometimes gets interpreted as int
+      
       if section_slug != None:
          cleaned = cleaned[cleaned['Section Slug'] == section_slug]
+      if start_date != None:
+         cleaned = cleaned[start_date <= cleaned['Date Created']]
+      if end_date != None:
+         cleaned = cleaned[cleaned['Date Created'] <= end_date]
+         
       self.raw_analytics = cleaned
       
       self.full_results = pd.DataFrame(data={'Student ID':self.raw_analytics['Student ID'], "Date Created":self.raw_analytics["Date Created"], 'Activity Title': self.raw_analytics['Activity Title'],"Attempt Number": self.raw_analytics["Attempt Number"],"Correct?": self.raw_analytics["Correct?"]})
@@ -372,18 +381,21 @@ class learning_module:
       participant.correct_first_try = pd.DataFrame(columns = self.skills, index = range(1, self.n_sessions + 1), dtype = bool)
       correct_participant = self.full_results[self.full_results['Student ID'] == participant.ID]
       n_answers = 0
-      participant.first_answer_date = datetime.datetime.max
-      participant.last_answer_date = datetime.datetime.min
+      # Using the max and min of datetime does not work together with Pandas
+      participant.first_answer_date = datetime.datetime(1900, 1, 1, tzinfo = pytz.UTC)
+      participant.last_answer_date = datetime.datetime(2200, 1, 1, tzinfo = pytz.UTC)
       for skill in self.skills:
          for session in range(1, self.n_sessions + 1):
             try:
                correct_skill = correct_participant[correct_participant['Activity Title'] == "{}_Q{}".format(skill, session)]
                first_try_index = correct_skill["Attempt Number"] == 1
-               first_try_date_string = correct_skill["Date Created"][first_try_index].to_numpy()[0]
-               first_try_date = datetime.datetime.strptime(first_try_date_string, self.date_format)
+               #first_try_date_string = correct_skill["Date Created"][first_try_index].to_numpy()[0]
+               #first_try_date = datetime.datetime.strptime(first_try_date_string, self.date_format)
+               first_try_date = correct_skill["Date Created"][first_try_index].to_numpy()[0]
                has_answered = True
                correct = correct_skill["Correct?"][first_try_index].to_numpy()[0]
                n_answers += 1
+               
                if first_try_date < participant.first_answer_date:
                   participant.first_answer_date = first_try_date
                if first_try_date > participant.last_answer_date:
@@ -486,7 +498,7 @@ class learning_module:
       dates_when_something_happened = {}
       for participant in participants:
          for date in participant.answer_date.values.flatten():
-            if not np.isnan(date):
+            if not pd.isnull(date):
                if not (date in dates_when_something_happened.keys()):
                   dates_when_something_happened[date] = 1
                else:

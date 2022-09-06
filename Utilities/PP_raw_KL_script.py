@@ -14,6 +14,9 @@ named 'Kartläggning' inside.
 """
 
 import os
+import datetime
+import pytz
+
 import preprocessing as pp
 
 competencies = {'Hitta och tolka digital information':['SearchingForInfo', 'MapServices', 'EvaluateInformation', 'SpotDeepFake', 'OrganisingFiles', 'SharingFiles'],
@@ -23,7 +26,10 @@ competencies = {'Hitta och tolka digital information':['SearchingForInfo', 'MapS
 		'Problemlösning i digitala miljöer':['SoftwareFreeze', 'FindingSolutions', 'LearningAboutFunctions', 'WifiProblems', 'OnlineMeetingProblems', 'SolvingCrash']}
 		
 mod = pp.learning_module(competencies, n_sessions = 1)
-mod.import_raw_analytics('OLI_analytics/Kartläggning/2022_09_02/raw_analytics.tsv', section_slug = 'kartlggning_av_digital_kompete') # This is temporary. It should not actually target a specific date.
+# The time span during which most coaches did the pilot
+start_date = datetime.datetime(2022, 8, 29, tzinfo = pytz.UTC)
+end_date = datetime.datetime(2022, 9, 3, tzinfo = pytz.UTC)
+mod.import_raw_analytics('OLI_analytics/Kartläggning/2022_09_06/raw_analytics.tsv', start_date = start_date, end_date = end_date, section_slug = 'kartlggning_av_digital_kompete') # This is temporary. It should not actually target a specific date.
 mod.infer_participants_from_full_results()
 mod.read_participants_results()
 mod.describe_module()
