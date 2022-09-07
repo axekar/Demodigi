@@ -580,7 +580,7 @@ class learning_module:
       plt.savefig('{}Resultat_över_tid.png'.format(folder_path))
       return
 
-   def plot_performance_for_competence(self, folder_path, competence):
+   def plot_performance_by_n_correct_for_competence(self, folder_path, competence):
       if folder_path[-1] != '/':
          folder_path += '/'
 
@@ -614,7 +614,7 @@ class learning_module:
       plt.savefig('{}{}_per_antal_rätt.png'.format(folder_path, competence.replace(' ', '_')))
       return
 
-   def plot_per_skill_for_competence(self, folder_path, competence):
+   def plot_performance_per_skill_for_competence(self, folder_path, competence):
       if folder_path[-1] != '/':
          folder_path += '/'
 
@@ -647,8 +647,8 @@ class learning_module:
       I may update this to look at first session onwards
       """
       for competence in self.competencies.keys():
-         self.plot_performance_for_competence(folder_path, competence)
-         self.plot_per_skill_for_competence(folder_path, competence)
+         self.plot_performance_by_n_correct_for_competence(folder_path, competence)
+         self.plot_performance_per_skill_for_competence(folder_path, competence)
       return
 
    def plot_results(self, folder_path):
