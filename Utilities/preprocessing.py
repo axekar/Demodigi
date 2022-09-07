@@ -581,6 +581,11 @@ class learning_module:
       return
 
    def plot_performance_by_n_correct_for_competence(self, folder_path, competence, threshold = 4/6):
+      """
+      Make a barplot showing how many participants got 0, 1, 2... answers
+      right on the first try of the first session and onwards, for a given
+      competence
+      """
       if folder_path[-1] != '/':
          folder_path += '/'
 
@@ -602,7 +607,7 @@ class learning_module:
          n_correct = 0
          for i in range(n_skill_for_this_competency):
             skill = self.competencies[competence][i]
-            n_correct += participant.correct_first_try.loc[1, skill]
+            n_correct += np.all(participant.correct_first_try.loc[:, skill])
          already_known[n_correct] += 1
       plt.clf()
       plt.bar(x, already_known, color = colors, edgecolor='black')
@@ -615,6 +620,10 @@ class learning_module:
       return
 
    def plot_performance_per_skill_for_competence(self, folder_path, competence):
+      """
+      Make a barplot showing how many participants got a given skill right on
+      the first try, for a given competence
+      """
       if folder_path[-1] != '/':
          folder_path += '/'
 
@@ -629,7 +638,7 @@ class learning_module:
       for participant in self.participants.values():
          for i in range(n_skill_for_this_competency):
             skill = self.competencies[competence][i]
-            already_known[i] += participant.correct_first_try.loc[1, skill]
+            already_known[i] += np.all(participant.correct_first_try.loc[:, skill])
       plt.clf()
       plt.bar(x, already_known)
       plt.xticks(ticks=x, labels=self.competencies[competence], rotation=90)
@@ -641,10 +650,7 @@ class learning_module:
 
    def plot_initial_performance(self, folder_path):
       """
-      This makes a bar plot showing the number of participants who answered
-      right on a particular skill on their first session
-      
-      I may update this to look at first session onwards
+      This makes bar plots showing the performance of the participants
       """
       for competence in self.competencies.keys():
          self.plot_performance_by_n_correct_for_competence(folder_path, competence)
