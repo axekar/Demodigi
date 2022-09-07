@@ -507,6 +507,10 @@ class learning_module:
       ### Functions for inspecting data
 
    def describe_module(self):
+      """
+      Output some basic numerical data about how the participants have done
+      as a group.
+      """
       if not self.participants_input:
          print('No participants have been read!')
       else:
@@ -643,7 +647,8 @@ class learning_module:
       plt.bar(x, already_known)
       plt.xticks(ticks=x, labels=self.competencies[competence], rotation=90)
       plt.ylim(0, self.n_participants)
-      plt.ylabel("Rätt på första försöket")
+      plt.ylabel("Deltagare med rätt på första försöket")
+      plt.title(competence)
       plt.tight_layout()
       plt.savefig('{}{}_per_skill.png'.format(folder_path, competence.replace(' ', '_')))
       return
