@@ -580,7 +580,7 @@ class learning_module:
       plt.savefig('{}Resultat_över_tid.png'.format(folder_path))
       return
 
-   def plot_performance_by_n_correct_for_competence(self, folder_path, competence):
+   def plot_performance_by_n_correct_for_competence(self, folder_path, competence, threshold = 4/6):
       if folder_path[-1] != '/':
          folder_path += '/'
 
@@ -593,7 +593,7 @@ class learning_module:
          x.append(i)
          already_known.append(0)
          
-         if i / n_skill_for_this_competency <= 4/6:
+         if i / n_skill_for_this_competency <= threshold:
             colors.append('orange')
          else:
             colors.append('green')
