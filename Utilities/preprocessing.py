@@ -269,7 +269,8 @@ class learning_module:
       raw['Date Created']= pd.to_datetime(raw['Date Created'])
       cleaned = raw.astype({'Student ID': str}) # This sometimes gets interpreted as int
       
-      self.raw_data = pd.DataFrame(data={'Student ID':cleaned['Student ID'], 'Date Created':cleaned['Date Created'], 'Activity Title': cleaned['Activity Title'],'Attempt Number': cleaned['Attempt Number'],'Correct?': cleaned['Correct?']})
+      self.raw_data_full = pd.DataFrame(data={'Student ID':cleaned['Student ID'], 'Date Created':cleaned['Date Created'], 'Activity Title': cleaned['Activity Title'],'Attempt Number': cleaned['Attempt Number'],'Correct?': cleaned['Correct?']})
+      self.raw_data = self.raw_data_full[(self.start_date < self.raw_data_full['Date Created']) & (self.raw_data_full['Date Created'] < self.end_date)].reset_index()
       self.results_read = True
       return
       
@@ -356,7 +357,8 @@ class learning_module:
                   correct.append(is_correct)
                   answer_dates.append(time)
 
-      self.xml_data = pd.DataFrame(data={'Student ID':IDs, 'Date Created':answer_dates, 'Activity Title': activity_titles,'Correct?': correct})
+      self.xml_data_full = pd.DataFrame(data={'Student ID':IDs, 'Date Created':answer_dates, 'Activity Title': activity_titles,'Correct?': correct})
+      self.xml_data = self.xml_data_full[(self.start_date < self.xml_data_full['Date Created']) & (self.xml_data_full['Date Created'] < self.end_date)].reset_index()
       self.results_read = True
       return
       
@@ -418,43 +420,21 @@ class learning_module:
       self.mapping_pseudonym_ID = mapping_pseudonym_ID
       self.mapping_ID_pseudonym = mapping_ID_pseudonym
       
-      self.unmatched_pseudonyms = {'all':[], 'within time span':[], 'outside time span':[]}
+      self.unmatched_pseudonyms = []
       for pseudonym in pseudonyms:
          if not (pseudonym in self.mapping['Pseudonym'].values):
-            self.unmatched_pseudonyms['all'].append(pseudonym)
-            
-            pseudonym_entries = self.raw_data[self.raw_data['Student ID'] == pseudonym]
-            pseudonym_times = pseudonym_entries['Date Created']           
-            index_within_interval = (self.start_date < pseudonym_times) & (pseudonym_times < self.end_date)
-            
-            if np.any(index_within_interval):
-               self.unmatched_pseudonyms['within time span'].append(pseudonym)
-            else:
-               self.unmatched_pseudonyms['outside time span'].append(pseudonym)
+            self.unmatched_pseudonyms.append(pseudonym)
 
-      self.unmatched_IDs ={'all':[], 'within time span':[], 'outside time span':[]}
+      self.unmatched_IDs = []
       for ID in IDs:
          if not (ID in self.mapping['Student ID'].values):
-            self.unmatched_IDs['all'].append(ID)
-
-            ID_entries = self.xml_data[self.xml_data['Student ID'] == pseudonym]
-            ID_times = ID_entries['Date Created']           
-            index_within_interval = (self.start_date < ID_times) & (ID_times < self.end_date)
-            
-            if np.any(index_within_interval):
-               self.unmatched_IDs['within time span'].append(ID)
-            else:
-               self.unmatched_IDs['outside time span'].append(ID)
+            self.unmatched_IDs.append(ID)
             
       if verbose:
          print('There are {} unique pseudonyms in the raw_analytics file'.format(n_pseudonym))
-         print('Of these, {} could not be matched to IDs in the Datashop file'.format(len(self.unmatched_pseudonyms['all'])))
-         print('Of these, {} were in the relevant time span'.format(len(self.unmatched_pseudonyms['within time span'])))
-         print('Another {} were outside'.format(len(self.unmatched_pseudonyms['outside time span'])))
+         print('Of these, {} could not be matched to IDs in the Datashop file'.format(len(self.unmatched_pseudonyms)))
          print('There are {} unique IDs in the Datashop file'.format(n_ID))
-         print('Of these, {} could not be matched to pseudonyms in the raw_analytics file'.format(len(self.unmatched_IDs['all'])))
-         print('Of these, {} were in the relevant time span'.format(len(self.unmatched_IDs['within time span'])))
-         print('Another {} were outside'.format(len(self.unmatched_IDs['outside time span'])))
+         print('Of these, {} could not be matched to pseudonyms in the raw_analytics file'.format(len(self.unmatched_IDs)))
       return
       
    def import_data(self, raw_analytics_path, xml_path, verbose = False):
@@ -470,10 +450,6 @@ class learning_module:
       for i in range(self.raw_data.shape[0]):
          ID = self.raw_data['Student ID'][i]
          if ID in self.mapping_pseudonym_ID.keys():
-            if self.raw_data['Date Created'][i] < self.start_date:
-               continue
-            if self.end_date < self.raw_data['Date Created'][i]:
-               continue
             student_ids.append(self.mapping_pseudonym_ID[ID])
             date_created.append(self.raw_data['Date Created'][i])
             activity_title.append(self.raw_data['Activity Title'][i])
