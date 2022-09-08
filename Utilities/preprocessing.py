@@ -198,7 +198,7 @@ class learning_module:
    \tInitially empty dict given the number of questions answered as a
    \tfunction of time.
    '''
-   def __init__(self, competencies, n_sessions = np.nan, participants = None, start_date = _effective_min_date, end_date = _effective_max_date):
+   def __init__(self, competencies, n_sessions = np.nan, participants = None, start_date = _effective_min_date, end_date = _effective_max_date, section_slug = None):
       '''
       Parameters
       ----------
@@ -234,6 +234,7 @@ class learning_module:
          self.n_participants = len(participants)
       self.start_date = start_date
       self.end_date = end_date
+      self.section_slug = section_slug
       self.flags = pd.DataFrame()
       self.raw_analytics = None
       self.full_results = None
@@ -268,8 +269,10 @@ class learning_module:
       
       raw['Date Created']= pd.to_datetime(raw['Date Created'])
       cleaned = raw.astype({'Student ID': str}) # This sometimes gets interpreted as int
+      if self.section_slug != None:
+         cleaned = cleaned[cleaned['Section Slug'] == self.section_slug]
       
-      self.raw_data_full = pd.DataFrame(data={'Student ID':cleaned['Student ID'], 'Date Created':cleaned['Date Created'], 'Activity Title': cleaned['Activity Title'],'Attempt Number': cleaned['Attempt Number'],'Correct?': cleaned['Correct?']})
+      self.raw_data_full = pd.DataFrame(data={'Student ID':cleaned['Student ID'], 'Date Created':cleaned['Date Created'], 'Activity Title': cleaned['Activity Title'], 'Attempt Number': cleaned['Attempt Number'], 'Correct?': cleaned['Correct?']})
       self.raw_data = self.raw_data_full[(self.start_date < self.raw_data_full['Date Created']) & (self.raw_data_full['Date Created'] < self.end_date)].reset_index()
       self.results_read = True
       return
@@ -357,7 +360,7 @@ class learning_module:
                   correct.append(is_correct)
                   answer_dates.append(time)
 
-      self.xml_data_full = pd.DataFrame(data={'Student ID':IDs, 'Date Created':answer_dates, 'Activity Title': activity_titles,'Correct?': correct})
+      self.xml_data_full = pd.DataFrame(data={'Student ID':IDs, 'Date Created':answer_dates, 'Activity Title': activity_titles, 'Correct?': correct})
       self.xml_data = self.xml_data_full[(self.start_date < self.xml_data_full['Date Created']) & (self.xml_data_full['Date Created'] < self.end_date)].reset_index()
       self.results_read = True
       return

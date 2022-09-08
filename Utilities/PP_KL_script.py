@@ -26,10 +26,10 @@ competencies = {'Hitta och tolka digital information':['SearchingForInfo', 'MapS
 		
 start_date = datetime.datetime(2022, 8, 29, tzinfo = pytz.UTC)
 end_date = datetime.datetime(2022, 9, 3, tzinfo = pytz.UTC)
-mod = pp.learning_module(competencies, n_sessions = 1, start_date = start_date, end_date = end_date)
+mod = pp.learning_module(competencies, n_sessions = 1, start_date = start_date, end_date = end_date, section_slug = 'kartlggning_av_digital_kompete')
 
 # This is temporary. It should not actually target a specific date.
-mod.import_data('OLI_analytics/Kartläggning/2022_09_08/raw_analytics.tsv', 'OLI_analytics/Kartläggning/2022_09_06/Datashop_af_kartlggning_av_digital_komp.xml', verbose = True)
+mod.import_data('OLI_analytics/Kartläggning/2022_09_08/raw_analytics.tsv', 'OLI_analytics/Kartläggning/2022_09_08/Datashop_af_kartlggning_av_digital_komp.xml', verbose = True)
 
 
 
