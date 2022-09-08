@@ -347,13 +347,15 @@ class learning_module:
       return
       
    def _infer_mapping_pseudonym_ID(self):
-      IDs = set(self.xml_data['Student ID'])
-      pseudonyms = set(self.raw_data['Student ID'])
+      IDs = list(set(self.xml_data['Student ID']))
+      pseudonyms = list(set(self.raw_data['Student ID']))
+      
       mapping = {}
       for ID in IDs:
          ID_entries = self.xml_data[self.xml_data['Student ID'] == ID]
          ID_times = list(ID_entries['Date Created'])
 
+         match_percentages = []
          for pseudonym in pseudonyms:
             pseudonym_entries = self.raw_data[self.raw_data['Student ID'] == pseudonym]
             pseudonym_times = set(pseudonym_entries['Date Created'])
@@ -369,14 +371,15 @@ class learning_module:
                      
                times_matched += match_found
                total_times += 1
-            if times_matched / total_times > 0.9:
-               mapping[pseudonym] = ID
-               break
+            match_percentages.append(times_matched / total_times)
+         match_percentages = np.asarray(match_percentages)
+         best_match_index = np.argmax(match_percentages)
+         
+         mapping[pseudonyms[best_match_index]] = ID
       
       if not len(mapping.values()) == len(set(mapping.values())):
          print('ID mapped to multiple times!')
          
-      
       for pseudonym in pseudonyms:
          if not (pseudonym in mapping.keys()):
             print('Could not match pseudonym {}'.format(pseudonym))
