@@ -409,19 +409,25 @@ class learning_module:
       self.mapping_pseudonym_ID = mapping_pseudonym_ID
       self.mapping_ID_pseudonym = mapping_ID_pseudonym
       
+      self.unmatched_pseudonyms = []
       for pseudonym in pseudonyms:
          if not (pseudonym in self.mapping['Pseudonym'].values):
-            print('Could not match pseudonym {}'.format(pseudonym))
-            
+            self.unmatched_pseudonyms.append(pseudonym)
+      
+      self.unmatched_IDs = []
       for ID in IDs:
          if not (ID in self.mapping['Student ID'].values):
-            print('Could not match ID {}'.format(ID))
+            self.unmatched_IDs.append(ID)
+            
+      if verbose:
+         print('Failed to match {} pseudonyms from raw_analytics file'.format(len(self.unmatched_pseudonyms)))
+         print('Failed to match {} IDs from Datashop file'.format(len(self.unmatched_IDs)))
       return
       
-   def import_data(self, raw_analytics_path, xml_path):
+   def import_data(self, raw_analytics_path, xml_path, verbose = False):
       self.import_raw_analytics(raw_analytics_path)
       self.import_datashop(xml_path)
-      self._infer_mapping_pseudonym_ID()
+      self._infer_mapping_pseudonym_ID(verbose = verbose)
       
       student_ids = []
       date_created = []
