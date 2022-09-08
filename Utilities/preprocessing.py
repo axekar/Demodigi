@@ -372,7 +372,11 @@ class learning_module:
             if times_matched / total_times > 0.9:
                mapping[pseudonym] = ID
                break
-               
+      
+      if not len(mapping.values()) == len(set(mapping.values())):
+         print('ID mapped to multiple times!')
+         
+      
       for pseudonym in pseudonyms:
          if not (pseudonym in mapping.keys()):
             print('Could not match pseudonym {}'.format(pseudonym))
