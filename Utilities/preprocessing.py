@@ -384,10 +384,10 @@ class learning_module:
             
             times_matched = 0
             total_times = 0
-            for xml_time in ID_times:
+            for ID_time in ID_times:
                match_found = False
-               for raw_time in pseudonym_times:
-                  if abs(xml_time - raw_time) < datetime.timedelta(seconds=60):
+               for pseudonym_time in pseudonym_times:
+                  if abs(ID_time - pseudonym_time) < datetime.timedelta(seconds=60):
                      match_found = True
                      break
                      
@@ -416,7 +416,7 @@ class learning_module:
       self.mapping_ID_pseudonym = mapping_ID_pseudonym
       
       
-      self.unmatched_pseudonyms = {'all':[], 'within time span':[]}
+      self.unmatched_pseudonyms = {'all':[], 'within time span':[], 'outside time span':[]}
       for pseudonym in pseudonyms:
          if not (pseudonym in self.mapping['Pseudonym'].values):
             self.unmatched_pseudonyms['all'].append(pseudonym)
@@ -427,8 +427,10 @@ class learning_module:
             
             if np.any(index_within_interval):
                self.unmatched_pseudonyms['within time span'].append(pseudonym)
+            else:
+               self.unmatched_pseudonyms['outside time span'].append(pseudonym)
 
-      self.unmatched_IDs ={'all':[], 'within time span':[]}
+      self.unmatched_IDs ={'all':[], 'within time span':[], 'outside time span':[]}
       for ID in IDs:
          if not (ID in self.mapping['Student ID'].values):
             self.unmatched_IDs['all'].append(ID)
@@ -439,12 +441,16 @@ class learning_module:
             
             if np.any(index_within_interval):
                self.unmatched_IDs['within time span'].append(ID)
+            else:
+               self.unmatched_IDs['outside time span'].append(ID)
             
       if verbose:
          print('Failed to match {} pseudonyms from raw_analytics file'.format(len(self.unmatched_pseudonyms['all'])))
          print('Of these, {} were in the relevant time span'.format(len(self.unmatched_pseudonyms['within time span'])))
+         print('Another {} were outside'.format(len(self.unmatched_pseudonyms['outside time span'])))
          print('Failed to match {} IDs from Datashop file'.format(len(self.unmatched_IDs['all'])))
          print('Of these, {} were in the relevant time span'.format(len(self.unmatched_IDs['within time span'])))
+         print('Another {} were outside'.format(len(self.unmatched_IDs['outside time span'])))
       return
       
    def import_data(self, raw_analytics_path, xml_path, verbose = False):
