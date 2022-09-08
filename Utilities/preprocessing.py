@@ -33,6 +33,12 @@ plt.style.use('tableau-colorblind10')
 _raw_date_format = '%B %d, %Y at %I:%M %p UTC'
 _xml_date_format = '%Y-%m-%d %H:%M:%S'
 
+# For complicated reasons using the max and min functions built into
+# datetime does not work with Pandas. Hence, I have picked these times
+# as being safely outside the span that we are interested in.
+_effective_min_date = datetime.datetime(1900, 1, 1, tzinfo = pytz.UTC)
+_effective_max_date = datetime.datetime(2200, 1, 1, tzinfo = pytz.UTC)
+
 class participant:
    '''
    This represents a single person taking a learning module.
@@ -192,7 +198,7 @@ class learning_module:
    \tInitially empty dict given the number of questions answered as a
    \tfunction of time.
    '''
-   def __init__(self, competencies, n_sessions = np.nan, participants = None, start_date = None, end_date = None):
+   def __init__(self, competencies, n_sessions = np.nan, participants = None, start_date = _effective_min_date, end_date = _effective_max_date):
       '''
       Parameters
       ----------
@@ -409,19 +415,36 @@ class learning_module:
       self.mapping_pseudonym_ID = mapping_pseudonym_ID
       self.mapping_ID_pseudonym = mapping_ID_pseudonym
       
-      self.unmatched_pseudonyms = []
+      
+      self.unmatched_pseudonyms = {'all':[], 'within time span':[]}
       for pseudonym in pseudonyms:
          if not (pseudonym in self.mapping['Pseudonym'].values):
-            self.unmatched_pseudonyms.append(pseudonym)
-      
-      self.unmatched_IDs = []
+            self.unmatched_pseudonyms['all'].append(pseudonym)
+            
+            pseudonym_entries = self.raw_data[self.raw_data['Student ID'] == pseudonym]
+            pseudonym_times = pseudonym_entries['Date Created']           
+            index_within_interval = (self.start_date < pseudonym_times) & (pseudonym_times < self.end_date)
+            
+            if np.any(index_within_interval):
+               self.unmatched_pseudonyms['within time span'].append(pseudonym)
+
+      self.unmatched_IDs ={'all':[], 'within time span':[]}
       for ID in IDs:
          if not (ID in self.mapping['Student ID'].values):
-            self.unmatched_IDs.append(ID)
+            self.unmatched_IDs['all'].append(ID)
+
+            ID_entries = self.xml_data[self.xml_data['Student ID'] == pseudonym]
+            ID_times = ID_entries['Date Created']           
+            index_within_interval = (self.start_date < ID_times) & (ID_times < self.end_date)
+            
+            if np.any(index_within_interval):
+               self.unmatched_IDs['within time span'].append(ID)
             
       if verbose:
-         print('Failed to match {} pseudonyms from raw_analytics file'.format(len(self.unmatched_pseudonyms)))
-         print('Failed to match {} IDs from Datashop file'.format(len(self.unmatched_IDs)))
+         print('Failed to match {} pseudonyms from raw_analytics file'.format(len(self.unmatched_pseudonyms['all'])))
+         print('Of these, {} were in the relevant time span'.format(len(self.unmatched_pseudonyms['within time span'])))
+         print('Failed to match {} IDs from Datashop file'.format(len(self.unmatched_IDs['all'])))
+         print('Of these, {} were in the relevant time span'.format(len(self.unmatched_IDs['within time span'])))
       return
       
    def import_data(self, raw_analytics_path, xml_path, verbose = False):
@@ -437,12 +460,10 @@ class learning_module:
       for i in range(self.raw_data.shape[0]):
          ID = self.raw_data['Student ID'][i]
          if ID in self.mapping_pseudonym_ID.keys():
-            if self.start_date != None:
-               if self.raw_data['Date Created'][i] < self.start_date:
-                  continue
-            if self.end_date != None:
-               if self.end_date < self.raw_data['Date Created'][i]:
-                  continue
+            if self.raw_data['Date Created'][i] < self.start_date:
+               continue
+            if self.end_date < self.raw_data['Date Created'][i]:
+               continue
             student_ids.append(self.mapping_pseudonym_ID[ID])
             date_created.append(self.raw_data['Date Created'][i])
             activity_title.append(self.raw_data['Activity Title'][i])
