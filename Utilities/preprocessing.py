@@ -192,7 +192,7 @@ class learning_module:
    \tInitially empty dict given the number of questions answered as a
    \tfunction of time.
    '''
-   def __init__(self, competencies, n_sessions = np.nan, participants = None):
+   def __init__(self, competencies, n_sessions = np.nan, participants = None, start_date = None, end_date = None):
       '''
       Parameters
       ----------
@@ -205,6 +205,12 @@ class learning_module:
       \tDescribed under attributes
       participants : dict of participant or None
       \tDescribed under attributes
+      start_date : DateTime or None
+      \tIf specified, gives the time at which the module is taken to have
+      \tstarted. All data from before this is ignored when importing results
+      end_date : DateTime or None
+      \tIf specified, gives the time at which the module is taken to have
+      \tended. All data from after this is ignored when importing results
       '''
       self.competencies = competencies
       self.skills = []
@@ -220,6 +226,8 @@ class learning_module:
       else:
          self.participants_input = True
          self.n_participants = len(participants)
+      self.start_date = start_date
+      self.end_date = end_date
       self.flags = pd.DataFrame()
       self.raw_analytics = None
       self.full_results = None
@@ -423,6 +431,12 @@ class learning_module:
       for i in range(self.raw_data.shape[0]):
          ID = self.raw_data['Student ID'][i]
          if ID in self.mapping_pseudonym_ID.keys():
+            if self.start_date != None:
+               if self.raw_data['Date Created'][i] < self.start_date:
+                  continue
+            if self.end_date != None:
+               if self.end_date < self.raw_data['Date Created'][i]:
+                  continue
             student_ids.append(self.mapping_pseudonym_ID[ID])
             date_created.append(self.raw_data['Date Created'][i])
             activity_title.append(self.raw_data['Activity Title'][i])
