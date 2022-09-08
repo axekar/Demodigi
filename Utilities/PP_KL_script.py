@@ -2,8 +2,7 @@
 This script is intended to take the results from the learning module
 Kartläggning and transform them into a format that can be handled by
 the module factorial_experiment, which is stored one directory further
-up. It assumes that the results are in the raw_analytics format, rather
-than XML.
+up.
 
 This course module is unusual in that it only has one session. Hence
 there is no point in plotting how participants improve over
@@ -26,10 +25,11 @@ competencies = {'Hitta och tolka digital information':['SearchingForInfo', 'MapS
 		'Problemlösning i digitala miljöer':['SoftwareFreeze', 'FindingSolutions', 'LearningAboutFunctions', 'WifiProblems', 'OnlineMeetingProblems', 'SolvingCrash']}
 		
 mod = pp.learning_module(competencies, n_sessions = 1)
-# The time span during which most coaches did the pilot
-start_date = datetime.datetime(2022, 8, 29, tzinfo = pytz.UTC)
-end_date = datetime.datetime(2022, 9, 3, tzinfo = pytz.UTC)
-mod.import_raw_analytics('OLI_analytics/Kartläggning/2022_09_06/raw_analytics.tsv', start_date = start_date, end_date = end_date, section_slug = 'kartlggning_av_digital_kompete') # This is temporary. It should not actually target a specific date.
+
+mod.import_data('OLI_analytics/Kartläggning/2022_09_06/raw_analytics.tsv', 'OLI_analytics/Kartläggning/2022_09_06/Datashop_af_kartlggning_av_digital_komp.xml') # This is temporary. It should not actually target a specific date.
+
+
+
 mod.infer_participants_from_full_results()
 mod.read_participants_results()
 mod.describe_module()
