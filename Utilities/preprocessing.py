@@ -350,7 +350,11 @@ class learning_module:
       IDs = list(set(self.xml_data['Student ID']))
       pseudonyms = list(set(self.raw_data['Student ID']))
       
-      mapping = {}
+      mapping_IDs = []
+      mapping_pseudonyms = []
+      mapping_best_match_percentages = []
+      mapping_pseudonym_ID = {}
+      mapping_ID_pseudonym = {}
       for ID in IDs:
          ID_entries = self.xml_data[self.xml_data['Student ID'] == ID]
          ID_times = list(ID_entries['Date Created'])
@@ -375,20 +379,24 @@ class learning_module:
          match_percentages = np.asarray(match_percentages)
          best_match_index = np.argmax(match_percentages)
          
-         mapping[pseudonyms[best_match_index]] = ID
-      
-      if not len(mapping.values()) == len(set(mapping.values())):
-         print('ID mapped to multiple times!')
+         mapping_IDs.append(ID)
+         mapping_pseudonyms.append(pseudonyms[best_match_index])
+         mapping_best_match_percentages.append(match_percentages[best_match_index])
          
+         mapping_pseudonym_ID[pseudonyms[best_match_index]] = ID
+         mapping_ID_pseudonym[ID] = pseudonyms[best_match_index]
+         
+      self.mapping = pd.DataFrame(data={'Student ID':mapping_IDs, 'Pseudonym':mapping_pseudonyms, 'Match percentage':mapping_best_match_percentages})
+      self.mapping_pseudonym_ID = mapping_pseudonym_ID
+      self.mapping_ID_pseudonym = mapping_ID_pseudonym
+      
       for pseudonym in pseudonyms:
-         if not (pseudonym in mapping.keys()):
+         if not (pseudonym in self.mapping['Pseudonym'].values):
             print('Could not match pseudonym {}'.format(pseudonym))
             
       for ID in IDs:
-         if not (ID in mapping.values()):
+         if not (ID in self.mapping['Student ID'].values):
             print('Could not match ID {}'.format(ID))
-            
-      self.pseudonym_ID_mapping = mapping
       return
       
    def import_data(self, raw_analytics_path, xml_path):
@@ -405,8 +413,8 @@ class learning_module:
       correct = []
       for i in range(self.raw_data.shape[0]):
          ID = self.raw_data['Student ID'][i]
-         if ID in self.pseudonym_ID_mapping.keys():
-            student_ids.append(self.pseudonym_ID_mapping[ID])
+         if ID in self.mapping_pseudonym_ID.keys():
+            student_ids.append(self.mapping_pseudonym_ID[ID])
             date_created.append(self.raw_data['Date Created'][i])
             activity_title.append(self.raw_data['Activity Title'][i])
             attempt_number.append(self.raw_data['Attempt Number'][i])
