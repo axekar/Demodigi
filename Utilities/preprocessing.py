@@ -366,7 +366,10 @@ class learning_module:
          print('This may take a while...')
    
       IDs = list(set(self.xml_data['Student ID']))
+      n_ID = len(IDs)
+      
       pseudonyms = list(set(self.raw_data['Student ID']))
+      n_pseudonym = len(pseudonyms)
       
       mapping_IDs = []
       mapping_pseudonyms = []
@@ -415,7 +418,6 @@ class learning_module:
       self.mapping_pseudonym_ID = mapping_pseudonym_ID
       self.mapping_ID_pseudonym = mapping_ID_pseudonym
       
-      
       self.unmatched_pseudonyms = {'all':[], 'within time span':[], 'outside time span':[]}
       for pseudonym in pseudonyms:
          if not (pseudonym in self.mapping['Pseudonym'].values):
@@ -445,10 +447,12 @@ class learning_module:
                self.unmatched_IDs['outside time span'].append(ID)
             
       if verbose:
-         print('Failed to match {} pseudonyms from raw_analytics file'.format(len(self.unmatched_pseudonyms['all'])))
+         print('There are {} unique pseudonyms in the raw_analytics file'.format(n_pseudonym))
+         print('Of these, {} could not be matched to IDs in the Datashop file'.format(len(self.unmatched_pseudonyms['all'])))
          print('Of these, {} were in the relevant time span'.format(len(self.unmatched_pseudonyms['within time span'])))
          print('Another {} were outside'.format(len(self.unmatched_pseudonyms['outside time span'])))
-         print('Failed to match {} IDs from Datashop file'.format(len(self.unmatched_IDs['all'])))
+         print('There are {} unique IDs in the Datashop file'.format(n_ID))
+         print('Of these, {} could not be matched to pseudonyms in the raw_analytics file'.format(len(self.unmatched_IDs['all'])))
          print('Of these, {} were in the relevant time span'.format(len(self.unmatched_IDs['within time span'])))
          print('Another {} were outside'.format(len(self.unmatched_IDs['outside time span'])))
       return
