@@ -346,7 +346,11 @@ class learning_module:
       self.results_read = True
       return
       
-   def _infer_mapping_pseudonym_ID(self):
+   def _infer_mapping_pseudonym_ID(self, verbose = True):
+      if verbose:
+         print('Figuring out mapping between pseudonyms in raw_analytics file and IDs in Datashop file.')
+         print('This may take a while...')
+   
       IDs = list(set(self.xml_data['Student ID']))
       pseudonyms = list(set(self.raw_data['Student ID']))
       
@@ -378,13 +382,20 @@ class learning_module:
             match_percentages.append(times_matched / total_times)
          match_percentages = np.asarray(match_percentages)
          best_match_index = np.argmax(match_percentages)
+         best_match_percentage = match_percentages[best_match_index]
          
-         mapping_IDs.append(ID)
-         mapping_pseudonyms.append(pseudonyms[best_match_index])
-         mapping_best_match_percentages.append(match_percentages[best_match_index])
+         if best_match_percentage > 0.5:
+            matched_pseudonym = pseudonyms[best_match_index]
          
-         mapping_pseudonym_ID[pseudonyms[best_match_index]] = ID
-         mapping_ID_pseudonym[ID] = pseudonyms[best_match_index]
+            mapping_IDs.append(ID)
+            mapping_pseudonyms.append(matched_pseudonym)
+            mapping_best_match_percentages.append(best_match_percentage)
+         
+            mapping_pseudonym_ID[matched_pseudonym] = ID
+            mapping_ID_pseudonym[ID] = matched_pseudonym
+         
+            # Ensure that we do not match the same pseudonym twice
+            pseudonyms.remove(matched_pseudonym)
          
       self.mapping = pd.DataFrame(data={'Student ID':mapping_IDs, 'Pseudonym':mapping_pseudonyms, 'Match percentage':mapping_best_match_percentages})
       self.mapping_pseudonym_ID = mapping_pseudonym_ID
@@ -402,8 +413,6 @@ class learning_module:
    def import_data(self, raw_analytics_path, xml_path):
       self.import_raw_analytics(raw_analytics_path)
       self.import_datashop(xml_path)
-      print('Figuring out mapping between pseudonyms in raw_analytics file and IDs in Datashop file.')
-      print('This may take a while...')
       self._infer_mapping_pseudonym_ID()
       
       student_ids = []
