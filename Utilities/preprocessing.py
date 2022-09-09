@@ -366,6 +366,10 @@ class learning_module:
       return
       
    def _infer_mapping_pseudonym_ID(self, verbose = True):
+      """
+      See the internal DD document 'Datashop och raw analytics' for an
+      explanation of what this method does and why.
+      """
       if verbose:
          print('Figuring out mapping between pseudonyms in raw_analytics file and IDs in Datashop file.')
          print('This may take a while...')
@@ -406,7 +410,7 @@ class learning_module:
          best_match_index = np.argmax(match_percentages)
          best_match_percentage = match_percentages[best_match_index]
          
-         if best_match_percentage > 0.5:
+         if best_match_percentage > 0.3:
             matched_pseudonym = pseudonyms[best_match_index]
          
             mapping_IDs.append(ID)
@@ -441,6 +445,11 @@ class learning_module:
       return
       
    def import_data(self, raw_analytics_path, xml_path, verbose = False):
+      """
+      Import data from the raw_analytics and Datashop files output by OLI
+      Torus and extract from them the data we need. Neither file individually
+      contains all the data, but together they do.
+      """
       self.import_raw_analytics(raw_analytics_path)
       self.import_datashop(xml_path)
       self._infer_mapping_pseudonym_ID(verbose = verbose)
