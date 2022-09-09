@@ -14,4 +14,6 @@ The current contents of this directory are:
 
 `sharepoint_robot.py`: Module for creating SharePoint pages to share passwords with participants in the project
 
+`SR_test_script.py`: Script for testing the parts of `sharepoint_robot.py` that do not require actually opening a web browser.
+
 `Word_lists`: Directory containing lists of words to be used by the `account_info_generator.py` when generating user names and passwords
