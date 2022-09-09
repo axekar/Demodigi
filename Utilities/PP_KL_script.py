@@ -23,15 +23,13 @@ competencies = {'Hitta och tolka digital information':['SearchingForInfo', 'MapS
 		'Skapa och bearbeta digitalt innehåll':['ImageEditingSoftware', 'InfoGraphics', 'TextFormating', 'Templates', 'ChangingPDFs', 'FreeImages'],
 		'IT-säkerhet':['SafePasswords', 'Phishing', 'Malware', 'Backup', 'PortableDeviceSafety', 'GDPR'],
 		'Problemlösning i digitala miljöer':['SoftwareFreeze', 'FindingSolutions', 'LearningAboutFunctions', 'WifiProblems', 'OnlineMeetingProblems', 'SolvingCrash']}
-		
+
 start_date = datetime.datetime(2022, 8, 29, tzinfo = pytz.UTC)
 end_date = datetime.datetime(2022, 9, 3, tzinfo = pytz.UTC)
 mod = pp.learning_module(competencies, n_sessions = 1, start_date = start_date, end_date = end_date, section_slug = 'kartlggning_av_digital_kompete')
 
 # This is temporary. It should not actually target a specific date.
 mod.import_data('OLI_analytics/Kartläggning/2022_09_08/raw_analytics.tsv', 'OLI_analytics/Kartläggning/2022_09_08/Datashop_af_kartlggning_av_digital_komp.xml', verbose = True)
-
-
 
 mod.infer_participants_from_full_results()
 mod.read_participants_results()
@@ -46,16 +44,16 @@ try:
 except FileExistsError:
    pass
 try:
-   os.mkdir('Results/Kartläggning/Plottar_raw')
+   os.mkdir('Results/Kartläggning/Plottar')
 except FileExistsError:
    pass
 try:
-   os.mkdir('Results/Kartläggning/Individer_raw')
+   os.mkdir('Results/Kartläggning/Individer')
 except FileExistsError:
    pass
-mod.export_results('Results/Kartläggning/Individer_raw')
-mod.export_IDs('Results/Kartläggning/Raw_IDs.json')
+mod.export_results('Results/Kartläggning/Individer')
+mod.export_IDs('Results/Kartläggning/IDs.json')
 mod.export_SCB_data('Results/Kartläggning/SCB_data.csv')
-mod.export_full_results('Results/Kartläggning/Raw_to_csv.csv')
-mod.plot_results_by_time('Results/Kartläggning/Plottar_raw')
-mod.plot_initial_performance('Results/Kartläggning/Plottar_raw')
+mod.export_full_results('Results/Kartläggning/Full_results.csv')
+mod.plot_results_by_time('Results/Kartläggning/Plottar')
+mod.plot_initial_performance('Results/Kartläggning/Plottar')
