@@ -19,6 +19,7 @@ pestbärare
 pestbringare
 pestbakterie
 böldpest
+lungpest
 kolera
 mjältbrand
 mjältbrandssporer

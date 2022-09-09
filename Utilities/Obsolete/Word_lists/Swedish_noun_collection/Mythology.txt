@@ -1,15 +1,19 @@
 oknytt
 väsen
 alv
+alvöron
 skogsalv
 alvdrottning
 alvkung
 älva
 älvdrottning
+älvdans
 troll
 trollkung
 trollgrotta
 trollskog
+skogstroll
+bergatroll
 bergakung
 gast
 spöke
@@ -22,6 +26,8 @@ drakunge
 drakeld
 drakägg
 drakskatt
+draktand
+drakhjärta
 vålnad
 demon
 djävul
@@ -35,6 +41,7 @@ kentaurhov
 sfinx
 lindorm
 jätte
+bergsjätte
 eldsjätte
 frostjätte
 jättekast
@@ -47,6 +54,7 @@ tomtenisse
 tomten
 skogstomte
 vätte
+skogsvätte
 gnom
 cyklop
 cyklopöga

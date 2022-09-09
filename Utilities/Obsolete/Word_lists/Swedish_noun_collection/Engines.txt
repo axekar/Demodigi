@@ -1,0 +1,15 @@
+motor
+elmotor
+förbränningsmotor
+förbränningsprocess
+explosionsmotor
+dieselmotor
+diesel
+bensinmotor
+ångmotor
+bränsle
+biobränsle
+flygplansbränsle
+flygbränsle
+flygfotogen
+bränsletank

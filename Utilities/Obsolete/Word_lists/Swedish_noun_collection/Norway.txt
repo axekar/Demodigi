@@ -19,3 +19,4 @@ toten
 telemark
 valdres
 vesterålen
+fylke

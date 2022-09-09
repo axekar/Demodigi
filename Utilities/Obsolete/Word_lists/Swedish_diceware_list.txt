@@ -21,6 +21,7 @@ affär
 afghan
 afghanistan
 afrika
+afrikan
 aga
 agda
 agder
@@ -45,6 +46,7 @@ akvedukt
 alabama
 alaska
 albanien
+albanska
 albatross
 albert
 albertina
@@ -85,11 +87,14 @@ alv
 alva
 alvdrottning
 alvkung
+alvöron
 amalia
 amanda
 amatörastronomi
+ambulans
 amelie
 amerika
+amerikan
 amerikanska
 ammunitionsdepå
 amnesti
@@ -100,6 +105,7 @@ anagram
 analogi
 anarki
 anarkism
+anda
 ande
 andemedium
 anders
@@ -159,8 +165,10 @@ aorta
 apelsinglass
 apelsinmarmelad
 aprikosmarmelad
+arab
 arabiska
 arapapegoja
+arbalest
 arbetarbostad
 arbetare
 arbetarklass
@@ -179,6 +187,7 @@ arbetsvägran
 area
 areabestämning
 argentina
+argentinare
 argon
 argonatom
 argongas
@@ -206,6 +215,7 @@ armborst
 armbåge
 armenien
 armenier
+armeniska
 armlås
 armstöd
 armveck
@@ -220,6 +230,7 @@ artillerigranat
 artilleriofficer
 artilleriregemente
 artillerispanare
+artillerispaningsplan
 artillerist
 arton
 arv
@@ -265,13 +276,16 @@ atomubåt
 aubergine
 aula
 australien
+australiensare
 autoklav
 autokrati
 automatisering
+autopilot
 avbild
 avel
 avelshingst
 avfolkningsbygd
+avgasrör
 avindustrialisering
 avkomling
 avledning
@@ -281,7 +295,9 @@ avloppsledning
 avloppsrör
 avloppsvatten
 avrättning
+avståndsbedömning
 avtryck
+avtryckare
 axel
 axeltatuering
 axiom
@@ -293,6 +309,7 @@ backe
 backgammon
 backhopp
 backhoppare
+backspegel
 bad
 badkar
 badlakan
@@ -308,12 +325,25 @@ bagare
 baguette
 bahamas
 bahrain
+bajonett
+bajonettfäktning
 bakelse
+bakhjulsdrift
 bakning
+bakruta
 bakterie
 bakteriecell
 bakverk
+baldans
+balett
+balettdansör
+balettdansös
+baletthopp
+balettkjol
+balettnummer
+balettsko
 ballong
+balsal
 balsam
 balsamflaska
 bandit
@@ -325,6 +355,7 @@ bandyspelare
 bandytränare
 bandyträning
 bangladesh
+bangladeshier
 bank
 banklån
 bankrån
@@ -390,8 +421,12 @@ benin
 benlås
 benmärg
 bensin
+bensinmotor
+bensintank
 berg
 bergakung
+bergatroll
+berggrund
 bergsjätte
 bergskedja
 bergsklättrare
@@ -422,6 +457,7 @@ bete
 beteende
 betong
 betongblock
+betongbunker
 betongvägg
 betsel
 betsocker
@@ -448,6 +484,7 @@ bidrottning
 biff
 bihonung
 bil
+bilbatteri
 bilbomb
 bilbro
 bilbroms
@@ -457,6 +494,7 @@ biljard
 biljett
 biljettförsäljning
 biljon
+bilmotor
 bilratt
 bilresa
 bilsäte
@@ -466,7 +504,9 @@ biltvätt
 bilväg
 bindestreck
 bindningsenergi
+binokulärseende
 biobiljett
+biobränsle
 bioduk
 bioetik
 biograf
@@ -565,6 +605,7 @@ bogserbåt
 bohuslän
 bok
 bokaffär
+bokmål
 bokomslag
 bokrygg
 boksamlare
@@ -572,11 +613,13 @@ boksamling
 boksida
 bokstav
 bolivia
+bolivian
 bollspel
 bomb
 bombanfall
 bombardemang
 bombeskader
+bombkrater
 bombkrig
 bomblucka
 bombplan
@@ -604,6 +647,7 @@ bordsbön
 borg
 borgmur
 borgport
+borgruin
 borgtorn
 borgvalv
 borgvägg
@@ -617,7 +661,9 @@ borste
 borås
 boskap
 boskapshjord
+bosniak
 bosnien
+bosnienserb
 bosse
 botanik
 botanist
@@ -667,6 +713,8 @@ broderinål
 brom
 bromatom
 broms
+bromspedal
+bromsskiva
 brons
 bronsmedalj
 bronsstaty
@@ -708,6 +756,8 @@ brädspel
 bränning
 brännmanet
 brännoffer
+bränsle
+bränsletank
 bråddjup
 bråkstreck
 bråktal
@@ -727,6 +777,7 @@ bröstben
 bröstharnesk
 bröstkorg
 bubbelkammare
+bulgar
 bulgarien
 buller
 bungeehopp
@@ -735,6 +786,7 @@ bunkerdörr
 bunsenbrännare
 burk
 burma
+burmes
 burundi
 bus
 buse
@@ -761,6 +813,7 @@ bäcken
 bäckenben
 bägare
 bärare
+bärgningsbil
 bärnsten
 bärnstenssmycke
 bärplockare
@@ -776,6 +829,7 @@ bågsträng
 bål
 bålgeting
 bålgetingbo
+bålverk
 bårhus
 bås
 båt
@@ -786,6 +840,7 @@ bödelsyxa
 böldpest
 bön
 börs
+bössa
 böter
 caesar
 california
@@ -802,12 +857,14 @@ cellkärna
 cello
 cement
 cementblandare
+centrism
 centurion
 champinjon
 chans
 charmkvark
 chaufför
 chile
+chilenare
 chilipeppar
 chilipulver
 choklad
@@ -828,13 +885,17 @@ citattecken
 citronsyra
 clown
 colombia
+colombian
 colorado
 columbia
 connecticut
 containerfartyg
 curry
+cyberkrigsföring
 cykel
 cykelbana
+cykelbroms
+cykelhjul
 cykelpedal
 cykelpump
 cykelstyre
@@ -851,6 +912,7 @@ dackefejden
 daddelpalm
 dag
 dagbok
+dagbrott
 dagg
 daggdroppe
 daggros
@@ -874,10 +936,21 @@ dammsugarpåse
 dammsugarslang
 danelagen
 danmark
+dansare
+dansform
 dansk
 danska
 danslektion
 danslärare
+dansmusik
+dansnummer
+dansorkester
+danspartner
+danssteg
+dansturnering
+danstävling
+dansör
+dansös
 dart
 dartspelare
 dataintrång
@@ -931,6 +1004,8 @@ diameter
 diana
 didaktik
 didrik
+diesel
+dieselmotor
 dieselubåt
 differentialekvation
 differentialkalkyl
@@ -975,11 +1050,13 @@ djupblått
 djuphavsfisk
 djuphavsgrav
 djuphavsmarulk
+djupseende
 djurcell
 djurgården
 djävul
 djävulshorn
 dodekaeder
+dojo
 doktorand
 dolk
 dolkstöt
@@ -1001,11 +1078,15 @@ doping
 doris
 dotter
 dovhjort
+drabantvärja
 dracula
+dragspelsbuss
 drake
 drakeld
+drakhjärta
 drakskatt
 draksvans
+draktand
 drakunge
 drakägg
 drama
@@ -1042,6 +1123,7 @@ dun
 durkslag
 dusch
 duschbås
+duschkabin
 duschmunstycke
 duschtvål
 dussin
@@ -1058,6 +1140,7 @@ dystopi
 däggdjur
 dån
 döden
+dödsdans
 dödsoffer
 dödsstraff
 döpare
@@ -1067,6 +1150,7 @@ dörrkarm
 dövhet
 ebba
 ecuador
+ecuadorian
 efterforskning
 efternamn
 efterord
@@ -1076,6 +1160,7 @@ egg
 eggjärn
 eggvapen
 egypten
+egyptier
 einar
 ek
 eka
@@ -1126,7 +1211,9 @@ elledning
 ellen
 ellips
 ellok
+elmotor
 elström
+elstängsel
 eluttag
 elva
 elverk
@@ -1165,11 +1252,13 @@ eremitkräfta
 erik
 erika
 eritrea
+eritrean
 erövring
 erövringskrig
 eskader
 eskil
 eskilstuna
+esperanto
 est
 estet
 estetik
@@ -1178,6 +1267,7 @@ estniska
 etik
 etikett
 etiopien
+etiopier
 ett
 ettöring
 europa
@@ -1190,10 +1280,12 @@ exempel
 exobiologi
 experiment
 experimentalist
+explosionsmotor
 exponent
 exponentialfunktion
 expresståg
 extas
+extremism
 fabian
 fabrik
 fabriksarbetare
@@ -1252,6 +1344,7 @@ fejd
 felicia
 felparkering
 felslut
+felstavning
 felsökning
 fem
 femkrona
@@ -1329,12 +1422,15 @@ fjärilsvinge
 fjärilsägg
 flamingo
 flamländska
+flamlänning
 flamma
 flaska
 flaskborste
 flikros
 flinga
 flinta
+flintlåsmusköt
+flintlåspistol
 flit
 flock
 flockbeteende
@@ -1353,17 +1449,21 @@ flouratom
 fluga
 flugsvamp
 flygbas
+flygbränsle
 flygekorre
+flygfotogen
 flygförband
 flygledartorn
 flygofficer
 flygplan
+flygplansbränsle
 flygplansmotor
 flygplansvinge
 flygplats
 flygvapnet
 flykt
 flyktbeteende
+flyktväg
 flytväst
 fläsk
 fläskstek
@@ -1372,6 +1472,8 @@ flöjtist
 flöjtspelare
 fnöske
 fogsvans
+folkdans
+folkdansare
 folkhögskola
 folkhögskolekurs
 folkkrigsföring
@@ -1402,6 +1504,8 @@ forskningsartikel
 forskningsetik
 forskningsfusk
 forskningsresultat
+fortifikation
+fortifikationsverket
 forum
 fosfor
 fosforatom
@@ -1428,9 +1532,11 @@ fotometri
 fotosfär
 fotring
 fotspår
+foxtrot
 fraktal
 fraktur
 framgång
+framhjulsdrift
 framtiden
 framtidsdröm
 framtidsförhoppning
@@ -1493,12 +1599,15 @@ furu
 fusk
 fuskare
 futurism
+fylke
 fylletatuering
 fynd
 fyr
 fyra
+fyrhjulsdrift
 fyrkant
 fyrsprång
+fyrtakt
 fyrtal
 fyrtio
 fyrtorn
@@ -1535,12 +1644,14 @@ fängelse
 fänkål
 fänrik
 färg
+färgkrita
 färgpenna
 färgseende
 färja
 fäste
 fästing
 fästingbett
+fästning
 fågel
 fågelbo
 fågeldun
@@ -1567,6 +1678,8 @@ fönsterkarm
 förare
 förband
 förbannelse
+förbränningsmotor
+förbränningsprocess
 förbundsarken
 förbundsstat
 förbättring
@@ -1579,6 +1692,7 @@ förfalskare
 förfalskning
 förfarande
 författare
+förgasare
 förgiftning
 förgänglighet
 förhistoria
@@ -1604,6 +1718,7 @@ förrätt
 förråd
 förrådsdörr
 förrådsväg
+förskansning
 förskingring
 förstånd
 förstörelse
@@ -1650,6 +1765,7 @@ gammastråle
 gammastrålning
 gammasönderfall
 gammateleskop
+gammelsvenska
 gammelvarg
 gamnacke
 gamunge
@@ -1665,6 +1781,7 @@ gasbehållare
 gaslagen
 gaslaser
 gasmoln
+gaspedal
 gast
 gastronom
 gastronomi
@@ -1678,6 +1795,8 @@ gatuslagsmål
 gatusopare
 gatustrid
 geckoödla
+gem
+gemkedja
 gen
 general
 gengångare
@@ -1688,6 +1807,7 @@ geometri
 geopolitik
 georgia
 georgien
+georgier
 gepard
 gepardklo
 gepardnos
@@ -1702,6 +1822,7 @@ gerillarörelse
 gerillasoldat
 germanium
 germaniumatom
+germanska
 gesäll
 get
 getabock
@@ -1716,6 +1837,7 @@ getingägg
 getöga
 gevär
 gevärseld
+gevärsmagasin
 gevärspipa
 gevärsskott
 ghana
@@ -1780,7 +1902,9 @@ grafräknare
 grammatik
 gran
 granat
+granatgevär
 granatkastare
+granatsplitter
 granbarr
 granit
 grankotte
@@ -1795,6 +1919,7 @@ gravitationsvågsteleskop
 graviton
 gravplats
 gravsten
+grek
 grekland
 gren
 grenada
@@ -1829,7 +1954,11 @@ grus
 grustag
 gruva
 gruvarbetare
+gruvdrift
+gruvfru
 gruvgång
+gruvolycka
+gruvrå
 gruvschakt
 gryning
 gryta
@@ -1890,6 +2019,7 @@ gurkmeja
 gustav
 guyana
 gylf
+gym
 gymnasiebyggnad
 gymnasieexamen
 gymnasium
@@ -1932,7 +2062,10 @@ hackspettsnäbb
 hadeland
 hagbard
 hagel
+hagelbössa
+hagelpatron
 haiti
+haitier
 haj
 hajbett
 hajfena
@@ -1971,6 +2104,7 @@ handbollstränare
 handbollsträning
 handborr
 handduk
+handeldvapen
 handelskompani
 handflata
 handgranat
@@ -1984,6 +2118,7 @@ handtag
 handtvål
 hangar
 hangarfartyg
+hankines
 hantverkare
 hare
 haremsbyxor
@@ -2071,6 +2206,7 @@ hjort
 hjorthorn
 hjul
 hjulaxel
+hjullåsmusköt
 hjälm
 hjälmbuske
 hjälmprydnad
@@ -2124,6 +2260,7 @@ huggormsägg
 huggspjut
 huggsvärd
 huggtand
+huggvapen
 huggvärja
 hugo
 hulda
@@ -2167,6 +2304,7 @@ hygge
 hygien
 hygienrutin
 hyllningsdikt
+hylsa
 hypernova
 hyperrymden
 hypnos
@@ -2183,6 +2321,7 @@ häftklammer
 häftstift
 häktning
 häl
+hällristning
 hälsa
 hälsena
 hälsingland
@@ -2242,7 +2381,9 @@ högskola
 högskolebyggnad
 högskoleexamen
 högskolekurs
+högsorbiska
 högtalare
+högtyska
 högunge
 högägg
 höjd
@@ -2250,6 +2391,7 @@ höjdare
 höjdhopp
 höjdhoppare
 höjdpunkt
+höjdroder
 hök
 hökvinge
 hölje
@@ -2282,8 +2424,10 @@ illerpäls
 illinois
 ilska
 imitation
+imperialism
 implantat
 inackordering
+inbromsning
 inbrott
 inbördeskrig
 index
@@ -2297,6 +2441,7 @@ individualitet
 indokina
 indokines
 indonesien
+indonesier
 indonesiska
 induktion
 induktionsbevis
@@ -2313,6 +2458,7 @@ infanteriangrepp
 infanteriförband
 infanteriofficer
 infanteriregemente
+infanterisabel
 infanterist
 infektion
 infektionsväg
@@ -2391,9 +2537,12 @@ ishacka
 ishavet
 ishockey
 island
+isländska
+islänning
 israel
 israelit
 italien
+italienare
 italienska
 jacka
 jackfoder
@@ -2410,17 +2559,21 @@ jaktplan
 jaktplanspilot
 jaktspindel
 jamaica
+jamaican
 jan
 jannika
 japan
 japanska
 jazz
+jazzdans
 jeans
 jeanstyg
 jeep
 jemen
 jenny
 jens
+jetflygplan
+jetmotor
 joakim
 joggingsko
 johan
@@ -2428,6 +2581,7 @@ johanna
 johannes
 jon
 jordanien
+jordanier
 jordatmosfären
 jordbruk
 jordbruksredskap
@@ -2446,6 +2600,7 @@ jordskred
 journal
 jugoslav
 jugoslavien
+jugoslaviska
 juice
 jul
 julafton
@@ -2557,6 +2712,7 @@ kardemumma
 kardinalitet
 kardinaltal
 karelen
+karelska
 karghet
 karikatyr
 karin
@@ -2564,6 +2720,7 @@ karl
 karljohansvamp
 karlskoga
 karlskrona
+karolinervärja
 karta
 kartong
 kartonglåda
@@ -2603,9 +2760,12 @@ kavalleriangrepp
 kavallerichock
 kavalleriförband
 kavalleriofficer
+kavalleripistol
 kavalleriregemente
+kavallerisabel
 kavallerist
 kavel
+kazak
 kazakstan
 kemi
 kemiexperiment
@@ -2624,6 +2784,7 @@ kentaurhov
 kentaursvans
 kentucky
 kenya
+kenyan
 keps
 keramik
 kerstin
@@ -2661,6 +2822,7 @@ klippor
 klippskreva
 klippöken
 klister
+klistertub
 klo
 klocka
 klockspel
@@ -2740,6 +2902,7 @@ kolmonoxid
 kolon
 koloni
 kolonialimperie
+kolonialism
 kolonialtiden
 kolonialvälde
 kolonn
@@ -2760,6 +2923,7 @@ kommersialism
 kommissarie
 kommun
 kommunfullmäktige
+kommunism
 komodovaran
 komorerna
 kompilering
@@ -2805,6 +2969,7 @@ kopparoxid
 kopparsmycke
 kopparödla
 koppel
+koppling
 korall
 korallrev
 koranen
@@ -2829,7 +2994,9 @@ korv
 korvbröd
 koskälla
 kosmonaut
+kosovar
 kosovo
+kossackdans
 kosvans
 kotte
 krabba
@@ -2853,6 +3020,7 @@ kretslopp
 krevad
 krig
 krigsbrott
+krigsdans
 krigsfilm
 krigsföring
 krigsförklaring
@@ -2870,7 +3038,10 @@ kristin
 kristinehamn
 krita
 kritik
+kroat
 kroatien
+kroatiska
+krogslagsmål
 kroksabel
 krom
 kromatom
@@ -2912,6 +3083,7 @@ krök
 krökning
 kub
 kuba
+kuban
 kubikrot
 kubmanet
 kudde
@@ -2921,6 +3093,7 @@ kuling
 kull
 kulle
 kullerbytta
+kulregn
 kulspetspenna
 kulspruta
 kulsprutebeskjutning
@@ -2941,6 +3114,8 @@ kungsörn
 kunskap
 kupp
 kurator
+kurd
+kurdiska
 kurdistan
 kurragömma
 kurs
@@ -2996,6 +3171,7 @@ kycklingdun
 kycklingnäbb
 kyla
 kymmenedalen
+kyrilliska
 kyrka
 kyrkklocka
 kyrkofönster
@@ -3087,6 +3263,7 @@ landfordon
 landgång
 landhockey
 landningsbana
+landningsställ
 landskap
 landskapsfotografi
 landskapsmålning
@@ -3095,6 +3272,8 @@ landsting
 lans
 lansstöt
 laos
+laotier
+laotiska
 lappland
 lapplisa
 lars
@@ -3166,6 +3345,7 @@ leverans
 libanes
 libanon
 liberia
+liberian
 libyen
 libyer
 licenciat
@@ -3205,6 +3385,7 @@ linsformeln
 list
 listighet
 litauen
+litauiska
 litium
 litiumatom
 litiumförgiftning
@@ -3255,14 +3436,17 @@ luftfarkost
 luftskepp
 luftvärnsgranat
 luftvärnskanon
+luftvärnsplattform
 luftvärnsrobot
 lugn
+lulesamiska
 luleå
 lunch
 lunchrast
 lund
 lungfisk
 lungor
+lungpest
 lungsot
 lurendrejare
 lurendrejeri
@@ -3305,8 +3489,11 @@ läxa
 läxförhör
 läxläsning
 lågor
+lågsorbiska
+lågtyska
 lån
 långbyxor
+långbåge
 långdistanslöpare
 långdistanslöpning
 långfinger
@@ -3336,6 +3523,8 @@ macka
 madagaskar
 madde
 madeleine
+magasin
+magdans
 mage
 maggan
 magi
@@ -3357,6 +3546,7 @@ major
 maka
 makaroner
 make
+makedonska
 makt
 maktlöshet
 maktstrid
@@ -3366,8 +3556,10 @@ maktövertagande
 mal
 malawi
 malaysia
+malaysier
 maldiverna
 mali
+malmåder
 malta
 malte
 malvinge
@@ -3379,6 +3571,7 @@ mangan
 manganatom
 mannagryn
 mannagrynsgröt
+mantelrörelse
 manusförfattare
 mardröm
 margareta
@@ -3394,6 +3587,7 @@ markör
 marmelad
 marmite
 marmorstaty
+marockan
 marocko
 mars
 marsbas
@@ -3404,6 +3598,7 @@ marsvarelse
 marulk
 maryland
 mashallöarna
+maskeringstejp
 maskin
 maskindiskmedel
 maskininlärning
@@ -3445,6 +3640,7 @@ mattetenta
 matteundervisning
 matthet
 mauretanien
+mauretanier
 mauritius
 maximering
 maximum
@@ -3478,6 +3674,7 @@ mesmerism
 metafor
 metall
 metallfil
+metallgem
 metallhink
 metallskrot
 metallslöjd
@@ -3485,6 +3682,7 @@ metallsåg
 metallåtervinning
 meteor
 meteorit
+mexikan
 mexiko
 mia
 michigan
@@ -3503,6 +3701,7 @@ mikrobiologi
 mikrofon
 mikrolitografi
 mikronesien
+mikronesier
 mikroorganism
 mikrovågor
 mikrovågslaser
@@ -3511,6 +3710,7 @@ militarism
 militär
 militärdiktator
 militärdiktatur
+militärjeep
 militärledning
 militärpolis
 militärubåt
@@ -3577,14 +3777,17 @@ moldavien
 molekyl
 mollusk
 moln
+molnby
 molnlandskap
 molotovcocktail
 moment
 momentaxel
 monaco
 monarki
+mongol
 mongoliet
 mongoliska
+mongolspråk
 monogami
 monopol
 monopolpengar
@@ -3609,6 +3812,7 @@ morgon
 morgonbön
 morgonrock
 morgonstjärna
+morgontidning
 morgontimmarna
 mormor
 morot
@@ -3620,6 +3824,7 @@ mossa
 moster
 motala
 motbevis
+motor
 motorcykel
 motorcykelgäng
 motorsåg
@@ -3650,12 +3855,14 @@ mus
 musfamilj
 musfälla
 musik
+muskedunder
 muskelcell
 musketör
 musklick
 musknapp
 muskot
 muskotnöt
+musköt
 musnos
 muspekare
 musselskal
@@ -3672,6 +3879,7 @@ myggmedel
 myggsurr
 myggvinge
 myggägg
+mynning
 mynt
 mynta
 myntsamlare
@@ -3781,6 +3989,7 @@ nebulosa
 nedbrytning
 nederländare
 nederländerna
+nederländska
 nedförsbacke
 nedkylning
 nedladdning
@@ -3795,6 +4004,7 @@ neonatom
 neongas
 neonlysrör
 nepal
+nepales
 nepotism
 neptunus
 nerkvark
@@ -3833,11 +4043,13 @@ nominalism
 nominalskala
 nonsens
 nordamerika
+nordamerikan
 nordcypern
 nordkorea
 nordkorean
 nordland
 nordmakedonien
+nordsamiska
 norge
 normalfördelning
 norr
@@ -3874,6 +4086,7 @@ nykterhet
 nyland
 nylon
 nylontråd
+nynorska
 nyp
 nyponbuske
 nyponros
@@ -3917,6 +4130,8 @@ offerceremoni
 offerkofta
 offerplats
 officer
+officerssabel
+officersvärja
 ofoten
 ogräs
 ogräsrensning
@@ -4021,6 +4236,7 @@ ortodoxi
 orvar
 orättvisa
 orörlighet
+osannolikhet
 oskicklighet
 ostron
 ostronskivling
@@ -4035,6 +4251,7 @@ oxalsyra
 oxe
 oxsvans
 ozonlager
+ozonlagret
 oändlighet
 oärlighet
 pacifism
@@ -4042,6 +4259,7 @@ padda
 page
 paj
 pajala
+pakettejp
 pakistan
 pakistanier
 pakt
@@ -4050,6 +4268,8 @@ palau
 paleontolog
 paleontologi
 palestina
+palestinier
+palissad
 pall
 palm
 palmblad
@@ -4085,8 +4305,10 @@ papegojvinge
 papegojägg
 pappa
 papper
+pappersark
 pappersförpackning
 papperslapp
+papperssax
 pappersåtervinning
 paprika
 papyrus
@@ -4129,6 +4351,8 @@ patentintrång
 patentlagstiftning
 patiens
 patientsekretess
+patron
+patronhylsa
 paus
 pausunderhållning
 pedagogik
@@ -4156,6 +4380,7 @@ periskop
 permafrost
 persien
 persilja
+persiska
 person
 personbil
 personhygien
@@ -4203,6 +4428,7 @@ pingisträning
 pingvin
 pingvinunge
 pingvinägg
+pipa
 piraja
 pirajabett
 pirajatand
@@ -4211,7 +4437,13 @@ piratkapten
 piratkopia
 pirål
 pistill
+pistol
+pistolkula
+pistolmagasin
+pistolmynning
 pistolräka
+pistolskott
+pitesamiska
 pjäs
 pjäsförfattare
 pjäsmanus
@@ -4230,6 +4462,7 @@ plastbehållare
 plastdunk
 plastflaska
 plastförpackning
+plastgem
 plasthink
 plastkasse
 plastlåda
@@ -4240,6 +4473,7 @@ plaståtervinning
 platina
 platinaatom
 plats
+plattyska
 plundringståg
 plustecken
 pluto
@@ -4258,6 +4492,7 @@ pokerspelare
 polemik
 polen
 polis
+polisbil
 polishund
 polishus
 polisingripande
@@ -4266,9 +4501,12 @@ polisjakt
 poliskonstapel
 polisuniform
 politiker
+polka
+polkadans
 pollen
 polonium
 poloniumatom
+polska
 polygami
 polyp
 polyteism
@@ -4282,6 +4520,8 @@ porträttfotografi
 porträttmålare
 porträttmålning
 portugal
+portugis
+portugisiska
 position
 positivism
 positivitet
@@ -4337,7 +4577,9 @@ proletariat
 proletär
 pronomen
 propeller
+propellerflygplan
 propellerkeps
+propellermotor
 proppskåp
 proton
 protuberans
@@ -4350,9 +4592,11 @@ psalmboken
 pseudovetenskap
 publik
 pudersnö
+pulsjetmotor
 pulsåder
 pumpa
 punkt
+punktering
 pupill
 puts
 putslustighet
@@ -4363,6 +4607,7 @@ päls
 pärm
 påföljd
 påk
+påkslag
 påle
 pålyxa
 pålägg
@@ -4376,6 +4621,7 @@ påstående
 påtalande
 påve
 qatar
+quenya
 rabarberpaj
 rabatt
 rabies
@@ -4386,6 +4632,7 @@ racerbil
 racerbilförare
 racerbåt
 radie
+radikalism
 radio
 radioaktivitet
 radiokommunikation
@@ -4402,6 +4649,8 @@ raklöddertub
 raksträcka
 rallarhalva
 rallarros
+ramjet
+ramjetmotor
 ramslök
 rap
 rapsolja
@@ -4417,6 +4666,7 @@ rede
 redskap
 reduktionism
 reformationen
+reformism
 refräng
 regelbok
 regelbrott
@@ -4426,6 +4676,8 @@ reggae
 regissör
 regler
 regn
+regndans
+regnmoln
 regnrock
 regnskog
 regnsky
@@ -4477,9 +4729,12 @@ returtangent
 rev
 revanschism
 revben
+revisionism
 revolt
 revolution
 revolutionär
+revolver
+revolverskott
 riddarborg
 riddare
 riddarlans
@@ -4491,6 +4746,8 @@ riksdagshus
 riksdagsledamot
 riksdagsman
 riksdagsval
+riksspråk
+rikssvenska
 rim
 ring
 ringbrynja
@@ -4512,12 +4769,14 @@ robotvapen
 rock
 rockad
 roddare
+roder
 rolighet
 rollspel
 rom
 roman
 romanförfattare
 romantik
+romare
 romarriket
 romerike
 romsdal
@@ -4540,6 +4799,8 @@ ruinstad
 rum
 rumskoordinat
 rumänien
+rumänier
+rumänska
 runa
 runda
 rundmun
@@ -4591,6 +4852,7 @@ ryttare
 ryttarrustning
 rädisa
 rädsla
+räffling
 räfsa
 räka
 räkmacka
@@ -4608,6 +4870,8 @@ rättsduell
 rättshaverist
 rättsmedicinalverket
 rättsskipning
+rättstavning
+rättstavningsfunktion
 rättstvist
 rättvisa
 räv
@@ -4692,6 +4956,7 @@ samhällskollaps
 samhällskunskap
 samhällsvetare
 samhällsvetenskap
+samiska
 sammanträffande
 sammelsurium
 sammet
@@ -4781,12 +5046,14 @@ separatism
 separatiströrelse
 serb
 serbien
+serbiska
 sergeant
 serie
 seriemord
 seriemördare
 servicesektorn
 sex
+sextakt
 sextio
 sexton
 seychellerna
@@ -4800,12 +5067,15 @@ sida
 sidfot
 sidhuvud
 sidnummer
+sidoruta
+sidospegel
 sierska
 siffertangent
 siffra
 signatur
 signaturmelodi
 sikt
+sikte
 sil
 silke
 silkestyg
@@ -4889,6 +5159,7 @@ skam
 skamstraff
 skandium
 skandiumatom
+skans
 skapelse
 skapelsen
 skarprättare
@@ -4912,6 +5183,7 @@ skepnad
 skepp
 skeppsgrav
 skeppskatt
+skevroder
 skicklighet
 skidskytt
 skidskytte
@@ -4938,6 +5210,7 @@ skogsstig
 skogstomte
 skogstroll
 skogsvandring
+skogsvätte
 skola
 skolbyggnad
 skolbänk
@@ -4945,6 +5218,7 @@ skolgång
 skolgård
 skollunch
 skolmatsal
+skoltsamiska
 skolutflykt
 skomakare
 skoputsare
@@ -5073,8 +5347,10 @@ slottstorn
 slottsvägg
 slovak
 slovakien
+slovakiska
 sloven
 slovenien
+slovenska
 slump
 slunga
 slungkast
@@ -5193,6 +5469,7 @@ solsken
 solspektrum
 soluppgång
 somalia
+somalier
 sommarjacka
 sommarlov
 sommarsolstånd
@@ -5208,6 +5485,8 @@ soppslev
 sopptallrik
 soppåse
 sopsäck
+sorb
+sorbiska
 sorg
 sork
 sorksvans
@@ -5229,6 +5508,8 @@ spamfilter
 spanien
 spaningsflygplan
 spaningspilot
+spaningsplan
+spanjor
 spanska
 sparbank
 sparbankslån
@@ -5303,10 +5584,13 @@ springare
 spruta
 sprängsten
 språk
+språkförbistring
 språkinlärning
 språklektion
 språklärare
 språkmarkör
+språkrekonstruktion
+språkstandardisering
 språkundervisning
 språng
 språngmarsch
@@ -5331,11 +5615,13 @@ spökstad
 spöregn
 squash
 stad
+stadsbebyggelse
 stadsdel
 stadsgräns
 stadshus
 stadskarta
 stadsplanering
+stadstull
 staffli
 staket
 stalingrad
@@ -5346,6 +5632,7 @@ stam
 stamfader
 standardavvikelse
 standardintegral
+standardtyska
 stat
 statare
 statik
@@ -5356,7 +5643,10 @@ statsskuld
 statsöverhuvud
 staty
 statyett
+stavfel
 stavhoppare
+stavning
+stavningsreform
 stearinljus
 stege
 stegpinne
@@ -5371,6 +5661,7 @@ stengolv
 stenhuggare
 stenhuggarlärling
 stenkross
+stenmur
 stenmurkla
 stenograf
 stenografi
@@ -5378,6 +5669,10 @@ stenros
 stenvägg
 stenåldern
 stenöken
+steppdans
+steppdansare
+steppdansnummer
+steppsko
 sticka
 sticksår
 stig
@@ -5395,6 +5690,7 @@ stjärnhop
 stjärnspektroskopi
 stjärnspektrum
 stjärnstoft
+stjärtfena
 sto
 stockholm
 stol
@@ -5422,6 +5718,7 @@ stridsflygplan
 stridsgas
 stridsgissel
 stridshammare
+stridskniv
 stridskäpp
 stridslie
 stridslinje
@@ -5501,6 +5798,7 @@ substantiv
 substantivism
 subtraktion
 sudan
+sudanes
 suddgummi
 sugga
 sugpropp
@@ -5555,6 +5853,7 @@ svintryne
 svitjod
 svordom
 svägerska
+svängradie
 svärd
 svärdfäste
 svärdotter
@@ -5571,10 +5870,13 @@ svävare
 svävarfarkost
 svåger
 swaziland
+swingdans
 sydamerika
+sydamerikan
 sydkorea
 sydkorean
 sydossetien
+sydsamiska
 sydsydan
 syl
 syllar
@@ -5621,6 +5923,7 @@ säckpipespelare
 säd
 sädessilo
 säkerhetsvakt
+säkring
 säl
 säljakt
 sällskapsspel
@@ -5679,6 +5982,7 @@ taiwanes
 tak
 taklucka
 takläggare
+taktart
 taktik
 taktpinne
 tal
@@ -5710,6 +6014,7 @@ tandrad
 tandtråd
 tangent
 tangentbord
+tango
 tankearbete
 tankefel
 tankefigur
@@ -5721,6 +6026,9 @@ tankeöverföring
 tankfullhet
 tant
 tanzania
+tapp
+tarantella
+tarantism
 tarvlighet
 tassemark
 tatuerare
@@ -5729,6 +6037,7 @@ tatueringsapparat
 tatueringsnål
 tautologi
 tavastland
+tavelkrita
 tavelstöld
 tavelsudd
 tavla
@@ -5749,12 +6058,15 @@ teckenspråksöversättning
 teckenstorlek
 tefat
 tegel
+tegelmur
 tegelpanna
 tegelsten
 tegeltak
 tegelvägg
+teism
 tejp
 tejphållare
+tejprulle
 teknik
 tekniker
 tekniklektion
@@ -5810,6 +6122,7 @@ tetraeder
 texas
 text
 thailand
+thailändare
 tiara
 tidigt
 tidning
@@ -5851,6 +6164,7 @@ titanlegering
 titel
 tjeck
 tjeckien
+tjeckiska
 tjetjenien
 tjocktarm
 tjocktröja
@@ -5863,6 +6177,7 @@ tjuvnyp
 tjäle
 tjälsprängning
 tjänsteman
+tjänstepistol
 toalett
 toasits
 tobago
@@ -5933,6 +6248,7 @@ tre
 tredjerot
 tredjespråk
 trekant
+tretakt
 trettio
 tretton
 triangel
@@ -6020,6 +6336,7 @@ tsardöme
 tsarinna
 tuggummi
 tull
+tullavgift
 tullinge
 tulpan
 tulpanlök
@@ -6032,6 +6349,7 @@ tumregel
 tundra
 tunga
 tunisien
+tunisier
 tunnbröd
 tunnel
 tunnelbana
@@ -6046,8 +6364,12 @@ tuppnäbb
 tur
 turbin
 turbinmotor
+turbopropmotor
 ture
+turk
 turkiet
+turkiska
+turkmen
 turkmenistan
 turkos
 tuschpenna
@@ -6068,6 +6390,7 @@ tvål
 tvålkopp
 tvång
 tvångsarbete
+tvåtakt
 tyfon
 tyg
 tyggardin
@@ -6088,6 +6411,7 @@ tyska
 tyskland
 täcke
 täljare
+tändhatt
 tändsticka
 tändvätska
 tänkvärdhet
@@ -6126,6 +6450,8 @@ ugglevinge
 uggleägg
 ugn
 ukraina
+ukrainare
+ukrainska
 ull
 ullkofta
 ulrika
@@ -6145,6 +6471,8 @@ undersökning
 undfallenhet
 ungdom
 ungern
+ungerska
+ungrare
 uniform
 unikum
 universitet
@@ -6186,8 +6514,10 @@ uranmalm
 uranus
 urban
 urberg
+urgermanska
 urinprov
 urna
+urspråk
 urspårning
 urtavla
 uruguay
@@ -6222,6 +6552,7 @@ utterpäls
 utterunge
 utvisning
 utåt
+uzbek
 uzbekistan
 vaccin
 vaccination
@@ -6245,6 +6576,8 @@ vallgrav
 valp
 valross
 valrossbete
+vals
+valstakt
 valuta
 valv
 valör
@@ -6369,10 +6702,13 @@ vin
 vind
 vindkraftverk
 vindpust
+vindruta
+vindrutetorkare
 vinflaska
 vinge
 vinglas
 vingslag
+vinkelhake
 vinnare
 vinst
 vinstmaximering
@@ -6397,6 +6733,7 @@ visualisering
 vitlök
 vitlöksklyfta
 vitpeppar
+vitryss
 vitryssland
 vits
 vitsighet
@@ -6460,9 +6797,11 @@ väster
 västerbotten
 västergötland
 västerås
+västflamländska
 västmanland
 västrom
 västsahara
+västsamiska
 västtysk
 västtyskland
 väte
@@ -6473,6 +6812,9 @@ vätgas
 vätgasballong
 vätska
 vätte
+växel
+växellåda
+växelspak
 växelström
 växt
 växtcell
@@ -6484,6 +6826,7 @@ våglära
 vågmönster
 vågrörelse
 våld
+våldshandling
 vålnad
 vårdmottagning
 vårjacka
@@ -6494,6 +6837,7 @@ walesare
 washington
 whiteboard
 whiteboardpenna
+wienervals
 william
 wisconsin
 wyoming
@@ -6520,6 +6864,7 @@ yxhugg
 yxhuvud
 yxskaft
 zambia
+zambier
 zeppelinare
 zeppelinarhölje
 zeppelinarkapten
@@ -6551,6 +6896,7 @@ zoologi
 älgko
 älgtjur
 älva
+älvdans
 älvdrottning
 äppelglass
 äppelpaj
@@ -6559,6 +6905,7 @@ zoologi
 ärkebiskop
 ärkemagiker
 ättling
+åder
 åker
 åkermark
 åklagare
@@ -6580,6 +6927,7 @@ zoologi
 årtusende
 åska
 åskblixt
+åskmoln
 åskmuller
 åsknedslag
 åsna
@@ -6631,8 +6979,10 @@ zoologi
 österbotten
 östergötland
 östermalm
+österrikare
 österrike
 östrom
+östsamiska
 östtimor
 östtysk
 östtyskland

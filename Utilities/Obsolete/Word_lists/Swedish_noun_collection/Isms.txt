@@ -7,6 +7,7 @@ individualism
 militarism
 pacifism
 socialism
+kommunism
 kapitalism
 anarkism
 syndikalism
@@ -21,6 +22,7 @@ teknikoptimism
 gnosticism
 agnosticism
 ateism
+teism
 monoteism
 polyteism
 deism
@@ -48,3 +50,10 @@ despotism
 nominalism
 legalism
 substantivism
+imperialism
+kolonialism
+extremism
+centrism
+reformism
+revisionism
+radikalism

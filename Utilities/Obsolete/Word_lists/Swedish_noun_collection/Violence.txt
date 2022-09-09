@@ -1,4 +1,5 @@
 våld
+våldshandling
 övervåld
 hot
 hotbild
@@ -30,7 +31,9 @@ avledning
 avledningsmanöver
 distraktion
 slagsmål
-upplopp
+gatuslagsmål
+krogslagsmål
 gatustrid
+upplopp
 kravaller
 kravallpolis

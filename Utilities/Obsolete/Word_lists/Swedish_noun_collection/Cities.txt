@@ -14,7 +14,10 @@ planering
 stadskarta
 karta
 kartritare
+stadstull
 tull
+tullavgift
+stadsbebyggelse
 förort
 tätort
 glesort

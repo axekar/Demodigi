@@ -12,6 +12,7 @@ gäcksamhet
 önskvärdhet
 olidlighet
 orimlighet
+osannolikhet
 aktsamhet
 varsamhet
 finurlighet
