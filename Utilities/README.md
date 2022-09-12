@@ -4,6 +4,8 @@ The current contents of this directory are:
 
 `README.md`: This text
 
+`feedback.py`: Module for providing feedback to the course participants, using the Canvas API
+
 `preprocessing.py`: Module for handling the data that comes out of OLI-Torus, changing it into a format suitable for the `factorial_experiment` module one level further up
 
 `PP_KL_script`: Script that handles the results of the course module `kartläggning`
