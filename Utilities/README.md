@@ -13,3 +13,5 @@ The current contents of this directory are:
 `PP_IS_script`: Script that handles the results of the course module `IT-säkerhet`
 
 `Obsolete`: Directory containing code that we no longer expect to need
+
+`Paragraphs`: Directory containing text files with the individual paragraphs that are combined when generating feedback to the individual users
