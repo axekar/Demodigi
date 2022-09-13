@@ -1,4 +1,4 @@
-'''
+"""
 This module was written for the ESF-financed project Demokratisk
 Digitalisering. The project is a collaboration between
 Arbetsförmedlingen (AF) and Kungliga Tekniska Högskolan (KTH). The
@@ -16,7 +16,7 @@ directory tree with plots of data that we believe is of interest.
 
 Written by Alvin Gavel,
 https://github.com/Alvin-Gavel/Demodigi
-'''
+"""
 
 import numpy as np
 import pandas as pd
@@ -40,7 +40,7 @@ _effective_min_date = datetime.datetime(1900, 1, 1, tzinfo = pytz.UTC)
 _effective_max_date = datetime.datetime(2200, 1, 1, tzinfo = pytz.UTC)
 
 class participant:
-   '''
+   """
    This represents a single person taking a learning module.
    
    Attributes
@@ -48,45 +48,53 @@ class participant:
    ID : string
    \tSome unique identifier of the participant. For privacy reasons, this
    \tis unlikely to be their actual name.
+   competencies : dict of list of str
+   \tA list of the competencies that the student is intended to learn, and
+   \tthe individual skills that we divide them into
    answered : pandas bool DataFrame
-   \tInitially empty DataFrame stating for each question in a learning
+   \tInitially empty DataFrame stating for each skill in a learning
    \tmodule whether the participant has given any answer
    answer_dates : pandas datetime DataFrame
-   \tInitially empty DataFrame stating for each question in a learning
+   \tInitially empty DataFrame stating for each skill in a learning
    \tmodule when the participant gave their first answer
    first_answer_date : datetime
    \tWhen the participant first gave any answer to a question
    last_answer_date : datetime
    \tWhen the participant last gave any answer to a question
    correct_first_try : pandas bool DataFrame
-   \tInitially empty DataFrame stating for each question in a learning
+   \tInitially empty DataFrame stating for each skill in a learning
    \tmodule whether the participant answered correctly on the first try.
+   correct_from_start : dict of bool
+   \tInitially empty dict stating for each skill whether a participant
+   \tconsistently answered correctly from the first session onwards
    accumulated_by_date : dict
    \tInitially empty dict given the number of questions answered as a
    \tfunction of time.
-   '''
+   """
    def __init__(self, ID):
-      '''
+      """
       Parameters
       ----------
       ID : string
       \tDescribed under attributes
-      '''
+      """
       self.ID = ID
+      self.competencies = {}
       self.answered = pd.DataFrame(dtype = bool)
       self.answer_date = pd.DataFrame(dtype = 'datetime64[s]')
       self.first_answer_date = None
       self.last_answer_date = None
       self.correct_first_try = pd.DataFrame(dtype = bool)
+      self.correct_from_start = {}
       # I would *like* to implement this one as a DataFrame, but it turns
       # out that Pandas does not accept datetime64 objects.
       self.accumulated_by_date = {}
       return
 
    def save_factorial_experiment_data(self, folder_path):
-      '''
+      """
       Save data that will be used by the factorial_experiment module.
-      '''
+      """
       if folder_path[-1] != '/':
          folder_path += '/'
       f = open(folder_path + self.ID + '.json', 'w')
@@ -96,6 +104,42 @@ class participant:
       f.write(packed)
       f.close()
       return
+      
+   def save_feedback(self, save_folder_path, feedback_folder_path = 'Feedback_paragraphs/Kartläggning'):
+      """
+      Save a text file of feedback that will be used by the feedback module.
+      
+      At the moment, this is specific to the course module kartläggning.
+      """
+      def read_txt(file_path):
+         f = open(file_path, 'r')
+         contents = f.read()
+         f.close()
+         return contents
+      feedback_string = read_txt('{}/Intro.txt'.format(feedback_folder_path))
+      feedback_string += '\n'
+
+      for competency_name, skills in self.competencies.items():
+         n_skills = len(skills)
+         n_known = 0
+         for skill in skills:
+            n_known += self.correct_from_start[skill]
+            
+         feedback_string += read_txt('{}/{}/Intro.txt'.format(feedback_folder_path, competency_name.replace(' ', '_')))
+         feedback_string += '\n'
+         feedback_string += read_txt('{}/{}/{}.txt'.format(feedback_folder_path, competency_name.replace(' ', '_'), n_known))
+         feedback_string += '\n'
+                     
+      feedback_string += read_txt('{}/Outro.txt'.format(feedback_folder_path))
+      
+      if save_folder_path[-1] != '/':
+         save_folder_path += '/'
+      f = open(save_folder_path + self.ID + '.txt', 'w')
+      
+      f.write(feedback_string)
+      f.close()
+      return
+
       
    def _cumulative_answers_by_date(self):
       dates_when_something_happened = {}
@@ -120,11 +164,11 @@ class participant:
       return self.correct_first_try.shape[1]
 
    def plot_results_by_session(self, folder_path):
-      '''
+      """
       This plots the results for the participant as a function of session,
       showing both which number of skills they have answered, and for what
       number they answered correctly on the first try.
-      '''
+      """
       if folder_path[-1] != '/':
          folder_path += '/'
       plt.clf()
@@ -139,9 +183,9 @@ class participant:
       return
 
    def plot_results_by_time(self, folder_path):
-      '''
+      """
       This plots the number of answers given as a function of time.
-      '''
+      """
       # Avoid plotting if there is nothing to plot.
       if self.accumulated_by_date == {}:
          return
@@ -160,7 +204,7 @@ class participant:
       return
          
 class learning_module:
-   '''
+   """
    This represents one learning module in the project.
   
    Attributes
@@ -197,9 +241,9 @@ class learning_module:
    accumulated_by_date : dict
    \tInitially empty dict given the number of questions answered as a
    \tfunction of time.
-   '''
+   """
    def __init__(self, competencies, n_sessions = np.nan, participants = None, start_date = _effective_min_date, end_date = _effective_max_date, section_slug = None):
-      '''
+      """
       Parameters
       ----------
       competencies : dict of lists of str
@@ -217,7 +261,7 @@ class learning_module:
       end_date : DateTime or None
       \tIf specified, gives the time at which the module is taken to have
       \tended. All data from after this is ignored when importing results
-      '''
+      """
       self.competencies = competencies
       self.skills = []
       for competence, skills in competencies.items():
@@ -245,13 +289,13 @@ class learning_module:
    ### Functions for handling data regarding individual participants
 
    def read_participant_IDs(self, filepath):
-      '''
+      """
       Reads a list of the participant IDs. The file is assumed to consist of
       a single column of IDs.
       
       The file of IDs is assumed to have been generated by the
       account_info_generator module.
-      '''
+      """
       f = open(filepath)
       IDs = [word.strip().lower() for word in f]
       f.close()
@@ -261,10 +305,10 @@ class learning_module:
       return
 
    def import_raw_analytics(self, filepath):
-      '''
+      """
       Import the raw_analytics.tsv file given by OLI Torus and pick out the 
       relevant information.
-      '''
+      """
       raw = pd.read_csv(filepath, sep='\t')
       
       raw['Date Created']= pd.to_datetime(raw['Date Created'])
@@ -278,7 +322,7 @@ class learning_module:
       return
       
    def import_datashop(self, filepath):
-      '''
+      """
       This imports an XML file following the format specified at
       
       https://pslcdatashop.web.cmu.edu/dtd/guide/tutor_message_dtd_guide_v4.pdf
@@ -287,7 +331,7 @@ class learning_module:
       followed by one or more pairs of first tool_message and tutor_message.
       Internally, these are ordered in time, but the whole batch of context,
       tool and tutor messages need not be ordered with respect to others.
-      '''
+      """
 
       tree = et.parse(filepath)
       root = tree.getroot()
@@ -472,14 +516,15 @@ class learning_module:
       return
 
    def _read_participant_results(self, participant):
-      '''
+      """
       Find out, for each question, whether a specific participant got it
       right on the first try.
-      '''
+      """
       if not self.n_sessions_input:
          print('Inferring number of sessions from OLI-Torus output')
          self.infer_n_sessions_from_full_results()
 
+      participant.competencies = self.competencies #Throwing this piece of data around like this is probably bad. Might fix later
       participant.answered = pd.DataFrame(columns = self.skills, index = range(1, self.n_sessions + 1), dtype = bool)
       participant.answer_date = pd.DataFrame(columns = self.skills, index = range(1, self.n_sessions + 1), dtype = 'datetime64[s]')
       participant.correct_first_try = pd.DataFrame(columns = self.skills, index = range(1, self.n_sessions + 1), dtype = bool)
@@ -509,6 +554,7 @@ class learning_module:
             participant.answered.loc[session, skill] = has_answered
             participant.correct_first_try.loc[session, skill] = correct
             participant.answer_date.loc[session, skill] = first_try_date
+         participant.correct_from_start[skill] = np.all(participant.correct_first_try.loc[:, skill])
       participant._cumulative_answers_by_date()
       self.flags.loc[participant.ID, 'started'] = True # Note that this is assumed by default, we cannot test it yet
       self.flags.loc[participant.ID, 'answered once'] = n_answers > 0
@@ -516,10 +562,10 @@ class learning_module:
       return
       
    def read_participants_results(self):
-      '''
+      """
       Find out, for each question, whether the participants got it right on
       the first try.
-      '''
+      """
       # If you simply test '[...] == None' Pandas will complain that
       # dataframes have ambiguous equality.
       if type(self.full_results) == type(None):
@@ -531,19 +577,19 @@ class learning_module:
       return
 
    def export_full_results(self, file_path):
-      '''
+      """
       Export the full results dataframe as a csv file.
       
       This is mostly intended to make visual inspection easier.
-      '''
+      """
       self.full_results.to_csv(file_path, index = False)
       return
 
    def export_individual_results(self, folder_path):
-      '''
+      """
       Export the results for each individual participant in a format which is
       legible to the factorial_experiment module.
-      '''
+      """
       if not self.results_read:
          print('There are no results to save!')
       else:
@@ -551,14 +597,26 @@ class learning_module:
             participant.save_factorial_experiment_data(folder_path)
       return
 
+   def export_individual_feedback(self, folder_path):
+      """
+      Export the feedback for each individual participant, which can then be
+      uploaded by the feedback module to Canvas.
+      """
+      if not self.results_read:
+         print('There are no results to give feedback on!')
+      else:
+         for participant in self.participants.values():
+            participant.save_feedback(folder_path)
+      return
+
    def export_IDs(self, file_path):
-      '''
+      """
       Write a file of participant IDs, which can be read by the
       factorial_experiment module, or by this module.
       
       There should not be any need to use this function, except when
       participants have been inferred from the results file.
-      '''
+      """
       f = open(file_path, 'w')
       # Here we do a weird thing because json can handle Python's built-in
       # bool type but not numpy's bool_ type.
@@ -568,14 +626,14 @@ class learning_module:
       return      
 
    def export_SCB_data(self, file_path):
-      '''
+      """
       Write a csv file to be delivered to Statistiska Centralbyrån (SCB), which
       contains the columns:
       
       person number, estimated time, starting date, finishing date
       
       The estimated time is always given as 30 minutes.
-      '''
+      """
       sorted_IDs = sorted(self.participants.keys())
       first_answer_dates = []
       last_answer_dates = []
@@ -615,10 +673,10 @@ class learning_module:
       ### Functions for inspecting data
 
    def describe_module(self):
-      '''
+      """
       Output some basic numerical data about how the participants have done
       as a group.
-      '''
+      """
       if not self.participants_input:
          print('No participants have been read!')
       else:
@@ -643,10 +701,10 @@ class learning_module:
       return
 
    def describe_participants(self):
-      '''
+      """
       Give a short summary of who the participants are and how far they have
       gotten in the course.
-      '''
+      """
       if not self.participants_input:
          print('No participants have been read!')
       else:
@@ -667,18 +725,18 @@ class learning_module:
       return
       
    def plot_individual_results(self, folder_path):
-      '''
+      """
       Plot the results for each individual participant.
-      '''
+      """
       for participant in self.participants.values():
          participant.plot_results_by_session(folder_path)
          participant.plot_results_by_time(folder_path)
       return
 
    def plot_results_by_time(self, folder_path):
-      '''
+      """
       This plots the number of answers given as a function of time.
-      '''
+      """
       if folder_path[-1] != '/':
          folder_path += '/'
       plt.clf()
@@ -693,11 +751,11 @@ class learning_module:
       return
 
    def plot_performance_by_n_correct_for_competence(self, folder_path, competence, threshold = 4/6):
-      '''
+      """
       Make a barplot showing how many participants got 0, 1, 2... answers
       right on the first try of the first session and onwards, for a given
       competence
-      '''
+      """
       if folder_path[-1] != '/':
          folder_path += '/'
 
@@ -717,9 +775,8 @@ class learning_module:
       
       for participant in self.participants.values():
          n_correct = 0
-         for i in range(n_skill_for_this_competency):
-            skill = self.competencies[competence][i]
-            n_correct += np.all(participant.correct_first_try.loc[:, skill])
+         for skill in self.competencies[competence]:
+            n_correct += participant.correct_from_start[skill]
          already_known[n_correct] += 1
       plt.clf()
       plt.bar(x, already_known, color = colors, edgecolor='black')
@@ -732,10 +789,10 @@ class learning_module:
       return
 
    def plot_performance_per_skill_for_competence(self, folder_path, competence):
-      '''
+      """
       Make a barplot showing how many participants got a given skill right on
       the first try, for a given competence
-      '''
+      """
       if folder_path[-1] != '/':
          folder_path += '/'
 
@@ -762,18 +819,18 @@ class learning_module:
       return
 
    def plot_initial_performance(self, folder_path):
-      '''
+      """
       This makes bar plots showing the performance of the participants
-      '''
+      """
       for competence in self.competencies.keys():
          self.plot_performance_by_n_correct_for_competence(folder_path, competence)
          self.plot_performance_per_skill_for_competence(folder_path, competence)
       return
 
    def plot_results(self, folder_path):
-      '''
+      """
       This plots everything that can be plotted
-      '''
+      """
       self.plot_individual_results(folder_path)
       self.plot_results_by_time(folder_path)
       self.plot_initial_performance(folder_path)
@@ -784,11 +841,11 @@ class learning_module:
    ### gone wrong)
    
    def infer_participants_from_full_results(self):
-      '''
+      """
       Figure out who the participants are from a file of results.
       
       NOTE: You should never actually need to use this
-      '''
+      """
       if not self.results_read:
          print('Must read a file of results first!')
       else:
@@ -801,11 +858,11 @@ class learning_module:
       return
       
    def infer_n_sessions_from_full_results(self, verbose = False):
-      '''
+      """
       Figure out how many sessions there are from a file of results.
       
       NOTE: You should never actually need to use this
-      '''
+      """
       if not self.results_read:
          print('Must read a file of results first!')
       else:
