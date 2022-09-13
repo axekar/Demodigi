@@ -51,7 +51,7 @@ try:
    os.mkdir('Results/Kartläggning/Individer')
 except FileExistsError:
    pass
-mod.export_results('Results/Kartläggning/Individer')
+mod.export_individual_results('Results/Kartläggning/Individer')
 mod.export_IDs('Results/Kartläggning/IDs.json')
 mod.export_SCB_data('Results/Kartläggning/SCB_data.csv')
 mod.export_full_results('Results/Kartläggning/Full_results.csv')

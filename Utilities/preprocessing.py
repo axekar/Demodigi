@@ -410,7 +410,7 @@ class learning_module:
          best_match_index = np.argmax(match_percentages)
          best_match_percentage = match_percentages[best_match_index]
          
-         if best_match_percentage > 0.3:
+         if best_match_percentage > 0.5:
             matched_pseudonym = pseudonyms[best_match_index]
          
             mapping_IDs.append(ID)
@@ -539,7 +539,7 @@ class learning_module:
       self.full_results.to_csv(file_path, index = False)
       return
 
-   def export_results(self, folder_path):
+   def export_individual_results(self, folder_path):
       '''
       Export the results for each individual participant in a format which is
       legible to the factorial_experiment module.

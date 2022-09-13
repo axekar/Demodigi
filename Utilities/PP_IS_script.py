@@ -29,6 +29,6 @@ try:
    os.mkdir('Results/IT-säkerhet')
 except FileExistsError:
    pass
-mod.export_results('Results/IT-säkerhet')
+mod.export_individual_results('Results/IT-säkerhet')
 mod.export_IDs('Results/IT-säkerhet/IDs.json')
 mod.export_SCB_data('Results/IT-säkerhet/SCB_data.csv')
