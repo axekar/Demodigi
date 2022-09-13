@@ -23,7 +23,7 @@ import os
 import requests as r
 
 
-def upload(file_path, user_id, token):
+def upload_file(file_path, user_id, token):
    """
    Upload a file to canvas
    """
@@ -54,6 +54,30 @@ def upload(file_path, user_id, token):
       print(response_2.headers['Status'])
    return
    
+def send_file_contents(file_path, user_id, token):
+   """
+   Send the contents of a text file to a user
+   """
+   
+   f = open(file_path, 'r')
+   contents = f.read()
+   f.close()
+   
+   payload = {
+      'subject': 'Återkoppling på kartläggningsmodul',
+      'force_new': True,
+      'recipients': [user_id],
+      'body': contents,
+   }
+   header = {
+      'Authorization': 'Bearer {}'.format(token)
+   }
+   
+   response = r.post('https://af.instructure.com/api/v1/conversations', data = payload, headers=header)
+   response_content = response.json()
+   return
+
+
 def account_name_user_id_mapping(token):
    """
    Canvas uses short user IDs that differ from the account names. This
