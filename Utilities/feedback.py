@@ -23,7 +23,7 @@ import os
 import requests as r
 
 
-def upload(file_path, token):
+def upload(file_path, course_id, token):
    """
    Upload a file to canvas
    """
@@ -37,7 +37,7 @@ def upload(file_path, token):
    'Authorization': 'Bearer {}'.format(token)
    }
    
-   response_1 = r.post('https://af.instructure.com/api/v1/users/self/files', data = payload, headers=header)
+   response_1 = r.post('https://af.instructure.com/api/v1/courses/{}/files'.format(course_id), data = payload, headers=header)
    if not 'OK' in response_1.headers['Status']:
       print('Tried to prepare for upload')
       print('Got unexpected status in response from Canvas:')
