@@ -14,4 +14,4 @@ The current contents of this directory are:
 
 `Obsolete`: Directory containing code that we no longer expect to need
 
-`Paragraphs`: Directory containing text files with the individual paragraphs that are combined when generating feedback to the individual users
+`Feedback_paragraphs`: Directory containing text files with the individual paragraphs that are combined when generating feedback to the individual users
