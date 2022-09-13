@@ -23,7 +23,7 @@ import os
 import requests as r
 
 
-def upload(file_path, course_id, token):
+def upload(file_path, user_id, token):
    """
    Upload a file to canvas
    """
@@ -34,10 +34,10 @@ def upload(file_path, course_id, token):
       'size': sz,
    }
    header = {
-   'Authorization': 'Bearer {}'.format(token)
+      'Authorization': 'Bearer {}'.format(token)
    }
    
-   response_1 = r.post('https://af.instructure.com/api/v1/courses/{}/files'.format(course_id), data = payload, headers=header)
+   response_1 = r.post('https://af.instructure.com/api/v1/users/{}/files'.format(user_id), data = payload, headers=header)
    if not 'OK' in response_1.headers['Status']:
       print('Tried to prepare for upload')
       print('Got unexpected status in response from Canvas:')
@@ -53,3 +53,52 @@ def upload(file_path, course_id, token):
       print('Got unexpected status in response from Canvas:')
       print(response_2.headers['Status'])
    return
+   
+def account_name_user_id_mapping(token):
+   """
+   Canvas uses short user IDs that differ from the account names. This
+   finds the mapping between the two.
+   
+   Note that this will include "users" like 'Outcomes Service API' and
+   'Quizzes.Next Service API', so some filtering is necessary
+   afterwards.
+   """
+   def find_next_link(link_long_string):
+      """
+      The get requests return a string which can be broken up into a comma-
+      separated list, where each entry is a link to the first, current, next
+      and previous (where a next and previous exist). This picks out which 
+      one is the next.
+      """
+      link_strings = link_long_string.split(',')
+      found = False
+      for link_string in link_strings:
+         if '; rel="next"' in link_string:
+            link = link_string.split('>')[0].split('<')[1]
+            found = True
+            break
+      if not found:
+         link = None
+      return link
+   
+   header = {
+      'Authorization': 'Bearer {}'.format(token)
+   }
+   response = r.get('https://af.instructure.com/api/v1/accounts/1/users', headers=header)
+   if not 'OK' in response.headers['Status']:
+      print('Tried to access list')
+      print('Got unexpected status in response from Canvas:')
+      print(response.headers['Status'])
+      
+   users = response.json()
+      
+   link = find_next_link(response.headers['Link'])
+   while link != None:
+      response = r.get(link, headers=header)
+      users += response.json()
+      link = find_next_link(response.headers['Link'])
+   
+   mapping = {}
+   for user in users:
+      mapping[user['name']] = user['id']
+   return mapping
