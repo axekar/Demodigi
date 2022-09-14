@@ -27,58 +27,6 @@ class UnexpectedResponseError(Exception):
         self.msg = msg
         return
 
-def upload_file(file_path, user_id, token):
-   """
-   Upload a file to canvas
-   """
-   file_name = file_path.split('/')[-1]
-   sz = os.stat(file_path).st_size
-   payload = {
-      'name': file_name,
-      'size': sz,
-   }
-   header = {
-      'Authorization': 'Bearer {}'.format(token)
-   }
-   
-   response_1 = r.post('https://af.instructure.com/api/v1/users/{}/files'.format(user_id), data = payload, headers=header)
-   if not 'OK' in response_1.headers['Status']:
-      raise UnexpectedResponseError('When preparing for upload, canvas returned status "{}"'.format(response_1.headers['Status']))
-   response_1_content = response_1.json()
-   upload_url = response_1_content['upload_url']
-
-   f = open(file_path, 'rb')
-   response_2 = r.post(upload_url, files = {file_name: f})
-   response_2_content = response_2.json()
-   if not response_2_content['upload_status'] == 'success':
-      raise UnexpectedResponseError('When uploading, canvas returned status "{}"'.format(response_2.headers['Status']))
-   return
-   
-def send_file_contents(file_path, user_id, token):
-   """
-   Send the contents of a text file to a user
-   """
-   
-   f = open(file_path, 'r')
-   contents = f.read()
-   f.close()
-   
-   payload = {
-      'subject': 'Återkoppling på kartläggningsmodul',
-      'force_new': True,
-      'recipients': [user_id],
-      'body': contents,
-   }
-   header = {
-      'Authorization': 'Bearer {}'.format(token)
-   }
-   
-   response = r.post('https://af.instructure.com/api/v1/conversations', data = payload, headers=header)
-   response_content = response.json()
-   if not type(response_content) == list:
-      raise UnexpectedResponseError('When uploading, canvas returned error message "{}"'.format(response_content['errors'][0]['message']))
-   return response
-
 
 def account_name_user_id_mapping(token):
    """
@@ -126,3 +74,118 @@ def account_name_user_id_mapping(token):
    for user in users:
       mapping[user['name']] = user['id']
    return mapping
+
+
+def send_file_contents(file_path, user_id, subject, token):
+   """
+   Send a message to a participant, where the message containing text read
+   from a file.
+   """
+   f = open(file_path, 'r')
+   contents = f.read()
+   f.close()
+   
+   payload = {
+      'subject': subject,
+      'force_new': True,
+      'recipients': [user_id],
+      'body': contents,
+      'group_conversation':False
+   }
+   header = {
+      'Authorization': 'Bearer {}'.format(token)
+   }
+   
+   response = r.post('https://af.instructure.com/api/v1/conversations', data = payload, headers=header)
+   response_content = response.json()
+   if not type(response_content) == list:
+      raise UnexpectedResponseError('When uploading, canvas returned error message "{}"'.format(response_content['errors'][0]['message']))
+   return
+
+
+def upload_file(file_path, canvas_path, user_id, token):
+   """
+   Upload a file to a particular path, in the Canvas API, while acting
+   as a specific user - possibly yourself
+   """
+   header = {
+      'Authorization': 'Bearer {}'.format(token)
+   }
+
+   file_name = file_path.split('/')[-1]
+   sz = os.stat(file_path).st_size
+   payload = {
+      'name': file_name,
+      'size': sz,
+      'as_user_id': user_id
+   }
+
+   response_1 = r.post(canvas_path, data = payload, headers=header)
+   if not 'OK' in response_1.headers['Status']:
+      raise UnexpectedResponseError('When preparing for upload, canvas returned status "{}"'.format(response_1.headers['Status']))
+   response_1_content = response_1.json()
+   upload_url = response_1_content['upload_url']
+
+   f = open(file_path, 'rb')
+   response_2 = r.post(upload_url, files = {file_name: f})
+   response_2_content = response_2.json()
+   if not response_2_content['upload_status'] == 'success':
+      raise UnexpectedResponseError('When uploading, canvas returned status "{}"'.format(response_2.headers['Status']))
+   return response_2_content['id']
+
+
+def upload_conversation_attachment(file_path, user_id, token):
+   """
+   Upload a conversation attachment to user file area. Typically, this
+   would be your own, in preparation for sending a message to another
+   user with that file attached.
+   """
+   header = {
+      'Authorization': 'Bearer {}'.format(token)
+   }
+   
+   response_1 = r.get('https://af.instructure.com/api/v1/users/{}/folders'.format(user_id), headers = {'Authorization': 'Bearer {}'.format(token)})
+   if not 'OK' in response_1.headers['Status']:
+      raise UnexpectedResponseError('When locating conversation attachment folder, canvas returned status "{}"'.format(response_1.headers['Status']))
+   response_1_content = response_1.json()
+   
+   found = False
+   for item in response_1_content:
+      if item['full_name'] == 'my files/conversation attachments':
+         found = True
+         folder_id = item['id']
+         break
+   if not found:
+      raise UnexpectedResponseError("Could not locate 'conversation attachments' folder")
+   
+   file_id = upload_file(file_path, 'https://af.instructure.com/api/v1/folders/{}/files'.format(folder_id), user_id, token)
+   return file_id
+
+
+## Right now I am not sure how to get this one to work
+
+#def send_file(file_path, self_id, target_id, subject, message, token):
+#   """
+#   Send a message to a participant, containing an attached file
+#   """
+#   file_id = upload_conversation_attachment(file_path, self_id, token)
+#   
+#   payload = {
+#      'subject': subject,
+#      'force_new': True,
+#      'recipients': [target_id],
+#      'attachment_ids':[file_id],
+#      'body': message,
+#      'group_conversation':False
+#   }
+#   header = {
+#      'Authorization': 'Bearer {}'.format(token)
+#   }
+#
+#   response = r.post('https://af.instructure.com/api/v1/conversations', data = payload, headers=header)
+#   
+#   response_content = response.json()
+#   if not type(response_content) == list:
+#      raise UnexpectedResponseError('When uploading, canvas returned error message "{}"'.format(response_content['errors'][0]['message']))
+#   return
+
