@@ -22,6 +22,13 @@ import os
 
 import requests as r
 
+class UnexpectedResponseError(Exception):
+    def __init__(self, msg):
+
+        # Error message thrown is saved in msg
+        self.msg = msg
+        return
+
 
 def upload_file(file_path, user_id, token):
    """
@@ -39,9 +46,7 @@ def upload_file(file_path, user_id, token):
    
    response_1 = r.post('https://af.instructure.com/api/v1/users/{}/files'.format(user_id), data = payload, headers=header)
    if not 'OK' in response_1.headers['Status']:
-      print('Tried to prepare for upload')
-      print('Got unexpected status in response from Canvas:')
-      print(response_1.headers['Status'])
+      raise UnexpectedResponseError('When preparing for upload, canvas returned status {}'.format(response_1.headers['Status']))
    response_1_content = response_1.json()
    upload_url = response_1_content['upload_url']
 
@@ -49,9 +54,7 @@ def upload_file(file_path, user_id, token):
    response_2 = r.post(upload_url, files = {file_name: f})
    response_2_content = response_2.json()
    if not response_2_content['upload_status'] == 'success':
-      print('Tried to upload')
-      print('Got unexpected status in response from Canvas:')
-      print(response_2.headers['Status'])
+      raise UnexpectedResponseError('When uploading, canvas returned status {}'.format(response_2.headers['Status']))
    return
    
 def send_file_contents(file_path, user_id, token):
@@ -110,9 +113,7 @@ def account_name_user_id_mapping(token):
    }
    response = r.get('https://af.instructure.com/api/v1/accounts/1/users', headers=header)
    if not 'OK' in response.headers['Status']:
-      print('Tried to access list')
-      print('Got unexpected status in response from Canvas:')
-      print(response.headers['Status'])
+      raise UnexpectedResponseError('When accessing user list, canvas returned status {}'.format(response.headers['Status']))
       
    users = response.json()
       
