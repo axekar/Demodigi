@@ -24,11 +24,8 @@ import requests as r
 
 class UnexpectedResponseError(Exception):
     def __init__(self, msg):
-
-        # Error message thrown is saved in msg
         self.msg = msg
         return
-
 
 def upload_file(file_path, user_id, token):
    """
@@ -46,7 +43,7 @@ def upload_file(file_path, user_id, token):
    
    response_1 = r.post('https://af.instructure.com/api/v1/users/{}/files'.format(user_id), data = payload, headers=header)
    if not 'OK' in response_1.headers['Status']:
-      raise UnexpectedResponseError('When preparing for upload, canvas returned status {}'.format(response_1.headers['Status']))
+      raise UnexpectedResponseError('When preparing for upload, canvas returned status "{}"'.format(response_1.headers['Status']))
    response_1_content = response_1.json()
    upload_url = response_1_content['upload_url']
 
@@ -54,7 +51,7 @@ def upload_file(file_path, user_id, token):
    response_2 = r.post(upload_url, files = {file_name: f})
    response_2_content = response_2.json()
    if not response_2_content['upload_status'] == 'success':
-      raise UnexpectedResponseError('When uploading, canvas returned status {}'.format(response_2.headers['Status']))
+      raise UnexpectedResponseError('When uploading, canvas returned status "{}"'.format(response_2.headers['Status']))
    return
    
 def send_file_contents(file_path, user_id, token):
@@ -78,7 +75,9 @@ def send_file_contents(file_path, user_id, token):
    
    response = r.post('https://af.instructure.com/api/v1/conversations', data = payload, headers=header)
    response_content = response.json()
-   return
+   if not type(response_content) == list:
+      raise UnexpectedResponseError('When uploading, canvas returned error message "{}"'.format(response_content['errors'][0]['message']))
+   return response
 
 
 def account_name_user_id_mapping(token):
@@ -113,7 +112,7 @@ def account_name_user_id_mapping(token):
    }
    response = r.get('https://af.instructure.com/api/v1/accounts/1/users', headers=header)
    if not 'OK' in response.headers['Status']:
-      raise UnexpectedResponseError('When accessing user list, canvas returned status {}'.format(response.headers['Status']))
+      raise UnexpectedResponseError('When accessing user list, canvas returned status "{}"'.format(response.headers['Status']))
       
    users = response.json()
       
