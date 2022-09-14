@@ -4,6 +4,8 @@ The current contents of this directory are:
 
 `README.md`: This text
 
+`account_info_generator.py`: Module for generating info of Canvas IDs
+
 `canvas_contact.py`: Module for interacting with the Canvas API, typically to provide individual feedback to the course participants
 
 `preprocessing.py`: Module for handling the data that comes out of OLI-Torus, changing it into a format suitable for the `factorial_experiment` module one level further up
