@@ -162,30 +162,27 @@ def upload_conversation_attachment(file_path, user_id, token):
    return file_id
 
 
-## Right now I am not sure how to get this one to work
+def send_file(file_path, self_id, target_id, subject, message, token):
+   """
+   Send a message to a participant, containing an attached file
+   """
+   file_id = upload_conversation_attachment(file_path, self_id, token)
+   
+   payload = {
+      'subject': subject,
+      'force_new': True,
+      'recipients': [target_id],
+      'attachment_ids[]':[file_id],
+      'body': message,
+      'mode':'sync'
+   }
+   header = {
+      'Authorization': 'Bearer {}'.format(token)
+   }
 
-#def send_file(file_path, self_id, target_id, subject, message, token):
-#   """
-#   Send a message to a participant, containing an attached file
-#   """
-#   file_id = upload_conversation_attachment(file_path, self_id, token)
-#   
-#   payload = {
-#      'subject': subject,
-#      'force_new': True,
-#      'recipients': [target_id],
-#      'attachment_ids':[file_id],
-#      'body': message,
-#      'group_conversation':False
-#   }
-#   header = {
-#      'Authorization': 'Bearer {}'.format(token)
-#   }
-#
-#   response = r.post('https://af.instructure.com/api/v1/conversations', data = payload, headers=header)
-#   
-#   response_content = response.json()
-#   if not type(response_content) == list:
-#      raise UnexpectedResponseError('When uploading, canvas returned error message "{}"'.format(response_content['errors'][0]['message']))
-#   return
+   response = r.post('https://af.instructure.com/api/v1/conversations', data = payload, headers=header)
+   response_content = response.json()
+   if not type(response_content) == list:
+      raise UnexpectedResponseError('When uploading, canvas returned error message "{}"'.format(response_content['errors'][0]['message']))
+   return
 
