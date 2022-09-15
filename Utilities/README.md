@@ -12,8 +12,6 @@ The current contents of this directory are:
 
 `PP_IS_script`: Script that handles the results of the course module `IT-säkerhet`
 
-`single_sign_on.py`: Module for interacting with the SSO that we use for logging in to Canvas
-
 `Obsolete`: Directory containing code that we no longer expect to need
 
 `Feedback_paragraphs`: Directory containing text files with the individual paragraphs that are combined when generating feedback to the individual users
