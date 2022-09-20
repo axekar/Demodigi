@@ -23,6 +23,7 @@ import pandas as pd
 import json
 import matplotlib.pyplot as plt
 
+import docx
 import datetime
 import pytz
 import xml.etree.ElementTree as et
@@ -131,15 +132,22 @@ class participant:
          feedback_string += '\n'
                      
       feedback_string += read_txt('{}/Outro.txt'.format(feedback_folder_path))
-      
+
+      doc = docx.Document()
+
+      doc.add_heading('Återkoppling', 0)
+
+      doc.add_paragraph(feedback_string)
+
       if save_folder_path[-1] != '/':
          save_folder_path += '/'
-      f = open(save_folder_path + self.ID + '.txt', 'w')
-      
-      f.write(feedback_string)
-      f.close()
-      return
+      doc.save(save_folder_path + self.ID + '.docx')
 
+      #f = open(save_folder_path + self.ID + '.txt', 'w')
+      
+      #f.write(feedback_string)
+      #f.close()
+      return
       
    def _cumulative_answers_by_date(self):
       dates_when_something_happened = {}
