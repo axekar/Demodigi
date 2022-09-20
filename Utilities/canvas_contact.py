@@ -209,6 +209,6 @@ def send_files(account_name_path, feedback_folder_path, self_account, subject, m
    mapping = account_name_user_id_mapping(token)
    for target_account in accounts:
       # This is clunky, and I will try to neaten it up tomorrow
-      send_file('{}{}.txt'.format(feedback_folder_path, target_account.lower()), mapping[self_account], mapping[target_account.replace('@arbetsformedlingen.se', '')], subject, message, token)
+      send_file('{}{}.docx'.format(feedback_folder_path, target_account.lower()), mapping[self_account], mapping[target_account.replace('@arbetsformedlingen.se', '')], subject, message, token)
 
    return
