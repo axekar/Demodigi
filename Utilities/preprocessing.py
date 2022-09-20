@@ -299,6 +299,8 @@ class learning_module:
       self.participants = {}
       for ID in IDs:
          self.participants[ID] = participant(ID) 
+      self.participants_input = True
+      self.n_participants = len(self.participants)
       return
 
    def import_raw_analytics(self, filepath):
@@ -411,15 +413,16 @@ class learning_module:
       See the internal DD document 'Datashop och raw analytics' for an
       explanation of what this method does and why.
       """
-      if verbose:
-         print('Figuring out mapping between pseudonyms in raw_analytics file and IDs in Datashop file.')
-         print('This may take a while...')
-   
       IDs = list(set(self.xml_data['Student ID']))
       n_ID = len(IDs)
       
       pseudonyms = list(set(self.raw_data['Student ID']))
       n_pseudonym = len(pseudonyms)
+
+      if verbose:
+         print('Figuring out mapping between pseudonyms in raw_analytics file and IDs in Datashop file.')
+         print('Comparing {} pseudonyms to {} IDs'.format(n_ID, n_pseudonym))
+         print('This may take a while...')
       
       mapping_IDs = []
       mapping_pseudonyms = []
@@ -667,7 +670,7 @@ class learning_module:
          accumulated_by_date[date] = accumulated
       return accumulated_by_date
    
-      ### Functions for inspecting data
+   ### Functions for inspecting data
 
    def describe_module(self):
       """
