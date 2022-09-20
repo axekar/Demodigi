@@ -72,7 +72,10 @@ def account_name_user_id_mapping(token):
    
    mapping = {}
    for user in users:
-      mapping[user['name']] = user['id']
+      try:
+         mapping[user['login_id']] = user['id']
+      except KeyError:
+         pass
    return mapping
 
 
@@ -186,3 +189,26 @@ def send_file(file_path, self_id, target_id, subject, message, token):
       raise UnexpectedResponseError('When uploading, canvas returned error message "{}"'.format(response_content['errors'][0]['message']))
    return
 
+def read_account_names(filepath):
+   """
+   Reads a list of the participant's account names
+   """
+   f = open(filepath)
+   IDs = [word.strip() for word in f]
+   f.close()
+   return IDs
+
+def send_files(account_name_path, feedback_folder_path, self_account, subject, message, token):
+   """
+   Send 
+   """
+   if feedback_folder_path[-1] != '/':
+      feedback_folder_path += '/'
+   
+   accounts = read_account_names(account_name_path)
+   mapping = account_name_user_id_mapping(token)
+   for target_account in accounts:
+      # This is clunky, and I will try to neaten it up tomorrow
+      send_file('{}{}.txt'.format(feedback_folder_path, target_account.lower()), mapping[self_account], mapping[target_account.replace('@arbetsformedlingen.se', '')], subject, message, token)
+
+   return
