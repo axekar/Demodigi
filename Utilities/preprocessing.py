@@ -18,6 +18,8 @@ Written by Alvin Gavel,
 https://github.com/Alvin-Gavel/Demodigi
 """
 
+import os
+
 import numpy as np
 import pandas as pd
 import json
@@ -135,18 +137,18 @@ class participant:
 
       doc = docx.Document()
 
-      doc.add_heading('Återkoppling', 0)
+      doc.add_heading('Återkoppling på kartläggning', 0)
 
       doc.add_paragraph(feedback_string)
 
       if save_folder_path[-1] != '/':
          save_folder_path += '/'
-      doc.save(save_folder_path + self.ID + '.docx')
-
-      #f = open(save_folder_path + self.ID + '.txt', 'w')
-      
-      #f.write(feedback_string)
-      #f.close()
+      ID_save_folder_path = save_folder_path + self.ID
+      try:
+         os.mkdir(ID_save_folder_path)
+      except FileExistsError:
+         pass
+      doc.save(ID_save_folder_path + '/' + 'Återkoppling.docx')
       return
       
    def _cumulative_answers_by_date(self):
