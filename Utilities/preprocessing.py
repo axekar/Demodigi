@@ -26,6 +26,7 @@ import json
 import matplotlib.pyplot as plt
 
 import docx
+from docx.shared import Cm
 import datetime
 import pytz
 import xml.etree.ElementTree as et
@@ -154,6 +155,8 @@ class participant:
          add_txt(doc, '{}/{}/{}.txt'.format(feedback_folder_path, competency_name.replace(' ', '_'), n_known))
       
       add_txt(doc, '{}/Outro.txt'.format(feedback_folder_path))
+
+      doc.add_picture('{}/Logo.png'.format(feedback_folder_path), width = Cm(3))
 
       if save_folder_path[-1] != '/':
          save_folder_path += '/'
