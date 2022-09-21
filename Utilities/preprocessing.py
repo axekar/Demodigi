@@ -114,15 +114,16 @@ class participant:
       
       At the moment, this is specific to the course module kartläggning.
       """
-      def read_txt(file_path):
+      def add_txt(doc, file_path):
          f = open(file_path, 'r')
          contents = f.read()
          f.close()
-         return contents
+         doc.add_paragraph().add_run(contents)
+         return
          
       doc = docx.Document()
       doc.add_heading('Återkoppling på kartläggning', 0)
-      doc.add_paragraph().add_run(read_txt('{}/Intro.txt'.format(feedback_folder_path)))
+      add_txt(doc, '{}/Intro.txt'.format(feedback_folder_path))
 
       for competency_name, skills in self.competencies.items():
          n_skills = len(skills)
@@ -130,10 +131,10 @@ class participant:
          for skill in skills:
             n_known += self.correct_from_start[skill]
          
-         doc.add_paragraph().add_run(read_txt('{}/{}/Intro.txt'.format(feedback_folder_path, competency_name.replace(' ', '_'))))
-         doc.add_paragraph().add_run(read_txt('{}/{}/{}.txt'.format(feedback_folder_path, competency_name.replace(' ', '_'), n_known)))
+         add_txt(doc, '{}/{}/Intro.txt'.format(feedback_folder_path, competency_name.replace(' ', '_')))
+         add_txt(doc, '{}/{}/{}.txt'.format(feedback_folder_path, competency_name.replace(' ', '_'), n_known))
       
-      doc.add_paragraph().add_run(read_txt('{}/Outro.txt'.format(feedback_folder_path)))
+      add_txt(doc, '{}/Outro.txt'.format(feedback_folder_path))
 
       if save_folder_path[-1] != '/':
          save_folder_path += '/'
