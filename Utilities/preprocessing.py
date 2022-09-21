@@ -119,12 +119,25 @@ class participant:
          contents = f.read()
          f.close()
          par = doc.add_paragraph()
-         segments = contents.split('<i>')
-         for i in range(len(segments)):
-            segment = segments[i]
+         segments = contents.split('<')
+         italic = False
+         bold = False
+         for segment in segments:
+            if segment[0:2] == 'i>':
+               italic = True
+               segment = segment[2:]
+            elif segment[0:2] == 'b>':
+               bold = True
+               segment = segment[2:]
+            elif segment[0:3] == '/i>':
+               italic = False
+               segment = segment[3:]
+            elif segment[0:3] == '/b>':
+               bold = False
+               segment = segment[3:]
             run = par.add_run(segment)
-            if i % 2 == 1:
-               run.italic = True
+            run.italic = italic
+            run.bold = bold
          return
          
       doc = docx.Document()
