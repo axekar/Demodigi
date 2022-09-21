@@ -119,27 +119,21 @@ class participant:
          contents = f.read()
          f.close()
          return contents
-      feedback_string = read_txt('{}/Intro.txt'.format(feedback_folder_path))
-      feedback_string += '\n'
+         
+      doc = docx.Document()
+      doc.add_heading('Återkoppling på kartläggning', 0)
+      doc.add_paragraph().add_run(read_txt('{}/Intro.txt'.format(feedback_folder_path)))
 
       for competency_name, skills in self.competencies.items():
          n_skills = len(skills)
          n_known = 0
          for skill in skills:
             n_known += self.correct_from_start[skill]
-            
-         feedback_string += read_txt('{}/{}/Intro.txt'.format(feedback_folder_path, competency_name.replace(' ', '_')))
-         feedback_string += '\n'
-         feedback_string += read_txt('{}/{}/{}.txt'.format(feedback_folder_path, competency_name.replace(' ', '_'), n_known))
-         feedback_string += '\n'
-                     
-      feedback_string += read_txt('{}/Outro.txt'.format(feedback_folder_path))
-
-      doc = docx.Document()
-
-      doc.add_heading('Återkoppling på kartläggning', 0)
-
-      doc.add_paragraph(feedback_string)
+         
+         doc.add_paragraph().add_run(read_txt('{}/{}/Intro.txt'.format(feedback_folder_path, competency_name.replace(' ', '_'))))
+         doc.add_paragraph().add_run(read_txt('{}/{}/{}.txt'.format(feedback_folder_path, competency_name.replace(' ', '_'), n_known)))
+      
+      doc.add_paragraph().add_run(read_txt('{}/Outro.txt'.format(feedback_folder_path)))
 
       if save_folder_path[-1] != '/':
          save_folder_path += '/'
