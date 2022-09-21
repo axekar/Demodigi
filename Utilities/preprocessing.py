@@ -118,7 +118,13 @@ class participant:
          f = open(file_path, 'r')
          contents = f.read()
          f.close()
-         doc.add_paragraph().add_run(contents)
+         par = doc.add_paragraph()
+         segments = contents.split('<i>')
+         for i in range(len(segments)):
+            segment = segments[i]
+            run = par.add_run(segment)
+            if i % 2 == 1:
+               run.italic = True
          return
          
       doc = docx.Document()
