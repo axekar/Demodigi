@@ -9,10 +9,9 @@ done by learning modules at KTH using OLI-Torus.
 
 --- About this Python module ---
 
-This module is intended to do preprocessing of data our data - for
-example that coming out of OLI-Torus - so that it can be used by the
-factorial_experiment module. While doing so it should also output a
-directory tree with plots of data that we believe is of interest.
+This module is intended to do preprocessing of the data that comes out
+of OLI Torus so that it can be used by the other modules in this
+repository.
 
 Written by Alvin Gavel,
 https://github.com/Alvin-Gavel/Demodigi
@@ -45,7 +44,7 @@ _effective_max_date = datetime.datetime(2200, 1, 1, tzinfo = pytz.UTC)
 
 class participant:
    """
-   This represents a single person taking a learning module.
+   This represents a single person taking a specific learning module.
    
    Attributes
    ----------
@@ -58,7 +57,7 @@ class participant:
    answered : pandas bool DataFrame
    \tInitially empty DataFrame stating for each skill in a learning
    \tmodule whether the participant has given any answer
-   answer_dates : pandas datetime DataFrame
+   answer_date : pandas datetime DataFrame
    \tInitially empty DataFrame stating for each skill in a learning
    \tmodule when the participant gave their first answer
    first_answer_date : datetime
@@ -97,7 +96,7 @@ class participant:
 
    def save_factorial_experiment_data(self, folder_path):
       """
-      Save data that will be used by the factorial_experiment module.
+      Save data that will be used by the python module factorial_experiment.
       """
       if folder_path[-1] != '/':
          folder_path += '/'
@@ -111,7 +110,8 @@ class participant:
       
    def save_feedback(self, save_folder_path, feedback_folder_path = 'Feedback_paragraphs/Kartläggning'):
       """
-      Save a text file of feedback that will be used by the feedback module.
+      Save a docx file of feedback that will be delivered to the participant
+      by the Python module canvas_contact.
       
       At the moment, this is specific to the course module kartläggning.
       """
@@ -239,6 +239,8 @@ class learning_module:
    competencies : dict of list of str
    \tA list of the competencies that the module is intended to teach, and
    \tthe individual skills that we divide them into
+   skills : list of str
+   \tThe skills contained in the directory of competencies
    n_skills : int
    \tThe number of skills in the learning module
    n_sessions : int
@@ -256,15 +258,28 @@ class learning_module:
    \tinstantiating the learning_module or afterwards from the
    n_participants : int
    \tThe number of participants
-   full_results : pandas DataFrame
-   \tThe results from the learning module as output by OLI-Torus
-   results_read : bool
-   \tWhether results have been read from a file
+   start_date : datetime object
+   \tThe time that the learning module is considered to have started.
+   \tAnything before this is discarded.
+   end_date : datetime object
+   \tThe time that the learning module is considered to have ended.
+   \tAnything after this is discarded.
+   section_slug : str
+   \tIdentifier internal to the raw_analytics file that describes the version
+   \tof the learning module. If this is specified, all entries that do not
+   \tmatch are discarded.
    flags : pandas DataFrame
    \tFlags that note whether each participant has:
    \t1. Started the learning module (we cannot currently test this, so always set to true)
    \t2. Answered at least one question
-   \t3. Finished the learning module
+   \t3. Finished the learning module   
+   raw_analytics : pandas dataframe
+   \tThe exact contents of the raw_analytics file that results are read from.
+   \tThis is initially empty.      
+   full_results : pandas DataFrame
+   \tThe results from the learning module as output by OLI-Torus
+   results_read : bool
+   \tWhether results have been read from a file
    accumulated_by_date : dict
    \tInitially empty dict given the number of questions answered as a
    \tfunction of time.
