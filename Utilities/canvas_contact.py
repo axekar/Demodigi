@@ -200,7 +200,8 @@ def read_account_names(filepath):
 
 def send_files(account_name_path, feedback_folder_path, self_account, subject, message, token):
    """
-   Send 
+   Take a list of participants and a folder of feedback created by the
+   preprocessing module and deliver feedback to all of them.
    """
    if feedback_folder_path[-1] != '/':
       feedback_folder_path += '/'
@@ -208,7 +209,6 @@ def send_files(account_name_path, feedback_folder_path, self_account, subject, m
    accounts = read_account_names(account_name_path)
    mapping = account_name_user_id_mapping(token)
    for target_account in accounts:
-      # This is clunky, and I will try to neaten it up tomorrow
       send_file('{}{}/Återkoppling.docx'.format(feedback_folder_path, target_account.lower()), mapping[self_account], mapping[target_account.replace('@arbetsformedlingen.se', '')], subject, message, token)
 
    return
