@@ -58,6 +58,7 @@ except FileExistsError:
 mod.export_individual_results('Results/Kartläggning/Individer')
 mod.export_individual_feedback('Results/Kartläggning/Återkoppling')
 mod.export_IDs('Results/Kartläggning/IDs.json')
+mod.export_mapping('Results/Kartläggning/Mapping.csv')
 mod.export_SCB_data('Results/Kartläggning/SCB_data.csv')
 mod.export_full_results('Results/Kartläggning/Full_results.csv')
 mod.plot_results_by_time('Results/Kartläggning/Plottar')

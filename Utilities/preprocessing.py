@@ -670,6 +670,15 @@ class learning_module:
       f.close()
       return      
 
+   def export_mapping(self, file_path):
+      """
+      Export the mapping between IDs as given in the Datashop and raw_analytics
+      files
+      """
+      self.mapping.to_csv(file_path, index = False)
+      return
+      
+
    def export_SCB_data(self, file_path):
       """
       Write a preliminary csv file to be delivered to Statistiska
