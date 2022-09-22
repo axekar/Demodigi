@@ -25,13 +25,13 @@ competencies = {'Hitta och tolka digital information':['SearchingForInfo', 'MapS
 		'Problemlösning i digitala miljöer':['SoftwareFreeze', 'FindingSolutions', 'LearningAboutFunctions', 'WifiProblems', 'OnlineMeetingProblems', 'SolvingCrash']}
 
 start_date = datetime.datetime(2022, 9, 18, tzinfo = pytz.UTC)
-end_date = datetime.datetime(2022, 9, 20, tzinfo = pytz.UTC)
+end_date = datetime.datetime(2022, 9, 23, tzinfo = pytz.UTC)
 mod = pp.learning_module(competencies, n_sessions = 1, start_date = start_date, end_date = end_date, section_slug = 'kartlggning_av_digital_kompete_5arpp')
 
 # This is temporary. It should not actually target a specific date.
-mod.import_data('OLI_analytics/Kartläggning/2022_09_20/raw_analytics.tsv', 'OLI_analytics/Kartläggning/2022_09_20/Datashop_af_kartlggning_av_digital_komp.xml', verbose = True)
+mod.import_data('OLI_analytics/Kartläggning/2022_09_22/raw_analytics.tsv', 'OLI_analytics/Kartläggning/2022_09_22/Datashop_af_kartlggning_av_digital_komp.xml', verbose = True)
 
-mod.read_participant_IDs('Participant_data/test.txt')
+mod.read_participant_IDs('Participant_data/Coaches.txt')
 mod.read_participants_results()
 mod.describe_module()
 

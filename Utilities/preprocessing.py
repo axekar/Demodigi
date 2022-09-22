@@ -100,7 +100,7 @@ class participant:
       """
       if folder_path[-1] != '/':
          folder_path += '/'
-      f = open(folder_path + self.ID + '.json', 'w')
+      f = open(folder_path + self.ID.replace('/', '_') + '.json', 'w')
       # Here we do a weird thing because json can handle Python's built-in
       # bool type but not numpy's bool_ type.
       packed = json.dumps({'ID':self.ID, 'Number of sessions':self.n_sessions(), 'Number of skills tested':self.n_skills(), 'Results':np.array(self.correct_first_try.to_numpy().tolist(), dtype=bool).tolist()})
@@ -156,16 +156,19 @@ class participant:
       
       add_txt(doc, '{}/Outro.txt'.format(feedback_folder_path))
 
-      doc.add_picture('{}/Logo.png'.format(feedback_folder_path), width = Cm(3))
+      # I strongly recommend against commenting this back in. The file area
+      # on Canvas is very limited, and the logo makes up about 5/6th of the
+      # memory space taken up by the feedback file.
+      #doc.add_picture('{}/Logo.png'.format(feedback_folder_path), width = Cm(3))
 
       if save_folder_path[-1] != '/':
          save_folder_path += '/'
-      ID_save_folder_path = save_folder_path + self.ID
+      ID_save_folder_path = save_folder_path + self.ID.replace('/', '_')
       try:
          os.mkdir(ID_save_folder_path)
       except FileExistsError:
          pass
-      doc.save(ID_save_folder_path + '/' + 'Återkoppling.docx')
+      doc.save('{}/Återkoppling_deltagare_{}.docx'.format(ID_save_folder_path, self.ID.replace('/', '_')))
       return
       
    def _cumulative_answers_by_date(self):
@@ -206,7 +209,7 @@ class participant:
       plt.xlim(1, self.n_sessions())
       plt.ylim(0, self.n_skills())
       plt.xticks(range(1, self.n_sessions()))
-      plt.savefig('{}{}_resultat_per_session.png'.format(folder_path, self.ID))
+      plt.savefig('{}{}_resultat_per_session.png'.format(folder_path, self.ID.replace('/', '_')))
       return
 
    def plot_results_by_time(self, folder_path):
@@ -227,7 +230,7 @@ class participant:
       plt.ylim(0, self.n_sessions() * self.n_skills())
       plt.xticks(rotation = 90)
       plt.tight_layout()
-      plt.savefig('{}{}_resultat_över_tid.png'.format(folder_path, self.ID))
+      plt.savefig('{}{}_resultat_över_tid.png'.format(folder_path, self.ID.replace('/', '_')))
       return
          
 class learning_module:
