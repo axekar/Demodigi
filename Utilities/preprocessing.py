@@ -669,12 +669,15 @@ class learning_module:
 
    def export_SCB_data(self, file_path):
       """
-      Write a csv file to be delivered to Statistiska Centralbyrån (SCB), which
-      contains the columns:
+      Write a preliminary csv file to be delivered to Statistiska
+      Centralbyrån (SCB), which contains the columns:
       
-      person number, estimated time, starting date, finishing date
+      user name, estimated time, starting date, finishing date
       
-      The estimated time is always given as 30 minutes.
+      The estimated time is always given as 30 minutes. Note that this file
+      is only preliminary. It will need to go through a second stage of
+      processing where the user names are replaced with the personal identity
+      numbers of the participants.
       """
       sorted_IDs = sorted(self.participants.keys())
       first_answer_dates = []
@@ -686,10 +689,10 @@ class learning_module:
          else:
             last_answer_dates.append('Ej klar')
 
-      SCB_data = pd.DataFrame(columns = ['Personnummer', 'Uppskattad tid', 'Startdatum', 'Avslutsdatum'])
+      SCB_data = pd.DataFrame(columns = ['Användarnamn', 'Uppskattad tid', 'Startdatum', 'Avslutsdatum'])
       SCB_data['Startdatum'] = first_answer_dates
       SCB_data['Avslutsdatum'] = last_answer_dates
-      SCB_data['Personnummer'] = 'Ej känt'
+      SCB_data['Användarnamn'] = sorted_IDs
       SCB_data['Uppskattad tid'] = '30 min'
       SCB_data.to_csv(file_path, index = False)
       return
