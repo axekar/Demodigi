@@ -174,12 +174,12 @@ class participant:
 
       if save_folder_path[-1] != '/':
          save_folder_path += '/'
-      ID_save_folder_path = save_folder_path + self.ID.replace('/', '_').replace('@arbetsformedlingen.se', '')
+      ID_save_folder_path = save_folder_path + self.ID.replace('/', '_')
       try:
          os.mkdir(ID_save_folder_path)
       except FileExistsError:
          pass
-      doc.save('{}/Återkoppling_deltagare_{}.docx'.format(ID_save_folder_path, self.ID.replace('/', '_').replace('@arbetsformedlingen.se', '')))
+      doc.save('{}/Återkoppling_deltagare_{}.docx'.format(ID_save_folder_path, self.ID.replace('/', '_')))
       return
       
    def _cumulative_answers_by_date(self):
@@ -509,15 +509,16 @@ class learning_module:
          best_match_index = np.argmax(match_percentages)
          best_match_percentage = match_percentages[best_match_index]
          
+         
          if best_match_percentage > 0.5:
             matched_pseudonym = pseudonyms[best_match_index]
          
-            mapping_lowercaseIDs.append(lowercaseID)
+            mapping_lowercaseIDs.append(lowercaseID.replace('@arbetsformedlingen.se', ''))
             mapping_pseudonyms.append(matched_pseudonym)
             mapping_best_match_percentages.append(best_match_percentage)
          
-            mapping_pseudonym_lowercaseID[matched_pseudonym] = lowercaseID
-            mapping_lowercaseID_pseudonym[lowercaseID] = matched_pseudonym
+            mapping_pseudonym_lowercaseID[matched_pseudonym] = lowercaseID.replace('@arbetsformedlingen.se', '')
+            mapping_lowercaseID_pseudonym[lowercaseID.replace('@arbetsformedlingen.se', '')] = matched_pseudonym
          
             # Ensure that we do not match the same pseudonym twice
             pseudonyms.remove(matched_pseudonym)
@@ -583,7 +584,7 @@ class learning_module:
       participant.answered = pd.DataFrame(columns = self.skills, index = range(1, self.n_sessions + 1), dtype = bool)
       participant.answer_date = pd.DataFrame(columns = self.skills, index = range(1, self.n_sessions + 1), dtype = 'datetime64[s]')
       participant.correct_first_try = pd.DataFrame(columns = self.skills, index = range(1, self.n_sessions + 1), dtype = bool)
-      correct_participant = self.full_results[self.full_results['Student ID (lowercase)'] == participant.ID.lower()]
+      correct_participant = self.full_results[self.full_results['Student ID (lowercase)'] == participant.ID.lower().replace('@arbetsformedlingen.se', '')]
       n_answers = 0
       # Using the max and min of datetime does not work together with Pandas
       participant.first_answer_date = _effective_max_date
