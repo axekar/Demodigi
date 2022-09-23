@@ -576,8 +576,8 @@ class learning_module:
       correct_participant = self.full_results[self.full_results['Student ID'] == participant.ID]
       n_answers = 0
       # Using the max and min of datetime does not work together with Pandas
-      participant.first_answer_date = datetime.datetime(1900, 1, 1, tzinfo = pytz.UTC)
-      participant.last_answer_date = datetime.datetime(2200, 1, 1, tzinfo = pytz.UTC)
+      participant.first_answer_date = datetime.datetime(2200, 1, 1, tzinfo = pytz.UTC)
+      participant.last_answer_date = datetime.datetime(1900, 1, 1, tzinfo = pytz.UTC)
       for skill in self.skills:
          for session in range(1, self.n_sessions + 1):
             try:
