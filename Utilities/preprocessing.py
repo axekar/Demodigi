@@ -64,6 +64,10 @@ class participant:
    \tWhen the participant first gave any answer to a question
    last_answer_date : datetime
    \tWhen the participant last gave any answer to a question
+   started : bool
+   \tWhether the participant has answered any questions in the course module
+   finished : bool
+   \tWhether the participant has answered all questions in the course module
    correct_first_try : pandas bool DataFrame
    \tInitially empty DataFrame stating for each skill in a learning
    \tmodule whether the participant answered correctly on the first try.
@@ -87,6 +91,8 @@ class participant:
       self.answer_date = pd.DataFrame(dtype = 'datetime64[s]')
       self.first_answer_date = None
       self.last_answer_date = None
+      self.started = False
+      self.finished = False
       self.correct_first_try = pd.DataFrame(dtype = bool)
       self.correct_from_start = {}
       # I would *like* to implement this one as a DataFrame, but it turns
@@ -602,8 +608,10 @@ class learning_module:
             participant.answer_date.loc[session, skill] = first_try_date
          participant.correct_from_start[skill] = np.all(participant.correct_first_try.loc[:, skill])
       participant._cumulative_answers_by_date()
-      self.flags.loc[participant.ID, 'started'] = n_answers > 0
-      self.flags.loc[participant.ID, 'finished'] = n_answers == self.n_sessions * self.n_skills
+      participant.started = n_answers > 0
+      participant.finished = n_answers == self.n_sessions * self.n_skills
+      self.flags.loc[participant.ID, 'started'] = participant.started
+      self.flags.loc[participant.ID, 'finished'] = participant.finished
       return
       
    def read_participants_results(self):
@@ -694,12 +702,13 @@ class learning_module:
       first_answer_dates = []
       last_answer_dates = []
       for ID in sorted_IDs:
-         if self.flags.loc[ID, 'started']:
-            first_answer_dates.append(self.participants[ID].first_answer_date.date())
+         participant = self.participants[ID]
+         if participant.started:
+            first_answer_dates.append(participant.first_answer_date.date())
          else:
             first_answer_dates.append('Ej börjat')
-         if self.flags.loc[ID, 'finished']:
-            last_answer_dates.append(self.participants[ID].last_answer_date.date())
+         if participant.finished:
+            last_answer_dates.append(participant.last_answer_date.date())
          else:
             last_answer_dates.append('Ej klar')
 
@@ -740,17 +749,17 @@ class learning_module:
          print('No participants have been read!')
       else:
          print('There are {} participants:'.format(len(self.participants)))
-         started = 0
-         finished = 0
+         n_started = 0
+         n_finished = 0
          for ID, participant in sorted(self.participants.items()):
             if self.results_read:
-               if self.flags.loc[ID, 'finished']:
-                  started += 1
-                  finished += 1
-               elif self.flags.loc[ID, 'started']:
-                  started += 1
-         print('{} have started'.format(started))
-         print('{} have finished'.format(finished))
+               if participant.finished:
+                  n_started += 1
+                  n_finished += 1
+               elif participant.started:
+                  n_started += 1
+         print('{} have started'.format(n_started))
+         print('{} have finished'.format(n_finished))
       return
 
    def describe_participants(self):
@@ -764,9 +773,9 @@ class learning_module:
          print('There are {} participants:'.format(len(self.participants)))
          for ID, participant in sorted(self.participants.items()):
             if self.results_read:
-               if self.flags.loc[ID, 'finished']:
+               if participant.finished:
                   status_string = 'Has finished module'
-               elif self.flags.loc[ID, 'started']:
+               elif participant.started:
                   status_string = 'Has started work'
                else:
                   status_string = 'Has not started'
