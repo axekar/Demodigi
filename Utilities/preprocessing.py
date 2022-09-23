@@ -584,7 +584,7 @@ class learning_module:
       participant.answered = pd.DataFrame(columns = self.skills, index = range(1, self.n_sessions + 1), dtype = bool)
       participant.answer_date = pd.DataFrame(columns = self.skills, index = range(1, self.n_sessions + 1), dtype = 'datetime64[s]')
       participant.correct_first_try = pd.DataFrame(columns = self.skills, index = range(1, self.n_sessions + 1), dtype = bool)
-      correct_participant = self.full_results[self.full_results['Student ID (lowercase)'] == participant.ID.lower().replace('@arbetsformedlingen.se', '')]
+      correct_participant = self.full_results[self.full_results['Student ID (lowercase)'] == participant.ID.lower()]
       n_answers = 0
       # Using the max and min of datetime does not work together with Pandas
       participant.first_answer_date = _effective_max_date
