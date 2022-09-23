@@ -147,6 +147,11 @@ class participant:
             run.bold = bold
          return
          
+      # We should never give feedback to a participant who has not actually
+      # done the entire module.
+      if not self.finished:
+         return
+         
       doc = docx.Document()
       doc.add_heading('Återkoppling på kartläggning', 0)
       add_txt(doc, '{}/Intro.txt'.format(feedback_folder_path))
