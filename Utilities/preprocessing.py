@@ -349,7 +349,8 @@ class learning_module:
       a single column of IDs.
       """
       f = open(filepath)
-      IDs = [word.strip().lower() for word in f]
+#      IDs = [word.strip().lower() for word in f]
+      IDs = [word.strip() for word in f]
       f.close()
       self.participants = {}
       for ID in IDs:
@@ -468,24 +469,24 @@ class learning_module:
       See the internal DD document 'Datashop och raw analytics' for an
       explanation of what this method does and why.
       """
-      IDs = list(set(self.xml_data['Student ID']))
-      n_ID = len(IDs)
+      lowercaseIDs = list(set(self.xml_data['Student ID']))
+      n_lowercaseID = len(lowercaseIDs)
       
       pseudonyms = list(set(self.raw_data['Student ID']))
       n_pseudonym = len(pseudonyms)
 
       if verbose:
          print('Figuring out mapping between pseudonyms in raw_analytics file and IDs in Datashop file.')
-         print('Comparing {} pseudonyms to {} IDs'.format(n_ID, n_pseudonym))
+         print('Comparing {} pseudonyms to {} IDs'.format(n_lowercaseID, n_pseudonym))
          print('This may take a while...')
       
-      mapping_IDs = []
+      mapping_lowercaseIDs = []
       mapping_pseudonyms = []
       mapping_best_match_percentages = []
-      mapping_pseudonym_ID = {}
-      mapping_ID_pseudonym = {}
-      for ID in IDs:
-         ID_entries = self.xml_data[self.xml_data['Student ID'] == ID]
+      mapping_pseudonym_lowercaseID = {}
+      mapping_lowercaseID_pseudonym = {}
+      for lowercaseID in lowercaseIDs:
+         ID_entries = self.xml_data[self.xml_data['Student ID'] == lowercaseID]
          ID_times = list(ID_entries['Date Created'])
 
          match_percentages = []
@@ -512,35 +513,35 @@ class learning_module:
          if best_match_percentage > 0.5:
             matched_pseudonym = pseudonyms[best_match_index]
          
-            mapping_IDs.append(ID)
+            mapping_lowercaseIDs.append(lowercaseID)
             mapping_pseudonyms.append(matched_pseudonym)
             mapping_best_match_percentages.append(best_match_percentage)
          
-            mapping_pseudonym_ID[matched_pseudonym] = ID
-            mapping_ID_pseudonym[ID] = matched_pseudonym
+            mapping_pseudonym_lowercaseID[matched_pseudonym] = lowercaseID
+            mapping_lowercaseID_pseudonym[lowercaseID] = matched_pseudonym
          
             # Ensure that we do not match the same pseudonym twice
             pseudonyms.remove(matched_pseudonym)
          
-      self.mapping = pd.DataFrame(data={'Student ID':mapping_IDs, 'Pseudonym':mapping_pseudonyms, 'Match percentage':mapping_best_match_percentages})
-      self.mapping_pseudonym_ID = mapping_pseudonym_ID
-      self.mapping_ID_pseudonym = mapping_ID_pseudonym
+      self.mapping = pd.DataFrame(data={'Student ID (lowercase)':mapping_lowercaseIDs, 'Pseudonym':mapping_pseudonyms, 'Match percentage':mapping_best_match_percentages})
+      self.mapping_pseudonym_lowercaseID = mapping_pseudonym_lowercaseID
+      self.mapping_lowercaseID_pseudonym = mapping_lowercaseID_pseudonym
       
       self.unmatched_pseudonyms = []
       for pseudonym in pseudonyms:
          if not (pseudonym in self.mapping['Pseudonym'].values):
             self.unmatched_pseudonyms.append(pseudonym)
 
-      self.unmatched_IDs = []
-      for ID in IDs:
-         if not (ID in self.mapping['Student ID'].values):
-            self.unmatched_IDs.append(ID)
+      self.unmatched_lowercaseIDs = []
+      for lowercaseID in lowercaseIDs:
+         if not (lowercaseID in self.mapping['Student ID (lowercase)'].values):
+            self.unmatched_lowercaseIDs.append(lowercaseID)
             
       if verbose:
          print('There are {} unique pseudonyms in the raw_analytics file'.format(n_pseudonym))
          print('Of these, {} could not be matched to IDs in the Datashop file'.format(len(self.unmatched_pseudonyms)))
-         print('There are {} unique IDs in the Datashop file'.format(n_ID))
-         print('Of these, {} could not be matched to pseudonyms in the raw_analytics file'.format(len(self.unmatched_IDs)))
+         print('There are {} unique IDs in the Datashop file'.format(n_lowercaseID))
+         print('Of these, {} could not be matched to pseudonyms in the raw_analytics file'.format(len(self.unmatched_lowercaseIDs)))
       return
       
    def import_data(self, raw_analytics_path, xml_path, verbose = False):
@@ -559,15 +560,15 @@ class learning_module:
       attempt_number = []
       correct = []
       for i in range(self.raw_data.shape[0]):
-         ID = self.raw_data['Student ID'][i]
-         if ID in self.mapping_pseudonym_ID.keys():
-            student_ids.append(self.mapping_pseudonym_ID[ID])
+         pseudonym = self.raw_data['Student ID'][i]
+         if pseudonym in self.mapping_pseudonym_lowercaseID.keys():
+            student_ids.append(self.mapping_pseudonym_lowercaseID[pseudonym])
             date_created.append(self.raw_data['Date Created'][i])
             activity_title.append(self.raw_data['Activity Title'][i])
             attempt_number.append(self.raw_data['Attempt Number'][i])
             correct.append(self.raw_data['Correct?'][i])
 
-      self.full_results = pd.DataFrame(data={'Student ID':student_ids, 'Date Created':date_created, 'Activity Title':activity_title,'Attempt Number':attempt_number, 'Correct?':correct})
+      self.full_results = pd.DataFrame(data={'Student ID (lowercase)':student_ids, 'Date Created':date_created, 'Activity Title':activity_title,'Attempt Number':attempt_number, 'Correct?':correct})
       return
 
    def _read_participant_results(self, participant):
@@ -583,7 +584,7 @@ class learning_module:
       participant.answered = pd.DataFrame(columns = self.skills, index = range(1, self.n_sessions + 1), dtype = bool)
       participant.answer_date = pd.DataFrame(columns = self.skills, index = range(1, self.n_sessions + 1), dtype = 'datetime64[s]')
       participant.correct_first_try = pd.DataFrame(columns = self.skills, index = range(1, self.n_sessions + 1), dtype = bool)
-      correct_participant = self.full_results[self.full_results['Student ID'] == participant.ID]
+      correct_participant = self.full_results[self.full_results['Student ID (lowercase)'] == participant.ID.lower()]
       n_answers = 0
       # Using the max and min of datetime does not work together with Pandas
       participant.first_answer_date = _effective_max_date
