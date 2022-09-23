@@ -174,12 +174,12 @@ class participant:
 
       if save_folder_path[-1] != '/':
          save_folder_path += '/'
-      ID_save_folder_path = save_folder_path + self.ID.replace('/', '_')
+      ID_save_folder_path = save_folder_path + self.ID.replace('/', '_').replace('@arbetsformedlingen.se', '')
       try:
          os.mkdir(ID_save_folder_path)
       except FileExistsError:
          pass
-      doc.save('{}/Återkoppling_deltagare_{}.docx'.format(ID_save_folder_path, self.ID.replace('/', '_')))
+      doc.save('{}/Återkoppling_deltagare_{}.docx'.format(ID_save_folder_path, self.ID.replace('/', '_').replace('@arbetsformedlingen.se', '')))
       return
       
    def _cumulative_answers_by_date(self):
@@ -349,7 +349,6 @@ class learning_module:
       a single column of IDs.
       """
       f = open(filepath)
-#      IDs = [word.strip().lower() for word in f]
       IDs = [word.strip() for word in f]
       f.close()
       self.participants = {}
@@ -661,6 +660,9 @@ class learning_module:
       Export the feedback for each individual participant, which can then be
       uploaded by the feedback module to Canvas.
       """
+      if folder_path[-1] != '/':
+         folder_path += '/'
+      
       if not self.results_read:
          print('There are no results to give feedback on!')
       else:
