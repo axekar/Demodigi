@@ -208,6 +208,11 @@ def send_files(account_name_path, feedback_folder_path, self_account, subject, m
    
    accounts = read_account_names(account_name_path)
    mapping = account_name_user_id_mapping(token)
+   n_sent = 0
    for target_account in accounts:
-      send_file('{0}{1}/Återkoppling_deltagare_{1}.docx'.format(feedback_folder_path, target_account.lower().replace('/', '_')), mapping[self_account], mapping[target_account.replace('@arbetsformedlingen.se', '')], subject, message, token)
+      file_path = '{0}{1}/Återkoppling_deltagare_{1}.docx'.format(feedback_folder_path, target_account.lower().replace('/', '_'))
+      if os.path.isfile(file_path):
+         send_file(file_path, mapping[self_account], mapping[target_account.replace('@arbetsformedlingen.se', '')], subject, message, token)
+         n_sent += 1
+   print('Delivered {} files of feedback'.format(n_sent))
    return
