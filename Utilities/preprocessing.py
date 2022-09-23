@@ -273,9 +273,8 @@ class learning_module:
    \tmatch are discarded.
    flags : pandas DataFrame
    \tFlags that note whether each participant has:
-   \t1. Started the learning module (we cannot currently test this, so always set to true)
-   \t2. Answered at least one question
-   \t3. Finished the learning module   
+   \t1. Started, by answering at least one question
+   \t2. Finished the learning module   
    raw_analytics : pandas dataframe
    \tThe exact contents of the raw_analytics file that results are read from.
    \tThis is initially empty.      
@@ -603,8 +602,7 @@ class learning_module:
             participant.answer_date.loc[session, skill] = first_try_date
          participant.correct_from_start[skill] = np.all(participant.correct_first_try.loc[:, skill])
       participant._cumulative_answers_by_date()
-      self.flags.loc[participant.ID, 'started'] = True # Note that this is assumed by default, we cannot test it yet
-      self.flags.loc[participant.ID, 'answered once'] = n_answers > 0
+      self.flags.loc[participant.ID, 'started'] = n_answers > 0
       self.flags.loc[participant.ID, 'finished'] = n_answers == self.n_sessions * self.n_skills
       return
       
@@ -680,7 +678,6 @@ class learning_module:
       self.mapping.to_csv(file_path, index = False)
       return
       
-
    def export_SCB_data(self, file_path):
       """
       Write a preliminary csv file to be delivered to Statistiska
@@ -697,7 +694,7 @@ class learning_module:
       first_answer_dates = []
       last_answer_dates = []
       for ID in sorted_IDs:
-         if self.flags.loc[ID, 'answered once']:
+         if self.flags.loc[ID, 'started']:
             first_answer_dates.append(self.participants[ID].first_answer_date.date())
          else:
             first_answer_dates.append('Ej börjat')
@@ -743,21 +740,15 @@ class learning_module:
          print('No participants have been read!')
       else:
          print('There are {} participants:'.format(len(self.participants)))
-         signed = 0
          started = 0
          finished = 0
          for ID, participant in sorted(self.participants.items()):
             if self.results_read:
                if self.flags.loc[ID, 'finished']:
-                  signed += 1
                   started += 1
                   finished += 1
-               elif self.flags.loc[ID, 'answered once']:
-                  signed += 1
-                  started += 1
                elif self.flags.loc[ID, 'started']:
-                  signed += 1
-         print('{} have signed up'.format(signed))
+                  started += 1
          print('{} have started'.format(started))
          print('{} have finished'.format(finished))
       return
@@ -775,12 +766,10 @@ class learning_module:
             if self.results_read:
                if self.flags.loc[ID, 'finished']:
                   status_string = 'Has finished module'
-               elif self.flags.loc[ID, 'answered once']:
-                  status_string = 'Has started work'
                elif self.flags.loc[ID, 'started']:
-                  status_string = 'Has signed up'
+                  status_string = 'Has started work'
                else:
-                  status_string = 'Has not signed up'
+                  status_string = 'Has not started'
             else:
                status_string = 'No results known'
             print('   {}: {}'.format(ID, status_string))
