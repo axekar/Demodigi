@@ -19,8 +19,10 @@ https://github.com/Alvin-Gavel/Demodigi
 '''
 
 import os
+from datetime import datetime
 
 import requests as r
+import pandas
 
 class UnexpectedResponseError(Exception):
     def __init__(self, msg):
@@ -194,25 +196,65 @@ def read_account_names(filepath):
    Reads a list of the participant's account names
    """
    f = open(filepath)
-   IDs = [word.strip() for word in f]
+   IDs = [word.strip().replace('@arbetsformedlingen.se', '') for word in f]
    f.close()
    return IDs
 
-def send_files(account_name_path, feedback_folder_path, self_account, subject, message, token):
+def send_feedback(account_name_path, feedback_folder_path, self_account, subject, message, token):
    """
    Take a list of participants and a folder of feedback created by the
    preprocessing module and deliver feedback to all of them.
    """
    if feedback_folder_path[-1] != '/':
       feedback_folder_path += '/'
+      
+   # This will keep track of which participants have already received feedback
+   tracker_folder_path = '{}Tracker/'.format(feedback_folder_path)
+   tracker_file_path = '{}Current.txt'.format(tracker_folder_path)
+
+   if not os.path.isfile(tracker_file_path):
+      try:
+         os.mkdir(tracker_folder_path)
+      except FileExistsError:
+         pass   
+      f = open(tracker_file_path, 'w')
+      f.close()
+   
+   f = open(tracker_file_path, 'r')
+   already_received_feedback = [ID.strip() for ID in f]
+   f.close()
    
    accounts = read_account_names(account_name_path)
    mapping = account_name_user_id_mapping(token)
    n_sent = 0
+   received_feedback_now = []
    for target_account in accounts:
-      file_path = '{0}{1}/Återkoppling_deltagare_{1}.docx'.format(feedback_folder_path, target_account.lower().replace('/', '_'))
+      file_path = '{0}{1}/Återkoppling_deltagare_{1}.docx'.format(feedback_folder_path, target_account.replace('/', '_'))
       if os.path.isfile(file_path):
-         send_file(file_path, mapping[self_account], mapping[target_account.replace('@arbetsformedlingen.se', '')], subject, message, token)
-         n_sent += 1
+         if target_account in already_received_feedback:
+            pass
+         else:
+            send_file(file_path, mapping[self_account], mapping[target_account], subject, message, token)
+            received_feedback_now.append(target_account)
+            n_sent += 1
+   print('There were {} participants in ID file'.format(len(accounts)))
+   print('There were {} already tagged as having received feedback'.format(len(already_received_feedback)))
    print('Delivered {} files of feedback'.format(n_sent))
+   
+   have_received_feedback = already_received_feedback + received_feedback_now
+   f = open(tracker_file_path, 'w')
+   f.write('\n'.join(have_received_feedback))
+   f.close()
+   
+   # Also save a backup file, so we can doublecheck progress afterwards
+   # This might never be necessary, but I am a bit of an information hoarder
+   today = datetime.today().strftime('%Y-%m-%d')
+   tracker_memory_file_path = '{}{}.txt'.format(tracker_folder_path, today)
+   i = 1
+   while os.path.isfile(tracker_memory_file_path):
+      tracker_memory_file_path = '{}{}_{}.txt'.format(tracker_folder_path, today, i)
+      i += 1
+   f = open(tracker_memory_file_path, 'w')
+   f.write('\n'.join(have_received_feedback))
+   f.close()
    return
