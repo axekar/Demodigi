@@ -30,6 +30,13 @@ class UnexpectedResponseError(Exception):
         return
 
 
+def make_folder(folder_path):
+   try:
+      os.mkdir(folder_path)
+   except FileExistsError:
+      pass
+   return
+
 def account_name_user_id_mapping(token):
    """
    Canvas uses short user IDs that differ from the account names. This
@@ -210,17 +217,19 @@ def send_feedback(account_name_path, feedback_folder_path, self_account, subject
       
    # This will keep track of which participants have already received feedback
    tracker_folder_path = '{}Tracker/'.format(feedback_folder_path)
-   tracker_file_path = '{}Current.txt'.format(tracker_folder_path)
+   daily_tracker_folder_path = '{}Daily_deliveries/'.format(tracker_folder_path)
+   total_tracker_folder_path = '{}Total_delivered/'.format(tracker_folder_path)
 
-   if not os.path.isfile(tracker_file_path):
-      try:
-         os.mkdir(tracker_folder_path)
-      except FileExistsError:
-         pass   
-      f = open(tracker_file_path, 'w')
+   make_folder(tracker_folder_path)
+   make_folder(daily_tracker_folder_path)
+   make_folder(total_tracker_folder_path)
+   
+   total_tracker_file_path = '{}Current.txt'.format(total_tracker_folder_path)
+   if not os.path.isfile(total_tracker_file_path):
+      f = open(total_tracker_file_path, 'w')
       f.close()
    
-   f = open(tracker_file_path, 'r')
+   f = open(total_tracker_file_path, 'r')
    already_received_feedback = [ID.strip() for ID in f]
    f.close()
    
@@ -234,25 +243,36 @@ def send_feedback(account_name_path, feedback_folder_path, self_account, subject
          if target_account in already_received_feedback:
             pass
          else:
-            send_file(file_path, mapping[self_account], mapping[target_account], subject, message, token)
+            #send_file(file_path, mapping[self_account], mapping[target_account], subject, message, token)
             received_feedback_now.append(target_account)
             n_sent += 1
    print('There were {} participants in ID file'.format(len(accounts)))
    print('There were {} already tagged as having received feedback'.format(len(already_received_feedback)))
    print('Delivered {} files of feedback'.format(n_sent))
    
+   # Save a file with the people who just received feedback
+   today = datetime.today().strftime('%Y-%m-%d')
+   daily_tracker_file_path = '{}{}.txt'.format(daily_tracker_folder_path, today)
+   i = 1
+   while os.path.isfile(daily_tracker_file_path):
+      daily_tracker_file_path = '{}{}_{}.txt'.format(daily_tracker_folder_path, today, i)
+      i += 1
+   f = open(daily_tracker_file_path, 'w')
+   f.write('\n'.join(received_feedback_now))
+   f.close()
+   
+   # Save a file with all the people who have ever received feedback
    have_received_feedback = already_received_feedback + received_feedback_now
-   f = open(tracker_file_path, 'w')
+   f = open(total_tracker_file_path, 'w')
    f.write('\n'.join(have_received_feedback))
    f.close()
    
    # Also save a backup file, so we can doublecheck progress afterwards
    # This might never be necessary, but I am a bit of an information hoarder
-   today = datetime.today().strftime('%Y-%m-%d')
-   tracker_memory_file_path = '{}{}.txt'.format(tracker_folder_path, today)
+   tracker_memory_file_path = '{}{}.txt'.format(total_tracker_folder_path, today)
    i = 1
    while os.path.isfile(tracker_memory_file_path):
-      tracker_memory_file_path = '{}{}_{}.txt'.format(tracker_folder_path, today, i)
+      tracker_memory_file_path = '{}{}_{}.txt'.format(total_tracker_folder_path, today, i)
       i += 1
    f = open(tracker_memory_file_path, 'w')
    f.write('\n'.join(have_received_feedback))
