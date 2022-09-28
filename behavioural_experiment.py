@@ -71,7 +71,7 @@ def _index_of_nearest(array, value):
 def logB(alpha, beta):
    """
    The logarithm of the normalisation factor that appears when doing
-   Bayesian fitting of binomial functions.
+   Bayesian fitting of binomial functions
    """
    return sp.loggamma(alpha) + sp.loggamma(beta) - sp.loggamma(alpha + beta)
 
@@ -225,7 +225,7 @@ class experiment_run:
       
    def plot_p(self):
       """
-      Plot the probability distributions p(P) for the two participant groups
+      Plot the probability distributions p(P) for the two participant groups.
       """
       plt.clf()
       self._plot_with_dot(self.P_range, self.p_pre, 'pre', self.P_pre)
@@ -243,7 +243,7 @@ class experiment_run:
    
    def plot_d(self):
       """
-      Plot the probability distribution d(D) for the participants
+      Plot the probability distribution d(D) for the participants.
       """
       plt.clf()
       self._plot_with_dot(self.D_range, self.d, 'diff', 0.0)
@@ -267,7 +267,7 @@ class varying_n:
    runs, and for each value of n taking the median of their estimated
 
    Optionally, it is possible to also include multiple values of P_pre and
-   P_post
+   P_post.
    
    Attributes
    ----------
@@ -316,11 +316,11 @@ class varying_n:
       
       Optional parameters
       -------------------
-      name : str
-      \tDescribed under attributes
       n_steps : int
       \tDescribed under attributes
       iterations : int
+      \tDescribed under attributes
+      name : str
       \tDescribed under attributes
       """
       self.n_min = n_min
@@ -362,7 +362,7 @@ class varying_n:
    
    def run(self):
       """
-      Start simulating experiment runs
+      Start simulating experiment runs.
       """
       for i in range(self.n_steps):
          n = self.ns[i]
@@ -376,7 +376,7 @@ class varying_n:
       
    def plot_pDpos(self):
       """
-      Plot median pDpos as a function of n
+      Plot median pDpos as a function of n.
       """
       plt.clf()
       for m in range(self.P_steps):
