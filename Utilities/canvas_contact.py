@@ -90,8 +90,8 @@ def account_name_user_id_mapping(token):
 
 def send_file_contents(file_path, user_id, subject, token):
    """
-   Send a message to a participant, where the message containing text read
-   from a file.
+   Send a message to a participant, with the message text taken from a
+   file.
    """
    f = open(file_path, 'r')
    contents = f.read()
@@ -117,8 +117,8 @@ def send_file_contents(file_path, user_id, subject, token):
 
 def upload_file(file_path, canvas_path, user_id, token):
    """
-   Upload a file to a particular path, in the Canvas API, while acting
-   as a specific user - possibly yourself
+   Upload a file to a particular path, in the Canvas API, while acting as
+   a specific user - possibly yourself.
    """
    header = {
       'Authorization': 'Bearer {}'.format(token)
@@ -176,7 +176,7 @@ def upload_conversation_attachment(file_path, user_id, token):
 
 def send_file(file_path, self_id, target_id, subject, message, token):
    """
-   Send a message to a participant, containing an attached file
+   Send a message to a participant, containing an attached file.
    """
    file_id = upload_conversation_attachment(file_path, self_id, token)
    
@@ -200,7 +200,7 @@ def send_file(file_path, self_id, target_id, subject, message, token):
 
 def read_account_names(filepath):
    """
-   Reads a list of the participant's account names
+   Reads a list of the participants' account names.
    """
    f = open(filepath)
    IDs = [word.strip().replace('@arbetsformedlingen.se', '') for word in f]
@@ -210,7 +210,8 @@ def read_account_names(filepath):
 def send_feedback(account_name_path, feedback_folder_path, self_account, subject, message, token):
    """
    Take a list of participants and a folder of feedback created by the
-   preprocessing module and deliver feedback to all of them.
+   preprocessing module and deliver feedback to those who have not yet
+   received feedback.
    """
    if feedback_folder_path[-1] != '/':
       feedback_folder_path += '/'
@@ -243,7 +244,7 @@ def send_feedback(account_name_path, feedback_folder_path, self_account, subject
          if target_account in already_received_feedback:
             pass
          else:
-            #send_file(file_path, mapping[self_account], mapping[target_account], subject, message, token)
+            send_file(file_path, mapping[self_account], mapping[target_account], subject, message, token)
             received_feedback_now.append(target_account)
             n_sent += 1
    print('There were {} participants in ID file'.format(len(accounts)))
