@@ -471,12 +471,18 @@ class learning_module:
       self.results_read = True
       return
       
-   def _infer_mapping_pseudonym_ID(self, verbose = True):
+   def _infer_mapping_pseudonym_ID(self, verbose = True, previous_mapping_path = None):
       """
       See the internal DD document 'Datashop och raw analytics' for an
       explanation of what this method does and why.
+      
+      The algorithm takes quite a while to run. To save time, there is the
+      option of giving the path to a file containing the results of a
+      previous mapping
       """
       lowercaseIDs = list(set(self.xml_data['Student ID']))
+      
+      
       n_lowercaseID = len(lowercaseIDs)
       
       pseudonyms = list(set(self.raw_data['Student ID']))
@@ -493,35 +499,55 @@ class learning_module:
       mapping_pseudonym_lowercaseID = {}
       mapping_lowercaseID_pseudonym = {}
       
+      older_mapping_included = False
+      if type(previous_mapping_path) == str:
+         try:
+            older_mapping = pd.read_csv(previous_mapping_path)
+            older_mapping_included = True
+            older_mapping_matches = 0
+         except FileNotFoundError:
+            pass
+         
       for lowercaseID in tqdm.tqdm(lowercaseIDs):
          ID_entries = self.xml_data[self.xml_data['Student ID'] == lowercaseID]
          ID_times = list(ID_entries['Date Created'])
 
-         match_percentages = []
-         for pseudonym in pseudonyms:
-            pseudonym_entries = self.raw_data[self.raw_data['Student ID'] == pseudonym]
-            pseudonym_times = set(pseudonym_entries['Date Created'])
+         already_known = False
+         if older_mapping_included:
+            index = older_mapping.index[older_mapping['Student ID (lowercase)'] == lowercaseID.replace('@arbetsformedlingen.se', '')].tolist()
+            if len(index) == 1:
+               # NTS: Replace this with reading pseudonyms as strings
+               if older_mapping.iloc[index[0]]['Match percentage'] == 1.0 and str(older_mapping.iloc[index[0]]['Pseudonym']) in pseudonyms:
+                  already_known = True
+                  best_match_percentage = older_mapping.iloc[index[0]]['Match percentage']
+                  matched_pseudonym = str(older_mapping.iloc[index[0]]['Pseudonym'])
+                  older_mapping_matches += 1
+               
+         if not already_known:
+            match_percentages = []
+            for pseudonym in pseudonyms:
+               pseudonym_entries = self.raw_data[self.raw_data['Student ID'] == pseudonym]
+               pseudonym_times = set(pseudonym_entries['Date Created'])
             
-            times_matched = 0
-            total_times = 0
-            for ID_time in ID_times:
-               match_found = False
-               for pseudonym_time in pseudonym_times:
-                  if abs(ID_time - pseudonym_time) < datetime.timedelta(seconds=60):
-                     match_found = True
-                     break
+               times_matched = 0
+               total_times = 0
+               for ID_time in ID_times:
+                  match_found = False
+                  for pseudonym_time in pseudonym_times:
+                     if abs(ID_time - pseudonym_time) < datetime.timedelta(seconds=60):
+                        match_found = True
+                        break
                      
-               times_matched += match_found
-               total_times += 1
-            match_percentages.append(times_matched / total_times)
-         match_percentages = np.asarray(match_percentages)
-         best_match_index = np.argmax(match_percentages)
-         best_match_percentage = match_percentages[best_match_index]
+                  times_matched += match_found
+                  total_times += 1
+               match_percentages.append(times_matched / total_times)
+            match_percentages = np.asarray(match_percentages)
+            best_match_index = np.argmax(match_percentages)
+            matched_pseudonym = pseudonyms[best_match_index]
+            best_match_percentage = match_percentages[best_match_index]
          
          
          if best_match_percentage > 0.5:
-            matched_pseudonym = pseudonyms[best_match_index]
-         
             mapping_lowercaseIDs.append(lowercaseID.replace('@arbetsformedlingen.se', ''))
             mapping_pseudonyms.append(matched_pseudonym)
             mapping_best_match_percentages.append(best_match_percentage)
@@ -549,11 +575,13 @@ class learning_module:
       if verbose:
          print('There are {} unique pseudonyms in the raw_analytics file'.format(n_pseudonym))
          print('Of these, {} could not be matched to IDs in the Datashop file'.format(len(self.unmatched_pseudonyms)))
+         if older_mapping_included:
+            print('Was able to read {} pseudonyms from older mapping file'.format(older_mapping_matches))
          print('There are {} unique IDs in the Datashop file'.format(n_lowercaseID))
          print('Of these, {} could not be matched to pseudonyms in the raw_analytics file'.format(len(self.unmatched_lowercaseIDs)))
       return
       
-   def import_data(self, raw_analytics_path, xml_path, verbose = False):
+   def import_data(self, raw_analytics_path, xml_path, verbose = False, previous_mapping_path = None):
       """
       Import data from the raw_analytics and Datashop files output by OLI
       Torus and extract from them the data we need. Neither file individually
@@ -561,7 +589,7 @@ class learning_module:
       """
       self.import_raw_analytics(raw_analytics_path)
       self.import_datashop(xml_path)
-      self._infer_mapping_pseudonym_ID(verbose = verbose)
+      self._infer_mapping_pseudonym_ID(verbose = verbose, previous_mapping_path = previous_mapping_path)
       
       student_ids = []
       date_created = []
