@@ -349,9 +349,16 @@ class learning_module:
       Reads a list of the participant IDs. The file is assumed to consist of
       a single column of IDs.
       """
-      f = open(filepath)
-      IDs = [word.strip() for word in f]
-      f.close()
+      file_ending = filepath.split('.')[-1]
+      if file_ending == 'txt':
+         f = open(filepath)
+         IDs = [word.strip() for word in f]
+         f.close()
+      elif file_ending == 'xlsx':
+         dataframe = pd.read_excel(filepath, header = None, dtype = str)
+         IDs = list(dataframe[0])
+      else:
+         print('Cannot recognise file type of {}'.format(filepath))
       self.participants = {}
       for ID in IDs:
          self.participants[ID] = participant(ID) 
