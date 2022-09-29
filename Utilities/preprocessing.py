@@ -569,7 +569,7 @@ class learning_module:
 
       self.unmatched_lowercaseIDs = []
       for lowercaseID in lowercaseIDs:
-         if not (lowercaseID in self.mapping['Student ID (lowercase)'].values):
+         if not (lowercaseID.replace('@arbetsformedlingen.se', '') in self.mapping['Student ID (lowercase)'].values):
             self.unmatched_lowercaseIDs.append(lowercaseID)
             
       if verbose:
