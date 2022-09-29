@@ -23,6 +23,7 @@ from datetime import datetime
 
 import requests as r
 import pandas
+import tqdm
 
 class UnexpectedResponseError(Exception):
     def __init__(self, msg):
@@ -37,7 +38,7 @@ def make_folder(folder_path):
       pass
    return
 
-def account_name_user_id_mapping(token):
+def account_name_user_id_mapping(token, verbose = False):
    """
    Canvas uses short user IDs that differ from the account names. This
    finds the mapping between the two.
@@ -78,6 +79,9 @@ def account_name_user_id_mapping(token):
       response = r.get(link, headers=header)
       users += response.json()
       link = find_next_link(response.headers['Link'])
+      n_read = len(users)
+      if verbose and n_read % 100 == 0:
+         print('Read {} users so far'.format(n_read))
    
    mapping = {}
    for user in users:
@@ -202,12 +206,20 @@ def read_account_names(filepath):
    """
    Reads a list of the participants' account names.
    """
-   f = open(filepath)
-   IDs = [word.strip().replace('@arbetsformedlingen.se', '') for word in f]
-   f.close()
+   file_ending = filepath.split('.')[-1]
+   if file_ending == 'txt':
+      f = open(filepath)
+      # I don't think this replacement is necessary any more.
+      IDs = [word.strip().replace('@arbetsformedlingen.se', '') for word in f]
+      f.close()
+   elif file_ending == 'xlsx':
+      dataframe = pd.read_excel(filepath, header = 0, dtype = str)
+      IDs = list(dataframe['user_id'])
+   else:
+      print('Cannot recognise file type of {}'.format(filepath))
    return IDs
 
-def send_feedback(account_name_path, feedback_folder_path, self_account, subject, message, token):
+def send_feedback(account_name_path, feedback_folder_path, self_account, subject, message, token, verbose = False, test = False):
    """
    Take a list of participants and a folder of feedback created by the
    preprocessing module and deliver feedback to those who have not yet
@@ -235,21 +247,28 @@ def send_feedback(account_name_path, feedback_folder_path, self_account, subject
    f.close()
    
    accounts = read_account_names(account_name_path)
-   mapping = account_name_user_id_mapping(token)
+   mapping = account_name_user_id_mapping(token, verbose = verbose)
    n_sent = 0
    received_feedback_now = []
-   for target_account in accounts:
-      file_path = '{0}{1}/Återkoppling_deltagare_{1}.docx'.format(feedback_folder_path, target_account.replace('/', '_'))
+   
+   if verbose:
+      print("Delivering participants' feedback. This may take a while...")
+   for target_account in tqdm.tqdm(accounts):
+      file_path = '{0}{1}/Feedback_participant_{1}.docx'.format(feedback_folder_path, target_account.replace('/', '_'))
       if os.path.isfile(file_path):
          if target_account in already_received_feedback:
             pass
          else:
-            send_file(file_path, mapping[self_account], mapping[target_account], subject, message, token)
-            received_feedback_now.append(target_account)
+            if not test:
+               send_file(file_path, mapping[self_account], mapping[target_account], subject, message, token)
+               received_feedback_now.append(target_account)
             n_sent += 1
    print('There were {} participants in ID file'.format(len(accounts)))
    print('There were {} already tagged as having received feedback'.format(len(already_received_feedback)))
-   print('Delivered {} files of feedback'.format(n_sent))
+   if not test:
+      print('Delivered {} files of feedback'.format(n_sent))
+   else:
+      print('Would have delivered {} files of feedback'.format(n_sent))
    
    # Save a file with the people who just received feedback
    today = datetime.today().strftime('%Y-%m-%d')
