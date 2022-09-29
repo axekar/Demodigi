@@ -143,6 +143,8 @@ class participant:
             elif segment[0:3] == '/b>':
                bold = False
                segment = segment[3:]
+               
+            converted = segment.encode('Windows-1252')
             run = par.add_run(segment)
             run.italic = italic
             run.bold = bold
