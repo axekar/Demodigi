@@ -657,7 +657,7 @@ class learning_module:
       self.flags.loc[participant.ID, 'finished'] = participant.finished
       return
       
-   def read_participants_results(self):
+   def read_participants_results(self, verbose = True):
       """
       Find out, for each question, whether the participants got it right on
       the first try.
@@ -667,7 +667,9 @@ class learning_module:
       if type(self.full_results) == type(None):
          print('No results have been read!')
          return
-      for participant in self.participants.values():
+      if verbose:
+         print("Reading participants' results. This may take a while...")
+      for participant in tqdm.tqdm(self.participants.values()):
          self._read_participant_results(participant)
       self.accumulated_by_date = self._cumulative_answers_by_date(self.participants.values())
       return

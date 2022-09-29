@@ -32,7 +32,7 @@ mod = pp.learning_module(competencies, n_sessions = 1, start_date = start_date, 
 mod.import_data('OLI_analytics/Kartläggning/2022_09_22/raw_analytics.tsv', 'OLI_analytics/Kartläggning/2022_09_22/Datashop_af_kartlggning_av_digital_komp.xml', verbose = True, previous_mapping_path = 'Results/Kartläggning/Mapping.csv')
 
 mod.read_participant_IDs('Participant_data/Coaches.xlsx')
-mod.read_participants_results()
+mod.read_participants_results(verbose = True)
 mod.describe_module()
 
 try:
