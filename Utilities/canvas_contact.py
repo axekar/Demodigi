@@ -254,7 +254,7 @@ def send_feedback(account_name_path, feedback_folder_path, self_account, subject
    if verbose:
       print("Delivering participants' feedback. This may take a while...")
    for target_account in tqdm.tqdm(accounts):
-      file_path = '{0}{1}/Feedback_participant_{1}.docx'.format(feedback_folder_path, target_account.replace('/', '_'))
+      file_path = '{0}{1}/Återkoppling_deltagare_{1}.docx'.format(feedback_folder_path, target_account.replace('/', '_'))
       if os.path.isfile(file_path):
          if target_account in already_received_feedback:
             pass
