@@ -666,12 +666,12 @@ class learning_module:
       # dataframes have ambiguous equality.
       if type(self.full_results) == type(None):
          print('No results have been read!')
-         return
-      if verbose:
-         print("Reading participants' results. This may take a while...")
-      for participant in tqdm.tqdm(self.participants.values()):
-         self._read_participant_results(participant)
-      self.accumulated_by_date = self._cumulative_answers_by_date(self.participants.values())
+      else:
+         if verbose:
+            print("Reading participants' results. This may take a while...")
+         for participant in tqdm.tqdm(self.participants.values()):
+            self._read_participant_results(participant)
+         self.accumulated_by_date = self._cumulative_answers_by_date(self.participants.values())
       return
 
    def export_full_results(self, file_path):
@@ -683,7 +683,7 @@ class learning_module:
       self.full_results.to_csv(file_path, index = False)
       return
 
-   def export_individual_results(self, folder_path):
+   def export_individual_results(self, folder_path, verbose = True):
       """
       Export the results for each individual participant in a format which is
       legible to the factorial_experiment module.
@@ -691,11 +691,13 @@ class learning_module:
       if not self.results_read:
          print('There are no results to save!')
       else:
-         for participant in self.participants.values():
+         if verbose:
+            print("Exporting participants' results. This may take a while...")
+         for participant in tqdm.tqdm(self.participants.values()):
             participant.save_factorial_experiment_data(folder_path)
       return
 
-   def export_individual_feedback(self, folder_path):
+   def export_individual_feedback(self, folder_path, verbose = True):
       """
       Export the feedback for each individual participant, which can then be
       uploaded by the feedback module to Canvas.
@@ -706,7 +708,9 @@ class learning_module:
       if not self.results_read:
          print('There are no results to give feedback on!')
       else:
-         for participant in self.participants.values():
+         if verbose:
+            print("Exporting participants' feedback. This may take a while...")
+         for participant in tqdm.tqdm(self.participants.values()):
             participant.save_feedback(folder_path)
       return
 
