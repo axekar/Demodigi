@@ -22,7 +22,7 @@ import os
 from datetime import datetime
 
 import requests as r
-import pandas
+import pandas as pd
 import tqdm
 
 class UnexpectedResponseError(Exception):
