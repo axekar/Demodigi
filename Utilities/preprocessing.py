@@ -29,6 +29,7 @@ from docx.shared import Cm
 import datetime
 import pytz
 import xml.etree.ElementTree as et
+import tqdm
 
 plt.style.use('tableau-colorblind10')
 
@@ -484,7 +485,8 @@ class learning_module:
       mapping_best_match_percentages = []
       mapping_pseudonym_lowercaseID = {}
       mapping_lowercaseID_pseudonym = {}
-      for lowercaseID in lowercaseIDs:
+      
+      for lowercaseID in tqdm.tqdm(lowercaseIDs):
          ID_entries = self.xml_data[self.xml_data['Student ID'] == lowercaseID]
          ID_times = list(ID_entries['Date Created'])
 
