@@ -123,7 +123,7 @@ class participant:
       At the moment, this is specific to the course module kartläggning.
       """
       def add_txt(doc, file_path):
-         f = open(file_path, 'r')
+         f = open(file_path, 'r', encoding = 'utf-8')
          contents = f.read()
          f.close()
          par = doc.add_paragraph()
