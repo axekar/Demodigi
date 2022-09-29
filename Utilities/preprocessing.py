@@ -355,8 +355,8 @@ class learning_module:
          IDs = [word.strip() for word in f]
          f.close()
       elif file_ending == 'xlsx':
-         dataframe = pd.read_excel(filepath, header = None, dtype = str)
-         IDs = list(dataframe[0])
+         dataframe = pd.read_excel(filepath, header = 0, dtype = str)
+         IDs = list(dataframe['user_id'])
       else:
          print('Cannot recognise file type of {}'.format(filepath))
       self.participants = {}
