@@ -380,6 +380,8 @@ class learning_module:
       if self.section_slug != None:
          cleaned = cleaned[cleaned['Section Slug'] == self.section_slug]
       
+      
+      
       self.raw_data_full = pd.DataFrame(data={'Student ID':cleaned['Student ID'], 'Date Created':cleaned['Date Created'], 'Activity Title': cleaned['Activity Title'], 'Attempt Number': cleaned['Attempt Number'], 'Correct?': cleaned['Correct?']})
       self.raw_data = self.raw_data_full[(self.start_date < self.raw_data_full['Date Created']) & (self.raw_data_full['Date Created'] < self.end_date)].reset_index()
       self.results_read = True
@@ -484,8 +486,6 @@ class learning_module:
       previous mapping
       """
       lowercaseIDs = list(set(self.xml_data['Student ID']))
-      
-      
       n_lowercaseID = len(lowercaseIDs)
       
       pseudonyms = list(set(self.raw_data['Student ID']))
@@ -495,6 +495,7 @@ class learning_module:
       mapping_pseudonyms = []
       mapping_best_match_percentages = []
       mapping_second_best_match_percentages = []
+      mapping_example_unmatched = []
       mapping_match_numbers = []
       mapping_total_occurrences = []
       mapping_pseudonym_lowercaseID = {}
@@ -534,11 +535,13 @@ class learning_module:
          if not already_known:
             n_matches = []
             match_percentages = []
+            examples_of_unmatched = []
             for pseudonym in pseudonyms:
                pseudonym_entries = self.raw_data[self.raw_data['Student ID'] == pseudonym]
                pseudonym_times_titles = set(zip(pseudonym_entries['Date Created'], pseudonym_entries['Activity Title']))
             
                times_matched = 0
+               example_unmatched = None
                for ID_time, ID_title in zip(ID_times, ID_titles):
                   match_found = False
                   for pseudonym_time, pseudonym_title in pseudonym_times_titles:
@@ -547,8 +550,12 @@ class learning_module:
                         break
                      
                   times_matched += match_found
+                  if not match_found:
+                     # Leave unmatched in a format matching that used in the raw_analytics file
+                     latest_unmatched = pseudonym_time.strftime(_raw_date_format).replace(' am ', ' AM ').replace(' pm ', ' PM ')
                n_matches.append(times_matched)
                match_percentages.append(times_matched / n_ID_occurrences)
+               examples_of_unmatched.append(latest_unmatched)
                
             match_percentages = np.asarray(match_percentages)
             
@@ -556,6 +563,7 @@ class learning_module:
             best_match_percentage = match_percentages[best_match_index]
             matched_pseudonym = pseudonyms[best_match_index]
             best_n_matches = n_matches[best_match_index]
+            example_unmatched = examples_of_unmatched[best_match_index]
             
             match_percentages[best_match_index] = -np.inf
             second_best_match_index = np.argmax(match_percentages)
@@ -566,6 +574,7 @@ class learning_module:
             mapping_pseudonyms.append(matched_pseudonym)
             mapping_best_match_percentages.append(best_match_percentage)
             mapping_second_best_match_percentages.append(second_best_match_percentage)
+            mapping_example_unmatched.append(example_unmatched)
             mapping_match_numbers.append(best_n_matches)
             mapping_total_occurrences.append(n_ID_occurrences)
          
@@ -575,7 +584,7 @@ class learning_module:
             # Ensure that we do not match the same pseudonym twice
             pseudonyms.remove(matched_pseudonym)
          
-      self.mapping = pd.DataFrame(data={'Student ID (lowercase)':mapping_lowercaseIDs, 'Pseudonym':mapping_pseudonyms, 'Match percentage':mapping_best_match_percentages, 'n matches':mapping_match_numbers, 'Total occurrences': mapping_total_occurrences, 'Second best match percentage':mapping_second_best_match_percentages})
+      self.mapping = pd.DataFrame(data={'Student ID (lowercase)':mapping_lowercaseIDs, 'Pseudonym':mapping_pseudonyms, 'Match percentage':mapping_best_match_percentages, 'n matches':mapping_match_numbers, 'Total occurrences': mapping_total_occurrences, 'Second best match percentage':mapping_second_best_match_percentages, 'Example unmatched time': mapping_example_unmatched})
       self.mapping_pseudonym_lowercaseID = mapping_pseudonym_lowercaseID
       self.mapping_lowercaseID_pseudonym = mapping_lowercaseID_pseudonym
       
