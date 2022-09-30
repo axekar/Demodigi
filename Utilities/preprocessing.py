@@ -497,16 +497,8 @@ class learning_module:
       pseudonyms = list(set(self.raw_data['Student ID']))
       n_pseudonym = len(pseudonyms)
 
-      mapping_lowercaseIDs = []
-      mapping_pseudonyms = []
-      mapping_reliable = []
-      mapping_best_match_percentages = []
-      mapping_second_best_match_percentages = []
-      mapping_example_unmatched_raw_format = []
-      mapping_example_unmatched_datashop_format = []
-      mapping_example_unmatched_activity = []
-      mapping_match_numbers = []
-      mapping_total_occurrences = []
+      mapping = {'Student ID (lowercase)':[],'Pseudonym':[],'Match reliable':[],'Match percentage':[], 'n matches':[], 'Total occurrences':[], 'Second best match percentage':[], 'Example unmatched time (raw_analytics format)': [], 'Example unmatched time (Datashop format)': [], 'Example unmatched time (corresponding activity)':[]}      
+
       mapping_pseudonym_lowercaseID = {}
       mapping_lowercaseID_pseudonym = {}
       
@@ -587,28 +579,29 @@ class learning_module:
             match_percentages[best_match_index] = -np.inf
             second_best_match_index = np.argmax(match_percentages)
             second_best_match_percentage = match_percentages[second_best_match_index]
+                       
             
          if best_match_percentage > 0.5:
             all_matches += 1
             reliable = best_match_percentage - second_best_match_percentage > 0.5 and best_n_matches > 5
             reliable_matches += reliable
-            mapping_reliable.append(reliable)
+            mapping['Match reliable'].append(reliable)
          
-            mapping_lowercaseIDs.append(lowercaseID.replace('@arbetsformedlingen.se', ''))
-            mapping_pseudonyms.append(matched_pseudonym)
-            mapping_best_match_percentages.append(best_match_percentage)
-            mapping_second_best_match_percentages.append(second_best_match_percentage)
+            mapping['Student ID (lowercase)'].append(lowercaseID.replace('@arbetsformedlingen.se', ''))
+            mapping['Pseudonym'].append(matched_pseudonym)
+            mapping['Match percentage'].append(best_match_percentage)
+            mapping['Second best match percentage'].append(second_best_match_percentage)
             if example_unmatched == None:
-               mapping_example_unmatched_raw_format.append('')
-               mapping_example_unmatched_datashop_format.append('')
-               mapping_example_unmatched_activity.append('')
+               mapping['Example unmatched time (raw_analytics format)'].append('')
+               mapping['Example unmatched time (Datashop format)'].append('')
+               mapping['Example unmatched time (corresponding activity)'].append('')
             else:
-               mapping_example_unmatched_raw_format.append(example_unmatched.strftime(_raw_date_format).replace(' am ', ' AM ').replace(' pm ', ' PM '))
-               mapping_example_unmatched_datashop_format.append(example_unmatched.strftime(_xml_date_format))
-               mapping_example_unmatched_activity.append(example_unmatched_activity)
+               mapping['Example unmatched time (raw_analytics format)'].append(example_unmatched.strftime(_raw_date_format).replace(' am ', ' AM ').replace(' pm ', ' PM '))
+               mapping['Example unmatched time (Datashop format)'].append(example_unmatched.strftime(_xml_date_format))
+               mapping['Example unmatched time (corresponding activity)'].append(example_unmatched_activity)
             
-            mapping_match_numbers.append(best_n_matches)
-            mapping_total_occurrences.append(n_ID_occurrences)
+            mapping['n matches'].append(best_n_matches)
+            mapping['Total occurrences'].append(n_ID_occurrences)
          
             if reliable:
                mapping_pseudonym_lowercaseID[matched_pseudonym] = lowercaseID.replace('@arbetsformedlingen.se', '')
@@ -620,7 +613,7 @@ class learning_module:
             unmapped_lowercaseIDs.append(lowercaseID.replace('@arbetsformedlingen.se', ''))
             unmapped_best_match_percentages.append(best_match_percentage)
          
-      self.full_mapping = pd.DataFrame(data={'Student ID (lowercase)':mapping_lowercaseIDs, 'Pseudonym':mapping_pseudonyms, 'Match reliable': mapping_reliable, 'Match percentage':mapping_best_match_percentages, 'n matches':mapping_match_numbers, 'Total occurrences': mapping_total_occurrences, 'Second best match percentage':mapping_second_best_match_percentages, 'Example unmatched time (raw_analytics format)': mapping_example_unmatched_raw_format, 'Example unmatched time (Datashop format)': mapping_example_unmatched_datashop_format, 'Example unmatched time (corresponding activity)':mapping_example_unmatched_activity})
+      self.full_mapping = pd.DataFrame(data=mapping)
       self.mapping = self.full_mapping[self.full_mapping['Match reliable']]
       self.mapping_pseudonym_lowercaseID = mapping_pseudonym_lowercaseID
       self.mapping_lowercaseID_pseudonym = mapping_lowercaseID_pseudonym
