@@ -413,6 +413,7 @@ class learning_module:
             meta = child.findall('meta')[0]
             anon_id = meta.findall('user_id')[0].text
             time_str = meta.findall('time')[0].text
+            # The Datashop file says that the timezone is GMT, but that is the same thing as UTC
             time = datetime.datetime.strptime(time_str, _xml_date_format).replace(tzinfo=datetime.timezone.utc)
             
             try:
@@ -493,6 +494,7 @@ class learning_module:
       mapping_lowercaseIDs = []
       mapping_pseudonyms = []
       mapping_best_match_percentages = []
+      mapping_second_best_match_percentages = []
       mapping_match_numbers = []
       mapping_total_occurrences = []
       mapping_pseudonym_lowercaseID = {}
@@ -549,16 +551,21 @@ class learning_module:
                match_percentages.append(times_matched / n_ID_occurrences)
                
             match_percentages = np.asarray(match_percentages)
+            
             best_match_index = np.argmax(match_percentages)
+            best_match_percentage = match_percentages[best_match_index]
             matched_pseudonym = pseudonyms[best_match_index]
             best_n_matches = n_matches[best_match_index]
-            best_match_percentage = match_percentages[best_match_index]
-         
-         
-         if best_match_percentage > 0.5:
+            
+            match_percentages[best_match_index] = -np.inf
+            second_best_match_index = np.argmax(match_percentages)
+            second_best_match_percentage = match_percentages[second_best_match_index]
+            
+         if best_match_percentage > 0.5 and best_match_percentage - second_best_match_percentage > 0.5:
             mapping_lowercaseIDs.append(lowercaseID.replace('@arbetsformedlingen.se', ''))
             mapping_pseudonyms.append(matched_pseudonym)
             mapping_best_match_percentages.append(best_match_percentage)
+            mapping_second_best_match_percentages.append(second_best_match_percentage)
             mapping_match_numbers.append(best_n_matches)
             mapping_total_occurrences.append(n_ID_occurrences)
          
@@ -568,7 +575,7 @@ class learning_module:
             # Ensure that we do not match the same pseudonym twice
             pseudonyms.remove(matched_pseudonym)
          
-      self.mapping = pd.DataFrame(data={'Student ID (lowercase)':mapping_lowercaseIDs, 'Pseudonym':mapping_pseudonyms, 'Match percentage':mapping_best_match_percentages, 'n matches':mapping_match_numbers, 'Total occurrences': mapping_total_occurrences})
+      self.mapping = pd.DataFrame(data={'Student ID (lowercase)':mapping_lowercaseIDs, 'Pseudonym':mapping_pseudonyms, 'Match percentage':mapping_best_match_percentages, 'n matches':mapping_match_numbers, 'Total occurrences': mapping_total_occurrences, 'Second best match percentage':mapping_second_best_match_percentages})
       self.mapping_pseudonym_lowercaseID = mapping_pseudonym_lowercaseID
       self.mapping_lowercaseID_pseudonym = mapping_lowercaseID_pseudonym
       
