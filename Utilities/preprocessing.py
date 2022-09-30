@@ -569,7 +569,7 @@ class learning_module:
             second_best_match_index = np.argmax(match_percentages)
             second_best_match_percentage = match_percentages[second_best_match_index]
             
-         if best_match_percentage > 0.5:# and (best_match_percentage - second_best_match_percentage) > 0.5 and best_n_matches > 5:
+         if best_match_percentage > 0.5 and (best_match_percentage - second_best_match_percentage) > 0.5 and best_n_matches > 5:
             mapping_lowercaseIDs.append(lowercaseID.replace('@arbetsformedlingen.se', ''))
             mapping_pseudonyms.append(matched_pseudonym)
             mapping_best_match_percentages.append(best_match_percentage)
