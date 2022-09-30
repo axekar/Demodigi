@@ -37,7 +37,7 @@ plt.style.use('tableau-colorblind10')
 # This is the format that I have inferred that OLI-Torus uses in the raw_analytics file
 if sys.platform in ["linux", "linux2"]:
    _raw_date_format = '%B %d, %Y at %-I:%M %p UTC'
-elif platform == "win32":
+elif sys.platform == "win32":
    _raw_date_format = '%B %d, %Y at %#I:%M %p UTC'
 else:
    print('Cannot figure out what OS this is. Using Unix date format and hoping for the best')
