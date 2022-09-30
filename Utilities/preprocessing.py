@@ -490,14 +490,11 @@ class learning_module:
       pseudonyms = list(set(self.raw_data['Student ID']))
       n_pseudonym = len(pseudonyms)
 
-      if verbose:
-         print('Figuring out mapping between pseudonyms in raw_analytics file and IDs in Datashop file.')
-         print('Comparing {} pseudonyms to {} IDs'.format(n_lowercaseID, n_pseudonym))
-         print('This may take a while...')
-      
       mapping_lowercaseIDs = []
       mapping_pseudonyms = []
       mapping_best_match_percentages = []
+      mapping_match_numbers = []
+      mapping_total_occurrences = []
       mapping_pseudonym_lowercaseID = {}
       mapping_lowercaseID_pseudonym = {}
       
@@ -509,10 +506,17 @@ class learning_module:
             older_mapping_matches = 0
          except FileNotFoundError:
             pass
-         
+            
+      if verbose:
+         print('Figuring out mapping between pseudonyms in raw_analytics file and IDs in Datashop file.')
+         print('Comparing {} pseudonyms to {} IDs'.format(n_lowercaseID, n_pseudonym))
+         print('This may take a while...')
       for lowercaseID in tqdm.tqdm(lowercaseIDs):
          ID_entries = self.xml_data[self.xml_data['Student ID'] == lowercaseID]
          ID_times = list(ID_entries['Date Created'])
+         ID_titles = list(ID_entries['Activity Title'])
+         
+         n_ID_occurrences = len(ID_times)
 
          already_known = False
          if older_mapping_included:
@@ -526,26 +530,28 @@ class learning_module:
                   older_mapping_matches += 1
                
          if not already_known:
+            n_matches = []
             match_percentages = []
             for pseudonym in pseudonyms:
                pseudonym_entries = self.raw_data[self.raw_data['Student ID'] == pseudonym]
-               pseudonym_times = set(pseudonym_entries['Date Created'])
+               pseudonym_times_titles = set(zip(pseudonym_entries['Date Created'], pseudonym_entries['Activity Title']))
             
                times_matched = 0
-               total_times = 0
-               for ID_time in ID_times:
+               for ID_time, ID_title in zip(ID_times, ID_titles):
                   match_found = False
-                  for pseudonym_time in pseudonym_times:
-                     if abs(ID_time - pseudonym_time) < datetime.timedelta(seconds=60):
+                  for pseudonym_time, pseudonym_title in pseudonym_times_titles:
+                     if abs(ID_time - pseudonym_time) < datetime.timedelta(seconds=61) and ID_title == pseudonym_title:
                         match_found = True
                         break
                      
                   times_matched += match_found
-                  total_times += 1
-               match_percentages.append(times_matched / total_times)
+               n_matches.append(times_matched)
+               match_percentages.append(times_matched / n_ID_occurrences)
+               
             match_percentages = np.asarray(match_percentages)
             best_match_index = np.argmax(match_percentages)
             matched_pseudonym = pseudonyms[best_match_index]
+            best_n_matches = n_matches[best_match_index]
             best_match_percentage = match_percentages[best_match_index]
          
          
@@ -553,6 +559,8 @@ class learning_module:
             mapping_lowercaseIDs.append(lowercaseID.replace('@arbetsformedlingen.se', ''))
             mapping_pseudonyms.append(matched_pseudonym)
             mapping_best_match_percentages.append(best_match_percentage)
+            mapping_match_numbers.append(best_n_matches)
+            mapping_total_occurrences.append(n_ID_occurrences)
          
             mapping_pseudonym_lowercaseID[matched_pseudonym] = lowercaseID.replace('@arbetsformedlingen.se', '')
             mapping_lowercaseID_pseudonym[lowercaseID.replace('@arbetsformedlingen.se', '')] = matched_pseudonym
@@ -560,7 +568,7 @@ class learning_module:
             # Ensure that we do not match the same pseudonym twice
             pseudonyms.remove(matched_pseudonym)
          
-      self.mapping = pd.DataFrame(data={'Student ID (lowercase)':mapping_lowercaseIDs, 'Pseudonym':mapping_pseudonyms, 'Match percentage':mapping_best_match_percentages})
+      self.mapping = pd.DataFrame(data={'Student ID (lowercase)':mapping_lowercaseIDs, 'Pseudonym':mapping_pseudonyms, 'Match percentage':mapping_best_match_percentages, 'n matches':mapping_match_numbers, 'Total occurrences': mapping_total_occurrences})
       self.mapping_pseudonym_lowercaseID = mapping_pseudonym_lowercaseID
       self.mapping_lowercaseID_pseudonym = mapping_lowercaseID_pseudonym
       
