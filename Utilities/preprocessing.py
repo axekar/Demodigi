@@ -34,7 +34,7 @@ import tqdm
 plt.style.use('tableau-colorblind10')
 
 # This is the format that I have inferred that OLI-Torus uses in the raw_analytics file
-_raw_date_format = '%B %d, %Y at %I:%M %p UTC'
+_raw_date_format = '%B %d, %Y at %-I:%M %p UTC'
 _xml_date_format = '%Y-%m-%d %H:%M:%S'
 
 # For complicated reasons using the max and min functions built into
@@ -495,7 +495,9 @@ class learning_module:
       mapping_pseudonyms = []
       mapping_best_match_percentages = []
       mapping_second_best_match_percentages = []
-      mapping_example_unmatched = []
+      mapping_example_unmatched_raw_format = []
+      mapping_example_unmatched_datashop_format = []
+      mapping_example_unmatched_activity = []
       mapping_match_numbers = []
       mapping_total_occurrences = []
       mapping_pseudonym_lowercaseID = {}
@@ -536,12 +538,14 @@ class learning_module:
             n_matches = []
             match_percentages = []
             examples_of_unmatched = []
+            examples_of_unmatched_activity = []
             for pseudonym in pseudonyms:
                pseudonym_entries = self.raw_data[self.raw_data['Student ID'] == pseudonym]
                pseudonym_times_titles = set(zip(pseudonym_entries['Date Created'], pseudonym_entries['Activity Title']))
             
                times_matched = 0
-               example_unmatched = None
+               latest_unmatched = None
+               latest_unmatched_activity = ''
                for ID_time, ID_title in zip(ID_times, ID_titles):
                   match_found = False
                   for pseudonym_time, pseudonym_title in pseudonym_times_titles:
@@ -551,11 +555,12 @@ class learning_module:
                      
                   times_matched += match_found
                   if not match_found:
-                     # Leave unmatched in a format matching that used in the raw_analytics file
-                     latest_unmatched = pseudonym_time.strftime(_raw_date_format).replace(' am ', ' AM ').replace(' pm ', ' PM ')
+                     latest_unmatched = ID_time
+                     latest_unmatched_activity = ID_title
                n_matches.append(times_matched)
                match_percentages.append(times_matched / n_ID_occurrences)
                examples_of_unmatched.append(latest_unmatched)
+               examples_of_unmatched_activity.append(latest_unmatched_activity)
                
             match_percentages = np.asarray(match_percentages)
             
@@ -564,6 +569,7 @@ class learning_module:
             matched_pseudonym = pseudonyms[best_match_index]
             best_n_matches = n_matches[best_match_index]
             example_unmatched = examples_of_unmatched[best_match_index]
+            example_unmatched_activity = examples_of_unmatched_activity[best_match_index]
             
             match_percentages[best_match_index] = -np.inf
             second_best_match_index = np.argmax(match_percentages)
@@ -574,7 +580,15 @@ class learning_module:
             mapping_pseudonyms.append(matched_pseudonym)
             mapping_best_match_percentages.append(best_match_percentage)
             mapping_second_best_match_percentages.append(second_best_match_percentage)
-            mapping_example_unmatched.append(example_unmatched)
+            if example_unmatched == None:
+               mapping_example_unmatched_raw_format.append('')
+               mapping_example_unmatched_datashop_format.append('')
+               mapping_example_unmatched_activity.append('')
+            else:
+               mapping_example_unmatched_raw_format.append(example_unmatched.strftime(_raw_date_format).replace(' am ', ' AM ').replace(' pm ', ' PM '))
+               mapping_example_unmatched_datashop_format.append(example_unmatched.strftime(_xml_date_format))
+               mapping_example_unmatched_activity.append(example_unmatched_activity)
+            
             mapping_match_numbers.append(best_n_matches)
             mapping_total_occurrences.append(n_ID_occurrences)
          
@@ -584,7 +598,7 @@ class learning_module:
             # Ensure that we do not match the same pseudonym twice
             pseudonyms.remove(matched_pseudonym)
          
-      self.mapping = pd.DataFrame(data={'Student ID (lowercase)':mapping_lowercaseIDs, 'Pseudonym':mapping_pseudonyms, 'Match percentage':mapping_best_match_percentages, 'n matches':mapping_match_numbers, 'Total occurrences': mapping_total_occurrences, 'Second best match percentage':mapping_second_best_match_percentages, 'Example unmatched time': mapping_example_unmatched})
+      self.mapping = pd.DataFrame(data={'Student ID (lowercase)':mapping_lowercaseIDs, 'Pseudonym':mapping_pseudonyms, 'Match percentage':mapping_best_match_percentages, 'n matches':mapping_match_numbers, 'Total occurrences': mapping_total_occurrences, 'Second best match percentage':mapping_second_best_match_percentages, 'Example unmatched time (raw_analytics format)': mapping_example_unmatched_raw_format, 'Example unmatched time (Datashop format)': mapping_example_unmatched_datashop_format, 'Example unmatched time (corresponding activity)':mapping_example_unmatched_activity})
       self.mapping_pseudonym_lowercaseID = mapping_pseudonym_lowercaseID
       self.mapping_lowercaseID_pseudonym = mapping_lowercaseID_pseudonym
       
