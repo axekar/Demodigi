@@ -29,7 +29,7 @@ end_date = datetime.datetime(2022, 9, 23, tzinfo = pytz.UTC)
 mod = pp.learning_module(competencies, n_sessions = 1, start_date = start_date, end_date = end_date, section_slug = 'kartlggning_av_digital_kompete_5arpp')
 
 # This is temporary. It should not actually target a specific date.
-mod.import_data('OLI_analytics/Kartläggning/2022_09_22/raw_analytics.tsv', 'OLI_analytics/Kartläggning/2022_09_22/Datashop_af_kartlggning_av_digital_komp.xml', verbose = True, previous_mapping_path = 'Results/Kartläggning/Mapping.csv')
+mod.import_data('OLI_analytics/Kartläggning/2022_09_22/raw_analytics.tsv', 'OLI_analytics/Kartläggning/2022_09_22/Datashop_af_kartlggning_av_digital_komp.xml', verbose = True)#, previous_mapping_path = 'Results/Kartläggning/Mapping.csv')
 
 mod.read_participant_IDs('Participant_data/Coaches.xlsx')
 mod.read_participants_results(verbose = True)
@@ -59,6 +59,8 @@ mod.export_individual_results('Results/Kartläggning/Individer')
 mod.export_individual_feedback('Results/Kartläggning/Återkoppling')
 mod.export_IDs('Results/Kartläggning/IDs.json')
 mod.export_mapping('Results/Kartläggning/Mapping.csv')
+mod.export_full_mapping('Results/Kartläggning/Mapping_full.csv')
+mod.export_unmapped('Results/Kartläggning/Mapping_unmapped.csv')
 mod.export_SCB_data('Results/Kartläggning/SCB_prelim.csv')
 mod.export_full_results('Results/Kartläggning/Full_results.csv')
 mod.plot_results_by_time('Results/Kartläggning/Plottar')

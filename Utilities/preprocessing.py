@@ -504,6 +504,9 @@ class learning_module:
       mapping_pseudonym_lowercaseID = {}
       mapping_lowercaseID_pseudonym = {}
       
+      unmapped_lowercaseIDs = []
+      unmapped_best_match_percentages = []
+      
       older_mapping_included = False
       if type(previous_mapping_path) == str:
          try:
@@ -607,11 +610,16 @@ class learning_module:
          
             # Ensure that we do not match the same pseudonym twice
             pseudonyms.remove(matched_pseudonym)
+         else:
+            unmapped_lowercaseIDs.append(lowercaseID.replace('@arbetsformedlingen.se', ''))
+            unmapped_best_match_percentages.append(best_match_percentage)
          
       self.full_mapping = pd.DataFrame(data={'Student ID (lowercase)':mapping_lowercaseIDs, 'Pseudonym':mapping_pseudonyms, 'Match reliable': mapping_reliable, 'Match percentage':mapping_best_match_percentages, 'n matches':mapping_match_numbers, 'Total occurrences': mapping_total_occurrences, 'Second best match percentage':mapping_second_best_match_percentages, 'Example unmatched time (raw_analytics format)': mapping_example_unmatched_raw_format, 'Example unmatched time (Datashop format)': mapping_example_unmatched_datashop_format, 'Example unmatched time (corresponding activity)':mapping_example_unmatched_activity})
       self.mapping = self.full_mapping[self.full_mapping['Match reliable']]
       self.mapping_pseudonym_lowercaseID = mapping_pseudonym_lowercaseID
       self.mapping_lowercaseID_pseudonym = mapping_lowercaseID_pseudonym
+      
+      self.unmapped = pd.DataFrame(data={'Student ID (lowercase)':unmapped_lowercaseIDs, 'Best match percentage':unmapped_best_match_percentages})
       
       self.unmatched_pseudonyms = []
       for pseudonym in pseudonyms:
@@ -630,7 +638,8 @@ class learning_module:
          if older_mapping_included:
             print('Was able to read {} pseudonyms from older mapping file'.format(older_mapping_matches))
          print('There are {} unique IDs in the Datashop file'.format(n_lowercaseID))
-         print('Of these, {} could not be matched to pseudonyms in the raw_analytics file'.format(len(self.unmatched_lowercaseIDs)))
+         print('Of these, {} could be reliably matched to pseudonyms in the raw_analytics file'.format(len(self.mapping['Student ID (lowercase)'].values)))
+         print('Another   {} could not'.format(len(self.unmatched_lowercaseIDs)))
       return
       
    def import_data(self, raw_analytics_path, xml_path, verbose = False, previous_mapping_path = None):
@@ -796,6 +805,13 @@ class learning_module:
       files, including tentative matches
       """
       self.full_mapping.to_csv(file_path, index = False)
+      return
+      
+   def export_unmapped(self, file_path):
+      """
+      Export a dataframe with those IDs that could not be mapped
+      """
+      self.unmapped.to_csv(file_path, index = False)
       return
       
    def export_SCB_data(self, file_path):
