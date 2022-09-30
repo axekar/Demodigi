@@ -493,6 +493,7 @@ class learning_module:
 
       mapping_lowercaseIDs = []
       mapping_pseudonyms = []
+      mapping_reliable = []
       mapping_best_match_percentages = []
       mapping_second_best_match_percentages = []
       mapping_example_unmatched_raw_format = []
@@ -516,6 +517,9 @@ class learning_module:
          print('Figuring out mapping between pseudonyms in raw_analytics file and IDs in Datashop file.')
          print('Comparing {} pseudonyms to {} IDs'.format(n_lowercaseID, n_pseudonym))
          print('This may take a while...')
+         
+      reliable_matches = 0
+      all_matches = 0
       for lowercaseID in tqdm.tqdm(lowercaseIDs):
          ID_entries = self.xml_data[self.xml_data['Student ID'] == lowercaseID]
          ID_times = list(ID_entries['Date Created'])
@@ -575,7 +579,12 @@ class learning_module:
             second_best_match_index = np.argmax(match_percentages)
             second_best_match_percentage = match_percentages[second_best_match_index]
             
-         if best_match_percentage > 0.5 and (best_match_percentage - second_best_match_percentage) > 0.5 and best_n_matches > 5:
+         if best_match_percentage > 0.5:
+            all_matches += 1
+            reliable = best_match_percentage - second_best_match_percentage > 0.5 and best_n_matches > 5
+            reliable_matches += reliable
+            mapping_reliable.append(reliable)
+         
             mapping_lowercaseIDs.append(lowercaseID.replace('@arbetsformedlingen.se', ''))
             mapping_pseudonyms.append(matched_pseudonym)
             mapping_best_match_percentages.append(best_match_percentage)
@@ -592,13 +601,15 @@ class learning_module:
             mapping_match_numbers.append(best_n_matches)
             mapping_total_occurrences.append(n_ID_occurrences)
          
-            mapping_pseudonym_lowercaseID[matched_pseudonym] = lowercaseID.replace('@arbetsformedlingen.se', '')
-            mapping_lowercaseID_pseudonym[lowercaseID.replace('@arbetsformedlingen.se', '')] = matched_pseudonym
+            if reliable:
+               mapping_pseudonym_lowercaseID[matched_pseudonym] = lowercaseID.replace('@arbetsformedlingen.se', '')
+               mapping_lowercaseID_pseudonym[lowercaseID.replace('@arbetsformedlingen.se', '')] = matched_pseudonym
          
             # Ensure that we do not match the same pseudonym twice
             pseudonyms.remove(matched_pseudonym)
          
-      self.mapping = pd.DataFrame(data={'Student ID (lowercase)':mapping_lowercaseIDs, 'Pseudonym':mapping_pseudonyms, 'Match percentage':mapping_best_match_percentages, 'n matches':mapping_match_numbers, 'Total occurrences': mapping_total_occurrences, 'Second best match percentage':mapping_second_best_match_percentages, 'Example unmatched time (raw_analytics format)': mapping_example_unmatched_raw_format, 'Example unmatched time (Datashop format)': mapping_example_unmatched_datashop_format, 'Example unmatched time (corresponding activity)':mapping_example_unmatched_activity})
+      self.full_mapping = pd.DataFrame(data={'Student ID (lowercase)':mapping_lowercaseIDs, 'Pseudonym':mapping_pseudonyms, 'Match reliable': mapping_reliable, 'Match percentage':mapping_best_match_percentages, 'n matches':mapping_match_numbers, 'Total occurrences': mapping_total_occurrences, 'Second best match percentage':mapping_second_best_match_percentages, 'Example unmatched time (raw_analytics format)': mapping_example_unmatched_raw_format, 'Example unmatched time (Datashop format)': mapping_example_unmatched_datashop_format, 'Example unmatched time (corresponding activity)':mapping_example_unmatched_activity})
+      self.mapping = self.full_mapping[self.full_mapping['Match reliable']]
       self.mapping_pseudonym_lowercaseID = mapping_pseudonym_lowercaseID
       self.mapping_lowercaseID_pseudonym = mapping_lowercaseID_pseudonym
       
@@ -614,7 +625,8 @@ class learning_module:
             
       if verbose:
          print('There are {} unique pseudonyms in the raw_analytics file'.format(n_pseudonym))
-         print('Of these, {} could not be matched to IDs in the Datashop file'.format(len(self.unmatched_pseudonyms)))
+         print('Of these, {} could be matched at all to IDs in the Datashop file'.format(all_matches))
+         print('Of these, {} could be reliably matched to IDs in the Datashop file'.format(reliable_matches))
          if older_mapping_included:
             print('Was able to read {} pseudonyms from older mapping file'.format(older_mapping_matches))
          print('There are {} unique IDs in the Datashop file'.format(n_lowercaseID))
@@ -776,6 +788,14 @@ class learning_module:
       files
       """
       self.mapping.to_csv(file_path, index = False)
+      return
+      
+   def export_full_mapping(self, file_path):
+      """
+      Export the mapping between IDs as given in the Datashop and raw_analytics
+      files, including tentative matches
+      """
+      self.full_mapping.to_csv(file_path, index = False)
       return
       
    def export_SCB_data(self, file_path):
