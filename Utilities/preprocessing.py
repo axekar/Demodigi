@@ -18,6 +18,7 @@ https://github.com/Alvin-Gavel/Demodigi
 """
 
 import os
+import sys
 
 import numpy as np
 import pandas as pd
@@ -34,7 +35,14 @@ import tqdm
 plt.style.use('tableau-colorblind10')
 
 # This is the format that I have inferred that OLI-Torus uses in the raw_analytics file
-_raw_date_format = '%B %d, %Y at %-I:%M %p UTC'
+if sys.platform in ["linux", "linux2"]:
+   _raw_date_format = '%B %d, %Y at %-I:%M %p UTC'
+elif platform == "win32":
+   _raw_date_format = '%B %d, %Y at %#I:%M %p UTC'
+else:
+   print('Cannot figure out what OS this is. Using Unix date format and hoping for the best')
+   _raw_date_format = '%B %d, %Y at %-I:%M %p UTC'
+   
 _xml_date_format = '%Y-%m-%d %H:%M:%S'
 
 # For complicated reasons using the max and min functions built into
@@ -379,8 +387,6 @@ class learning_module:
       cleaned = raw.astype({'Student ID': str}) # This sometimes gets interpreted as int
       if self.section_slug != None:
          cleaned = cleaned[cleaned['Section Slug'] == self.section_slug]
-      
-      
       
       self.raw_data_full = pd.DataFrame(data={'Student ID':cleaned['Student ID'], 'Date Created':cleaned['Date Created'], 'Activity Title': cleaned['Activity Title'], 'Attempt Number': cleaned['Attempt Number'], 'Correct?': cleaned['Correct?']})
       self.raw_data = self.raw_data_full[(self.start_date < self.raw_data_full['Date Created']) & (self.raw_data_full['Date Created'] < self.end_date)].reset_index()
