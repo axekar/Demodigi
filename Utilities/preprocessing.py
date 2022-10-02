@@ -477,7 +477,7 @@ class learning_module:
                   correct.append(is_correct)
                   answer_dates.append(time)
 
-      self.xml_data_full = pd.DataFrame(data={'Student ID':IDs, 'Date Created':answer_dates, 'Activity Title': activity_titles, 'Correct?': correct})
+      self.xml_data_full = pd.DataFrame(data={'Student ID (lowercase)':IDs, 'Date Created':answer_dates, 'Activity Title': activity_titles, 'Correct?': correct})
       self.xml_data = self.xml_data_full[(self.start_date < self.xml_data_full['Date Created']) & (self.xml_data_full['Date Created'] < self.end_date)].reset_index()
       self.results_read = True
       return
@@ -491,7 +491,7 @@ class learning_module:
       option of giving the path to a file containing the results of a
       previous mapping
       """
-      lowercaseIDs = list(set(self.xml_data['Student ID']))
+      lowercaseIDs = list(set(self.xml_data['Student ID (lowercase)']))
       n_lowercaseID = len(lowercaseIDs)
       
       pseudonyms = list(set(self.raw_data['Student ID']))
@@ -522,7 +522,7 @@ class learning_module:
       reliable_matches = 0
       all_matches = 0
       for lowercaseID in tqdm.tqdm(lowercaseIDs):
-         ID_entries = self.xml_data[self.xml_data['Student ID'] == lowercaseID]
+         ID_entries = self.xml_data[self.xml_data['Student ID (lowercase)'] == lowercaseID]
          ID_times = list(ID_entries['Date Created'])
          ID_titles = list(ID_entries['Activity Title'])
          
@@ -665,13 +665,14 @@ class learning_module:
             attempt_number.append(self.raw_data['Attempt Number'][i])
             correct.append(self.raw_data['Correct?'][i])
 
-      self.full_results = pd.DataFrame(data={'Student ID (lowercase)':student_ids, 'Date Created':date_created, 'Activity Title':activity_title,'Attempt Number':attempt_number, 'Correct?':correct})
+      self.full_results = pd.DataFrame(data={'Student ID':student_ids, 'Date Created':date_created, 'Activity Title':activity_title,'Attempt Number':attempt_number, 'Correct?':correct})
       return
 
-   def _read_participant_results(self, participant):
+
+   def _setup_result_reading(self, participant):
       """
-      Find out, for each question, whether a specific participant got it
-      right on the first try.
+      Create the empty dataframes and dummy dates necessary before filling in
+      results for the participant.
       """
       if not self.n_sessions_input:
          print('Inferring number of sessions from OLI-Torus output')
@@ -681,15 +682,25 @@ class learning_module:
       participant.answered = pd.DataFrame(columns = self.skills, index = range(1, self.n_sessions + 1), dtype = bool)
       participant.answer_date = pd.DataFrame(columns = self.skills, index = range(1, self.n_sessions + 1), dtype = 'datetime64[s]')
       participant.correct_first_try = pd.DataFrame(columns = self.skills, index = range(1, self.n_sessions + 1), dtype = bool)
-      correct_participant = self.full_results[self.full_results['Student ID (lowercase)'] == participant.ID.lower()]
-      n_answers = 0
       # Using the max and min of datetime does not work together with Pandas
       participant.first_answer_date = _effective_max_date
       participant.last_answer_date = _effective_min_date
+      return
+      
+   def _read_participant_results_from_combined(self, participant):
+      """
+      Find out, for each question, whether a specific participant got it
+      right on the first try.
+      """
+      self._setup_result_reading(participant)
+      correct_participant = self.full_results[self.full_results['Student ID'] == participant.ID.lower()]
+      n_answers = 0
       for skill in self.skills:
          for session in range(1, self.n_sessions + 1):
             try:
                correct_skill = correct_participant[correct_participant['Activity Title'] == '{}_Q{}'.format(skill, session)]
+               
+               # What on earth is this for?
                if len(correct_skill) == 0:
                   pass
                first_try_index = correct_skill['Attempt Number'] == 1
@@ -717,7 +728,64 @@ class learning_module:
       self.flags.loc[participant.ID, 'finished'] = participant.finished
       return
       
-   def read_participants_results(self, verbose = True):
+   def _read_participant_results_from_xml(self, participant):
+      """
+      Try to find out, for each question, whether a specific participant got
+      it right on the first try.
+      
+      Since the Datashop file does not contain timestamps for individual
+      answer attempts, this function will assume that a participant got it
+      right on the first try iff they gave one answer, which was correct. In
+      those cases where a participant answered correctly on the first try and
+      then checked the other alternatives out of curiosity, they will be
+      flagged as having answered incorrectly. This is *very bad* but we may
+      not have any viable alternative.
+      """
+      
+      self._setup_result_reading(participant)
+      correct_participant = self.xml_data[self.xml_data['Student ID (lowercase)'] == participant.ID.lower() + '@arbetsformedlingen.se']
+      n_answers = 0
+      for skill in self.skills:
+         for session in range(1, self.n_sessions + 1):
+            try:
+               correct_skill = correct_participant[correct_participant['Activity Title'] == '{}_Q{}'.format(skill, session)]
+               
+               if len(correct_skill) == 0:
+                  has_answered = False
+                  correct = False
+                  first_try_date = None
+               
+               else:
+                  first_try_date = _effective_max_date
+                  for date in correct_skill['Date Created']:
+                     if first_try_date > date:
+                        first_try_date = date
+ 
+                  correct = len(correct_skill[correct_skill['Date Created'] == first_try_date]) == 1
+               
+                  has_answered = True
+                  n_answers += 1
+               
+                  if first_try_date < participant.first_answer_date:
+                     participant.first_answer_date = first_try_date
+                  if first_try_date > participant.last_answer_date:
+                     participant.last_answer_date = first_try_date
+            except IndexError:
+               has_answered = False
+               correct = False
+               first_try_date = None
+            participant.answered.loc[session, skill] = has_answered
+            participant.correct_first_try.loc[session, skill] = correct
+            participant.answer_date.loc[session, skill] = first_try_date
+         participant.correct_from_start[skill] = np.all(participant.correct_first_try.loc[:, skill])
+      participant._cumulative_answers_by_date()
+      participant.started = n_answers > 0
+      participant.finished = n_answers == self.n_sessions * self.n_skills
+      self.flags.loc[participant.ID, 'started'] = participant.started
+      self.flags.loc[participant.ID, 'finished'] = participant.finished
+      return
+      
+   def read_participants_results(self, database = 'combined', verbose = True):
       """
       Find out, for each question, whether the participants got it right on
       the first try.
@@ -728,9 +796,15 @@ class learning_module:
          print('No results have been read!')
       else:
          if verbose:
-            print("Reading participants' results. This may take a while...")
+            print("Reading participants' results from {} database. This may take a while...".format(database))
          for participant in tqdm.tqdm(self.participants.values()):
-            self._read_participant_results(participant)
+            if database == 'combined':
+               self._read_participant_results_from_combined(participant)
+            elif database == 'datashop':
+               self._read_participant_results_from_xml(participant)
+            else:
+               print('Cannot recognise database {}'.format(database))
+               return
          self.accumulated_by_date = self._cumulative_answers_by_date(self.participants.values())
       return
 
