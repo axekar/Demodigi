@@ -699,10 +699,6 @@ class learning_module:
          for session in range(1, self.n_sessions + 1):
             try:
                correct_skill = correct_participant[correct_participant['Activity Title'] == '{}_Q{}'.format(skill, session)]
-               
-               # What on earth is this for?
-               if len(correct_skill) == 0:
-                  pass
                first_try_index = correct_skill['Attempt Number'] == 1
                first_try_date = correct_skill['Date Created'][first_try_index].to_numpy()[0]
                has_answered = True
