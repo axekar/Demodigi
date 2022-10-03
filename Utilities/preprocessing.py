@@ -700,6 +700,7 @@ class learning_module:
             try:
                correct_skill = correct_participant[correct_participant['Activity Title'] == '{}_Q{}'.format(skill, session)]
                first_try_index = correct_skill['Attempt Number'] == 1
+               # If nothing was found, this will throw an IndexError
                first_try_date = correct_skill['Date Created'][first_try_index].to_numpy()[0]
                has_answered = True
                correct = correct_skill['Correct?'][first_try_index].to_numpy()[0]
