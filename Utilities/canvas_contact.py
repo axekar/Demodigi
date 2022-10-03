@@ -225,6 +225,23 @@ def send_feedback(account_name_path, feedback_folder_path, self_account, subject
    preprocessing module and deliver feedback to those who have not yet
    received feedback.
    """
+   def update_trackers(already_received_feedback, received_feedback_now, daily_tracker_file_path, total_tracker_file_path, tracker_memory_file_path):
+      f = open(daily_tracker_file_path, 'w')
+      f.write('\n'.join(received_feedback_now))
+      f.close()
+   
+      # Save a file with all the people who have ever received feedback
+      have_received_feedback = already_received_feedback + received_feedback_now
+      f = open(total_tracker_file_path, 'w')
+      f.write('\n'.join(have_received_feedback))
+      f.close()
+
+      f = open(tracker_memory_file_path, 'w')
+      f.write('\n'.join(have_received_feedback))
+      f.close()
+      return
+      
+   
    if feedback_folder_path[-1] != '/':
       feedback_folder_path += '/'
       
@@ -250,6 +267,20 @@ def send_feedback(account_name_path, feedback_folder_path, self_account, subject
    mapping = account_name_user_id_mapping(token, verbose = verbose)
    n_sent = 0
    received_feedback_now = []
+
+   # Define paths to files of trackers
+   today = datetime.today().strftime('%Y-%m-%d')
+   daily_tracker_file_path = '{}{}.txt'.format(daily_tracker_folder_path, today)
+   i = 1
+   while os.path.isfile(daily_tracker_file_path):
+      daily_tracker_file_path = '{}{}_{}.txt'.format(daily_tracker_folder_path, today, i)
+      i += 1
+
+   tracker_memory_file_path = '{}{}.txt'.format(total_tracker_folder_path, today)
+   i = 1
+   while os.path.isfile(tracker_memory_file_path):
+      tracker_memory_file_path = '{}{}_{}.txt'.format(total_tracker_folder_path, today, i)
+      i += 1
    
    if verbose:
       print("Delivering participants' feedback. This may take a while...")
@@ -259,42 +290,22 @@ def send_feedback(account_name_path, feedback_folder_path, self_account, subject
          if target_account in already_received_feedback:
             pass
          else:
-            if not test:
-               send_file(file_path, mapping[self_account], mapping[target_account], subject, message, token)
-               received_feedback_now.append(target_account)
-            n_sent += 1
+            try:
+               if not test:
+                  send_file(file_path, mapping[self_account], mapping[target_account], subject, message, token)
+                  received_feedback_now.append(target_account)
+                  if n_sent % 100 == 0:
+                     update_trackers(already_received_feedback, received_feedback_now, daily_tracker_file_path, total_tracker_file_path, tracker_memory_file_path)
+               n_sent += 1
+            except KeyError:
+               print('Could not find mapping for account {}'.format(target_account))
    print('There were {} participants in ID file'.format(len(accounts)))
    print('There were {} already tagged as having received feedback'.format(len(already_received_feedback)))
    if not test:
       print('Delivered {} files of feedback'.format(n_sent))
    else:
       print('Would have delivered {} files of feedback'.format(n_sent))
-   
-   # Save a file with the people who just received feedback
-   today = datetime.today().strftime('%Y-%m-%d')
-   daily_tracker_file_path = '{}{}.txt'.format(daily_tracker_folder_path, today)
-   i = 1
-   while os.path.isfile(daily_tracker_file_path):
-      daily_tracker_file_path = '{}{}_{}.txt'.format(daily_tracker_folder_path, today, i)
-      i += 1
-   f = open(daily_tracker_file_path, 'w')
-   f.write('\n'.join(received_feedback_now))
-   f.close()
-   
-   # Save a file with all the people who have ever received feedback
-   have_received_feedback = already_received_feedback + received_feedback_now
-   f = open(total_tracker_file_path, 'w')
-   f.write('\n'.join(have_received_feedback))
-   f.close()
-   
-   # Also save a backup file, so we can doublecheck progress afterwards
-   # This might never be necessary, but I am a bit of an information hoarder
-   tracker_memory_file_path = '{}{}.txt'.format(total_tracker_folder_path, today)
-   i = 1
-   while os.path.isfile(tracker_memory_file_path):
-      tracker_memory_file_path = '{}{}_{}.txt'.format(total_tracker_folder_path, today, i)
-      i += 1
-   f = open(tracker_memory_file_path, 'w')
-   f.write('\n'.join(have_received_feedback))
-   f.close()
+
+   update_trackers(already_received_feedback, received_feedback_now, daily_tracker_file_path, total_tracker_file_path, tracker_memory_file_path)
+
    return
