@@ -32,7 +32,10 @@ import pytz
 import xml.etree.ElementTree as et
 import tqdm
 
+
 plt.style.use('tableau-colorblind10')
+
+### Internal variables of different sorts
 
 # This is the format that I have inferred that OLI-Torus uses in the raw_analytics file
 if sys.platform in ["linux", "linux2"]:
@@ -50,6 +53,9 @@ _xml_date_format = '%Y-%m-%d %H:%M:%S'
 # as being safely outside the span that we are interested in.
 _effective_min_date = datetime.datetime(1900, 1, 1, tzinfo = pytz.UTC)
 _effective_max_date = datetime.datetime(2200, 1, 1, tzinfo = pytz.UTC)
+
+NoneType = type(None)
+
 
 class participant:
    """
@@ -641,7 +647,7 @@ class learning_module:
          print('Another   {} could not'.format(len(self.unmatched_lowercaseIDs)))
       return
       
-   def import_data(self, raw_analytics_path, xml_path, verbose = False, previous_mapping_path = None):
+   def import_data(self, raw_analytics_path, xml_path, previous_mapping_path = None):
       """
       Import data from the raw_analytics and Datashop files output by OLI
       Torus and extract from them the data we need. Neither file individually
@@ -744,33 +750,28 @@ class learning_module:
       n_answers = 0
       for skill in self.skills:
          for session in range(1, self.n_sessions + 1):
-            try:
-               correct_skill = correct_participant[correct_participant['Activity Title'] == '{}_Q{}'.format(skill, session)]
+            correct_skill = correct_participant[correct_participant['Activity Title'] == '{}_Q{}'.format(skill, session)]
                
-               if len(correct_skill) == 0:
-                  has_answered = False
-                  correct = False
-                  first_try_date = None
-               
-               else:
-                  first_try_date = _effective_max_date
-                  for date in correct_skill['Date Created']:
-                     if first_try_date > date:
-                        first_try_date = date
- 
-                  correct = len(correct_skill[correct_skill['Date Created'] == first_try_date]) == 1
-               
-                  has_answered = True
-                  n_answers += 1
-               
-                  if first_try_date < participant.first_answer_date:
-                     participant.first_answer_date = first_try_date
-                  if first_try_date > participant.last_answer_date:
-                     participant.last_answer_date = first_try_date
-            except IndexError:
+            if len(correct_skill) == 0:
                has_answered = False
                correct = False
                first_try_date = None
+            else:            
+               has_answered = True
+               n_answers += 1
+            
+               first_try_date = _effective_max_date
+               for date in correct_skill['Date Created']:
+                  if first_try_date > date:
+                     first_try_date = date
+               
+               correct = np.all(correct_skill[correct_skill['Date Created'] == first_try_date]['Correct?'])
+               
+               if first_try_date < participant.first_answer_date:
+                  participant.first_answer_date = first_try_date
+               if first_try_date > participant.last_answer_date:
+                  participant.last_answer_date = first_try_date
+
             participant.answered.loc[session, skill] = has_answered
             participant.correct_first_try.loc[session, skill] = correct
             participant.answer_date.loc[session, skill] = first_try_date
@@ -789,7 +790,7 @@ class learning_module:
       """
       # If you simply test '[...] == None' Pandas will complain that
       # dataframes have ambiguous equality.
-      if type(self.full_results) == type(None):
+      if (database == 'combined' and type(self.full_results) == NoneType) or (database == 'datashop' and type(self.xml_data) == NoneType):
          print('No results have been read!')
       else:
          if verbose:
@@ -811,7 +812,10 @@ class learning_module:
       
       This is mostly intended to make visual inspection easier.
       """
-      self.full_results.to_csv(file_path, index = False)
+      if type(self.full_results) == NoneType:
+         print('No results have been read!')
+      else:
+         self.full_results.to_csv(file_path, index = False)
       return
 
    def export_individual_results(self, folder_path, verbose = True):
