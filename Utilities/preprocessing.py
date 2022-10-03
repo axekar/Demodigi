@@ -813,7 +813,10 @@ class learning_module:
       This is mostly intended to make visual inspection easier.
       """
       if type(self.full_results) == NoneType:
-         print('No results have been read!')
+         if type(self.xml_data) == NoneType:
+            print('No results have been read!')
+         else:
+            print('Full results have not been read!\nThese are necessary to give meaningful individual results.')
       else:
          self.full_results.to_csv(file_path, index = False)
       return
