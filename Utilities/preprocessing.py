@@ -563,7 +563,6 @@ class learning_module:
                not_too_early = time_span[0] <= pseudonym_entries['Date Created'] - datetime.timedelta(seconds=60)
                not_too_late = pseudonym_entries['Date Created'] <= time_span[1]
                
-               matched_so_far = True
                for problem_name, batch_answers in problem_names.items():
 
                   same_problem = pseudonym_entries['Activity Title'] == problem_name
@@ -572,9 +571,9 @@ class learning_module:
                   as_many_answers = len(pseudonym_answers) == len(batch_answers)
                   as_many_correct = sum(pseudonym_answers) == sum(batch_answers)
 
-                  matched_so_far = matched_so_far and as_many_answers and as_many_correct
+                  matched = as_many_answers and as_many_correct
                   
-                  n_batches_matched += matched_so_far
+                  n_batches_matched += matched
                   n_batches += 1
             n_matches.append(n_batches_matched)
             match_percentages.append(n_batches_matched / n_batches)
