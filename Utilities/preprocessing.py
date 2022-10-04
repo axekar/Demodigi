@@ -468,8 +468,7 @@ class learning_module:
             else:
                print('Cannot figure out if action was completed correctly or not')
             answers[anon_id][time][problem_name].append(is_correct)
-      
-      
+
       # Prepare to store the information in better structured ways
       IDs = []
       answer_dates = []
@@ -585,7 +584,7 @@ class learning_module:
          if best_match_percentage >= 0.5:
             all_matches += 1
            
-            reliable = True # This will need to be changed   
+            reliable = best_match_percentage - second_best_match_percentage > 0.5 and best_n_matches > 5
             reliable_matches += reliable
          
             pseudonyms.remove(matched_pseudonym)
@@ -999,6 +998,9 @@ class learning_module:
       plt.clf()
      
       sorted_dates_accumulated = list(zip(*sorted(zip(self.accumulated_by_date.keys(), self.accumulated_by_date.values()))))
+      if len(sorted_dates_accumulated) == 0:
+         print('Nothing to plot')
+         return
       plt.plot(sorted_dates_accumulated[0], sorted_dates_accumulated[1], '-', label = 'Besvarade frågor')
       plt.legend()
       plt.ylim(0, self.n_sessions * self.n_skills * self.n_participants)
