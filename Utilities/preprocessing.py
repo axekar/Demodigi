@@ -508,8 +508,7 @@ class learning_module:
       mapping_pseudonym_lowercaseID = {}
       mapping_lowercaseID_pseudonym = {}
       
-      unmapped_lowercaseIDs = []
-      unmapped_best_match_percentages = []
+      unmapped = {'Student ID (lowercase)':[], 'Match percentage':[]}
       
       older_mapping_included = False
       if type(previous_mapping_path) == str:
@@ -616,15 +615,15 @@ class learning_module:
             # Ensure that we do not match the same pseudonym twice
             pseudonyms.remove(matched_pseudonym)
          else:
-            unmapped_lowercaseIDs.append(lowercaseID.replace('@arbetsformedlingen.se', ''))
-            unmapped_best_match_percentages.append(best_match_percentage)
+            unmapped['Student ID (lowercase)'].append(lowercaseID.replace('@arbetsformedlingen.se', ''))
+            unmapped['Match percentage'].append(best_match_percentage)
          
       self.full_mapping = pd.DataFrame(data=mapping)
       self.mapping = self.full_mapping[self.full_mapping['Match reliable']]
       self.mapping_pseudonym_lowercaseID = mapping_pseudonym_lowercaseID
       self.mapping_lowercaseID_pseudonym = mapping_lowercaseID_pseudonym
       
-      self.unmapped = pd.DataFrame(data={'Student ID (lowercase)':unmapped_lowercaseIDs, 'Best match percentage':unmapped_best_match_percentages})
+      self.unmapped = unmapped
       
       self.unmatched_pseudonyms = []
       for pseudonym in pseudonyms:
@@ -647,7 +646,7 @@ class learning_module:
          print('Another   {} could not'.format(len(self.unmatched_lowercaseIDs)))
       return
       
-   def import_data(self, raw_analytics_path, xml_path, previous_mapping_path = None):
+   def import_data(self, raw_analytics_path, xml_path, verbose = False, previous_mapping_path = None):
       """
       Import data from the raw_analytics and Datashop files output by OLI
       Torus and extract from them the data we need. Neither file individually
