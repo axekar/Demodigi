@@ -473,10 +473,19 @@ class learning_module:
       # We now put the information in a pandas dataframe
       IDs = []
       answer_dates = []
+      next_dates = []
       correct = []
       activity_titles = []
       for anon_id, times in answers.items():
-         for time, problem_names in sorted(times.items()):
+         times_problem_names = sorted(times.items())
+         n_times_problem_names = len(times_problem_names)
+         for i in range(n_times_problem_names):
+            time, problem_names = times_problem_names[i]
+            if i < n_times_problem_names-1:
+               next_time, dummy = times_problem_names[i+1]
+            else:
+               next_time == _effective_max_date
+            
             for problem_name, answers in problem_names.items():
                matched_skill = match_skill(problem_name)
                if matched_skill == '':
@@ -486,8 +495,10 @@ class learning_module:
                   activity_titles.append(matched_skill)
                   correct.append(is_correct)
                   answer_dates.append(time)
+                  next_dates.append(next_time)
          
-      self.xml_data_full = pd.DataFrame(data={'Student ID (lowercase)':IDs, 'Date Created':answer_dates, 'Activity Title': activity_titles, 'Correct?': correct})
+      # Note that the next date might make use of feedback and other things which are not stored in the dataframe itself.
+      self.xml_data_full = pd.DataFrame(data={'Student ID (lowercase)':IDs, 'Date Created':answer_dates, 'Next Date':next_dates, 'Activity Title': activity_titles, 'Correct?': correct})
       self.xml_data = self.xml_data_full[(self.start_date < self.xml_data_full['Date Created']) & (self.xml_data_full['Date Created'] < self.end_date)].reset_index()
       self.results_read = True
       return
