@@ -505,6 +505,9 @@ class learning_module:
          
                   batches_full[anon_id][(time, next_time)][matched_skill].append(is_correct)
       
+            if batches_full[anon_id][(time, next_time)] == {}:
+               batches_full[anon_id].pop((time, next_time), None)
+      
       batches = {}
       for anon_id, timespans in batches_full.items():
          batches[anon_id] = {}
@@ -544,9 +547,11 @@ class learning_module:
          print('Figuring out mapping between pseudonyms in raw_analytics file and IDs in Datashop file.')
          print('Comparing {} pseudonyms to {} IDs'.format(n_pseudonym, n_lowercaseID))
          print('This may take a while...')
+         
       all_matches = 0
       reliable_matches = 0
       for lowercaseID, batches in tqdm.tqdm(self.xml_dict.items()):
+      
          n_matches = []
          match_percentages = []
          for pseudonym in pseudonyms:
@@ -555,20 +560,22 @@ class learning_module:
             n_batches = 0
             n_batches_matched = 0
             for time_span, problem_names in batches.items():
+               not_too_early = time_span[0] <= pseudonym_entries['Date Created'] - datetime.timedelta(seconds=60)
+               not_too_late = pseudonym_entries['Date Created'] <= time_span[1]
+               
                matched_so_far = True
-               for problem_name, answers in problem_names.items():
-                  not_too_early = time_span[0] <= pseudonym_entries['Date Created'] - datetime.timedelta(seconds=60)
-                  not_too_late = pseudonym_entries['Date Created'] <= time_span[1]
+               for problem_name, batch_answers in problem_names.items():
+
                   same_problem = pseudonym_entries['Activity Title'] == problem_name
                   pseudonym_answers = pseudonym_entries[not_too_early & not_too_late & same_problem]['Correct?'].values
                 
-                  as_many_answers = len(pseudonym_answers) == len(answers)
-                  as_many_correct = sum(pseudonym_answers) == sum(answers)
+                  as_many_answers = len(pseudonym_answers) == len(batch_answers)
+                  as_many_correct = sum(pseudonym_answers) == sum(batch_answers)
 
                   matched_so_far = matched_so_far and as_many_answers and as_many_correct
                   
-               n_batches_matched += matched_so_far
-               n_batches += 1
+                  n_batches_matched += matched_so_far
+                  n_batches += 1
             n_matches.append(n_batches_matched)
             match_percentages.append(n_batches_matched / n_batches)
         
@@ -586,7 +593,7 @@ class learning_module:
          if best_match_percentage >= 0.5:
             all_matches += 1
            
-            reliable = best_match_percentage - second_best_match_percentage > 0.5 and best_n_matches > 5
+            reliable = best_match_percentage - second_best_match_percentage >= 0.5 and best_n_matches > 5
             reliable_matches += reliable
          
             pseudonyms.remove(matched_pseudonym)
