@@ -557,8 +557,8 @@ class learning_module:
          for pseudonym in pseudonyms:
             pseudonym_entries = self.raw_data[self.raw_data['Student ID'] == pseudonym]
          
-            n_batches = 0
-            n_batches_matched = 0
+            n_problems = 0
+            n_problems_matched = 0
             for time_span, problem_names in batches.items():
                not_too_early = time_span[0] <= pseudonym_entries['Date Created'] - datetime.timedelta(seconds=60)
                not_too_late = pseudonym_entries['Date Created'] <= time_span[1]
@@ -573,10 +573,10 @@ class learning_module:
 
                   matched = as_many_answers and as_many_correct
                   
-                  n_batches_matched += matched
-                  n_batches += 1
-            n_matches.append(n_batches_matched)
-            match_percentages.append(n_batches_matched / n_batches)
+                  n_problems_matched += matched
+                  n_problems += 1
+            n_matches.append(n_problems_matched)
+            match_percentages.append(n_problems_matched / n_problems)
         
          match_percentages = np.asarray(match_percentages)
             
