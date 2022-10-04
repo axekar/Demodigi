@@ -527,6 +527,7 @@ class learning_module:
       See the internal DD document 'Datashop och raw analytics' for an
       explanation of what this method does and why.
       """
+      
       n_lowercaseID = len(self.xml_dict)
       
       pseudonyms = list(set(self.raw_data['Student ID']))
@@ -556,14 +557,15 @@ class learning_module:
             for time_span, problem_names in batches.items():
                matched_so_far = True
                for problem_name, answers in problem_names.items():
-                  answer_set = set(answers)
-               
                   not_too_early = time_span[0] <= pseudonym_entries['Date Created'] - datetime.timedelta(seconds=60)
                   not_too_late = pseudonym_entries['Date Created'] <= time_span[1]
                   same_problem = pseudonym_entries['Activity Title'] == problem_name
                   pseudonym_answers = pseudonym_entries[not_too_early & not_too_late & same_problem]['Correct?'].values
-                  
-                  matched_so_far = matched_so_far and set(pseudonym_answers) == answer_set
+                
+                  as_many_answers = len(pseudonym_answers) == len(answers)
+                  as_many_correct = sum(pseudonym_answers) == sum(answers)
+
+                  matched_so_far = matched_so_far and as_many_answers and as_many_correct
                   
                n_batches_matched += matched_so_far
                n_batches += 1
