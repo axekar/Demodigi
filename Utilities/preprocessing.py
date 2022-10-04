@@ -517,7 +517,8 @@ class learning_module:
             older_mapping_included = True
             older_mapping_matches = 0
          except FileNotFoundError:
-            pass
+            if verbose:
+               print('No older mapping to use. Doing everything from scratch.')
             
       if verbose:
          print('Figuring out mapping between pseudonyms in raw_analytics file and IDs in Datashop file.')
@@ -559,7 +560,11 @@ class learning_module:
                for ID_time, ID_title in zip(ID_times, ID_titles):
                   match_found = False
                   for pseudonym_time, pseudonym_title in pseudonym_times_titles:
-                     if abs(ID_time - pseudonym_time) < datetime.timedelta(seconds=61) and ID_title == pseudonym_title:
+                     # It seems that times logged in the datashop file precede those in 
+                     # the raw_analytics file with up to a few minutes, but there is also
+                     # a rounding to minutes in the datashop file.
+                     time_delta = pseudonym_time - ID_time
+                     if datetime.timedelta(seconds=300) >= time_delta >= datetime.timedelta(seconds=-60) and ID_title == pseudonym_title:
                         match_found = True
                         break
                      
@@ -623,7 +628,7 @@ class learning_module:
       self.mapping_pseudonym_lowercaseID = mapping_pseudonym_lowercaseID
       self.mapping_lowercaseID_pseudonym = mapping_lowercaseID_pseudonym
       
-      self.unmapped = unmapped
+      self.unmapped = pd.DataFrame(data=unmapped)
       
       self.unmatched_pseudonyms = []
       for pseudonym in pseudonyms:
