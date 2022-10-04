@@ -470,15 +470,19 @@ class learning_module:
             answers[anon_id][time][problem_name].append(is_correct)
       
       
-      # We now put the information in a pandas dataframe
+      # Prepare to store the information in better structured ways
       IDs = []
       answer_dates = []
       next_dates = []
       correct = []
       activity_titles = []
+      
+      batches_full = {}
       for anon_id, times in answers.items():
          times_problem_names = sorted(times.items())
          n_times_problem_names = len(times_problem_names)
+         
+         batches_full[anon_id] = {}
          for i in range(n_times_problem_names):
             time, problem_names = times_problem_names[i]
             if i < n_times_problem_names-1:
@@ -486,10 +490,13 @@ class learning_module:
             else:
                next_time == _effective_max_date
             
+            batches_full[anon_id][(time, next_time)] = {}
             for problem_name, answers in problem_names.items():
                matched_skill = match_skill(problem_name)
                if matched_skill == '':
                   continue
+                  
+               batches_full[anon_id][(time, next_time)][matched_skill] = []               
                for is_correct in answers:
                   IDs.append(anon_id)
                   activity_titles.append(matched_skill)
@@ -497,14 +504,136 @@ class learning_module:
                   answer_dates.append(time)
                   next_dates.append(next_time)
          
+                  batches_full[anon_id][(time, next_time)][matched_skill].append(is_correct)
+      
+      batches = {}
+      for anon_id, timespans in batches_full.items():
+         batches[anon_id] = {}
+         for timespan in timespans.keys():
+            if self.start_date < timespan[0] < self.end_date:
+               batches[anon_id][timespan] = batches_full[anon_id][timespan]
+         if batches[anon_id] == {}:
+            batches.pop(anon_id, None)
+      
+      self.xml_dict_full = batches_full
+      self.xml_dict = batches
       # Note that the next date might make use of feedback and other things which are not stored in the dataframe itself.
-      self.xml_data_full = pd.DataFrame(data={'Student ID (lowercase)':IDs, 'Date Created':answer_dates, 'Next Date':next_dates, 'Activity Title': activity_titles, 'Correct?': correct})
-      self.xml_data = self.xml_data_full[(self.start_date < self.xml_data_full['Date Created']) & (self.xml_data_full['Date Created'] < self.end_date)].reset_index()
+      self.xml_dataframe_full = pd.DataFrame(data={'Student ID (lowercase)':IDs, 'Date Created':answer_dates, 'Next Date':next_dates, 'Activity Title': activity_titles, 'Correct?': correct})
+      self.xml_dataframe = self.xml_dataframe_full[(self.start_date < self.xml_dataframe_full['Date Created']) & (self.xml_dataframe_full['Date Created'] < self.end_date)].reset_index()
       self.results_read = True
       return
 
+   def _infer_mapping_pseudonym_ID(self, verbose = True):
+      """
+      See the internal DD document 'Datashop och raw analytics' for an
+      explanation of what this method does and why.
+      """
+      n_lowercaseID = len(self.xml_dict)
       
-   def _infer_mapping_pseudonym_ID(self, verbose = True, previous_mapping_path = None):
+      pseudonyms = list(set(self.raw_data['Student ID']))
+      n_pseudonym = len(pseudonyms)
+
+      mapping = {'Student ID (lowercase)':[],'Pseudonym':[],'Match reliable':[],'Match percentage':[], 'n matches':[], 'Total occurrences':[], 'Second best match percentage':[]}      
+
+      mapping_pseudonym_lowercaseID = {}
+      mapping_lowercaseID_pseudonym = {}
+      
+      unmapped = {'Student ID (lowercase)':[], 'Match percentage':[]}
+   
+      if verbose:
+         print('Figuring out mapping between pseudonyms in raw_analytics file and IDs in Datashop file.')
+         print('Comparing {} pseudonyms to {} IDs'.format(n_pseudonym, n_lowercaseID))
+         print('This may take a while...')
+      all_matches = 0
+      reliable_matches = 0
+      for lowercaseID, batches in tqdm.tqdm(self.xml_dict.items()):
+         n_matches = []
+         match_percentages = []
+         for pseudonym in pseudonyms:
+            pseudonym_entries = self.raw_data[self.raw_data['Student ID'] == pseudonym]
+         
+            n_batches = 0
+            n_batches_matched = 0
+            for time_span, problem_names in batches.items():
+               matched_so_far = True
+               for problem_name, answers in problem_names.items():
+                  answer_set = set(answers)
+               
+                  not_too_early = time_span[0] <= pseudonym_entries['Date Created'] - datetime.timedelta(seconds=60)
+                  not_too_late = pseudonym_entries['Date Created'] <= time_span[1]
+                  same_problem = pseudonym_entries['Activity Title'] == problem_name
+                  pseudonym_answers = pseudonym_entries[not_too_early & not_too_late & same_problem]['Correct?'].values
+                  
+                  matched_so_far = matched_so_far and set(pseudonym_answers) == answer_set
+                  
+               n_batches_matched += matched_so_far
+               n_batches += 1
+            n_matches.append(n_batches_matched)
+            match_percentages.append(n_batches_matched / n_batches)
+        
+         match_percentages = np.asarray(match_percentages)
+            
+         best_match_index = np.argmax(match_percentages)
+         best_match_percentage = match_percentages[best_match_index]
+         matched_pseudonym = pseudonyms[best_match_index]
+         best_n_matches = n_matches[best_match_index]
+         
+         match_percentages[best_match_index] = -np.inf
+         second_best_match_index = np.argmax(match_percentages)
+         second_best_match_percentage = match_percentages[second_best_match_index]
+
+         if best_match_percentage >= 0.5:
+            all_matches += 1
+           
+            reliable = True # This will need to be changed   
+            reliable_matches += reliable
+         
+            pseudonyms.remove(matched_pseudonym)
+            mapping['Student ID (lowercase)'].append(lowercaseID.replace('@arbetsformedlingen.se', ''))
+            mapping['Pseudonym'].append(matched_pseudonym)
+            mapping['Match reliable'].append(reliable)      
+            mapping['Match percentage'].append(best_match_percentage)
+            mapping['n matches'].append(best_n_matches)
+            mapping['Total occurrences'].append(best_n_matches)
+            mapping['Second best match percentage'].append(second_best_match_percentage)
+            if reliable:
+               mapping_pseudonym_lowercaseID[matched_pseudonym] = lowercaseID.replace('@arbetsformedlingen.se', '')
+               mapping_lowercaseID_pseudonym[lowercaseID.replace('@arbetsformedlingen.se', '')] = matched_pseudonym
+         else:
+            unmapped['Student ID (lowercase)'].append(lowercaseID.replace('@arbetsformedlingen.se', ''))
+            unmapped['Match percentage'].append(best_match_percentage)
+            
+         if len(pseudonyms) == 0:
+            break
+      self.full_mapping = pd.DataFrame(data=mapping)
+      self.mapping = self.full_mapping[self.full_mapping['Match reliable']]
+      self.mapping_pseudonym_lowercaseID = mapping_pseudonym_lowercaseID
+      self.mapping_lowercaseID_pseudonym = mapping_lowercaseID_pseudonym
+      
+      self.unmapped = pd.DataFrame(data=unmapped)
+      
+      self.unmatched_pseudonyms = []
+      for pseudonym in pseudonyms:
+         if not (pseudonym in self.mapping['Pseudonym'].values):
+            self.unmatched_pseudonyms.append(pseudonym)
+
+      self.unmatched_lowercaseIDs = []
+      for lowercaseID in self.xml_dict.keys():
+         if not (lowercaseID.replace('@arbetsformedlingen.se', '') in self.mapping['Student ID (lowercase)'].values):
+            self.unmatched_lowercaseIDs.append(lowercaseID)
+            
+      if verbose:
+         print('There are {} unique pseudonyms in the raw_analytics file'.format(n_pseudonym))
+         print('Of these, {} could be matched at all to IDs in the Datashop file'.format(all_matches))
+         print('Of these, {} could be reliably matched to IDs in the Datashop file'.format(reliable_matches))
+         print('There are {} unique IDs in the Datashop file'.format(n_lowercaseID))
+         print('Of these, {} could be reliably matched to pseudonyms in the raw_analytics file'.format(len(mapping_lowercaseID_pseudonym)))
+         print('Another   {} could not'.format(len(self.unmatched_lowercaseIDs)))
+      return
+
+   
+      
+   def _infer_mapping_pseudonym_ID_old(self, verbose = True, previous_mapping_path = None):
       """
       See the internal DD document 'Datashop och raw analytics' for an
       explanation of what this method does and why.
@@ -513,7 +642,7 @@ class learning_module:
       option of giving the path to a file containing the results of a
       previous mapping
       """
-      lowercaseIDs = list(set(self.xml_data['Student ID (lowercase)']))
+      lowercaseIDs = list(set(self.xml_dataframe['Student ID (lowercase)']))
       n_lowercaseID = len(lowercaseIDs)
       
       pseudonyms = list(set(self.raw_data['Student ID']))
@@ -544,7 +673,7 @@ class learning_module:
       reliable_matches = 0
       all_matches = 0
       for lowercaseID in tqdm.tqdm(lowercaseIDs):
-         ID_entries = self.xml_data[self.xml_data['Student ID (lowercase)'] == lowercaseID]
+         ID_entries = self.xml_dataframe[self.xml_dataframe['Student ID (lowercase)'] == lowercaseID]
          ID_times = list(ID_entries['Date Created'])
          ID_titles = list(ID_entries['Activity Title'])
          
@@ -675,7 +804,7 @@ class learning_module:
       """
       self.import_raw_analytics(raw_analytics_path)
       self.import_datashop(xml_path)
-      self._infer_mapping_pseudonym_ID(verbose = verbose, previous_mapping_path = previous_mapping_path)
+      self._infer_mapping_pseudonym_ID(verbose = verbose)#, previous_mapping_path = previous_mapping_path)
       
       student_ids = []
       date_created = []
@@ -766,7 +895,7 @@ class learning_module:
       """
       
       self._setup_result_reading(participant)
-      correct_participant = self.xml_data[self.xml_data['Student ID (lowercase)'] == participant.ID.lower() + '@arbetsformedlingen.se']
+      correct_participant = self.xml_dataframe[self.xml_dataframe['Student ID (lowercase)'] == participant.ID.lower() + '@arbetsformedlingen.se']
       n_answers = 0
       for skill in self.skills:
          for session in range(1, self.n_sessions + 1):
@@ -810,7 +939,7 @@ class learning_module:
       """
       # If you simply test '[...] == None' Pandas will complain that
       # dataframes have ambiguous equality.
-      if (database == 'combined' and type(self.full_results) == NoneType) or (database == 'datashop' and type(self.xml_data) == NoneType):
+      if (database == 'combined' and type(self.full_results) == NoneType) or (database == 'datashop' and type(self.xml_dataframe) == NoneType):
          print('No results have been read!')
       else:
          if verbose:
@@ -833,7 +962,7 @@ class learning_module:
       This is mostly intended to make visual inspection easier.
       """
       if type(self.full_results) == NoneType:
-         if type(self.xml_data) == NoneType:
+         if type(self.xml_dataframe) == NoneType:
             print('No results have been read!')
          else:
             print('Full results have not been read!\nThese are necessary to give meaningful individual results.')
@@ -892,7 +1021,7 @@ class learning_module:
       """
       Export the data interpreted from the XML file
       """
-      self.xml_data.to_csv(file_path, index = False)
+      self.xml_dataframe.to_csv(file_path, index = False)
       return
 
    def export_mapping(self, file_path):
