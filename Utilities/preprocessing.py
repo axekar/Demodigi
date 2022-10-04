@@ -399,7 +399,7 @@ class learning_module:
       self.results_read = True
       return
       
-   def import_datashop(self, filepath):
+   def import_datashop(self, filepath, verbose = False):
       """
       This imports an XML file following the format specified at
       
@@ -410,6 +410,18 @@ class learning_module:
       Internally, these are ordered in time, but the whole batch of context,
       tool and tutor messages need not be ordered with respect to others.
       """
+      def match_skill(problem_name):
+         """
+         See if the problem name matches the format of a question on any of the
+         skills we want to test.
+         """
+         matched_skill = ''
+         for skill in self.skills:
+            for session in range(self.n_sessions):
+               mixedcase_name = '{}_Q{}'.format(skill, session + 1)
+               if problem_name == mixedcase_name.lower():
+                  matched_skill = mixedcase_name
+         return matched_skill
 
       tree = et.parse(filepath)
       root = tree.getroot()
@@ -462,17 +474,11 @@ class learning_module:
       answer_dates = []
       correct = []
       activity_titles = []
-      attempt_number = []
       for anon_id, problem in answers.items():
          for problem_name, times in problem.items():
             # Remove those problems that do not match any skill that we are
             # trying to test, such as practise problems, feedback, etc
-            matched_skill = ''
-            for skill in self.skills:
-               for session in range(self.n_sessions):
-                  mixedcase_name = '{}_Q{}'.format(skill, session + 1)
-                  if problem_name == mixedcase_name.lower():
-                     matched_skill = mixedcase_name
+            matched_skill = match_skill(problem_name)
             if matched_skill == '':
                continue
                
@@ -482,6 +488,13 @@ class learning_module:
                   activity_titles.append(matched_skill)
                   correct.append(is_correct)
                   answer_dates.append(time)
+
+
+      # We need to figure out the earliest point where we know with certainty
+      # that the participant went on to the next question.
+     # next_question_time = []
+     # for ID, activity_title, date in tqdm.tqdm(zip(IDs, activity_titles, answer_dates)):
+         
 
       self.xml_data_full = pd.DataFrame(data={'Student ID (lowercase)':IDs, 'Date Created':answer_dates, 'Activity Title': activity_titles, 'Correct?': correct})
       self.xml_data = self.xml_data_full[(self.start_date < self.xml_data_full['Date Created']) & (self.xml_data_full['Date Created'] < self.end_date)].reset_index()
@@ -871,6 +884,13 @@ class learning_module:
       f.write(packed)
       f.close()
       return      
+
+   def export_datashop(self, file_path):
+      """
+      Export the data interpreted from the XML file
+      """
+      self.xml_data.to_csv(file_path, index = False)
+      return
 
    def export_mapping(self, file_path):
       """
