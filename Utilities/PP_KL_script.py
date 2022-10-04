@@ -19,27 +19,7 @@ import pytz
 import preprocessing as pp
 
 # Do we use both datashop and raw_analytics, or just datashop?
-use_full_results = True
-
-competencies = {'Hitta och tolka digital information':['SearchingForInfo', 'MapServices', 'EvaluateInformation', 'SpotDeepFake', 'OrganisingFiles', 'SharingFiles'],
-		'Kommunikation och samarbete':['EmailFunctions', 'SharingPictures', 'SharingEvents', 'CollaborationInDocuments',  'CreatingPresentations', 'SharingLargeFiles'],
-		#'Skapa och bearbeta digitalt innehåll':['ImageEditingSoftware', 'InfoGraphics', 'TextFormating', 'Templates', 'ChangingPDFs', 'FreeImages'],
-		'IT-säkerhet':['SafePasswords', 'Phishing', 'Malware', 'Backup', 'PortableDeviceSafety', 'GDPR'],
-		'Problemlösning i digitala miljöer':['SoftwareFreeze', 'FindingSolutions', 'LearningAboutFunctions', 'WifiProblems', 'OnlineMeetingProblems', 'SolvingCrash']}
-
-start_date = datetime.datetime(2022, 9, 1, tzinfo = pytz.UTC)
-end_date = datetime.datetime(2022, 9, 23, tzinfo = pytz.UTC)
-mod = pp.learning_module(competencies, n_sessions = 1, start_date = start_date, end_date = end_date, section_slug = 'kartlggning_av_digital_kompete_5arpp')
-
-# This is temporary. It should not actually target a specific date.
-if use_full_results:
-   mod.import_data('OLI_analytics/Kartläggning/2022_09_22/raw_analytics.tsv', 'OLI_analytics/Kartläggning/2022_09_22/Datashop_af_kartlggning_av_digital_komp.xml')#, previous_mapping_path = 'Results/Kartläggning/Mapping.csv')
-else:
-   mod.import_datashop('OLI_analytics/Kartläggning/2022_09_22/Datashop_af_kartlggning_av_digital_komp.xml')
-
-mod.read_participant_IDs('Participant_data/Coaches.xlsx')
-mod.read_participants_results(database = 'combined', verbose = True)
-mod.describe_module()
+use_full_results = False
 
 try:
    os.mkdir('Results')
@@ -61,6 +41,33 @@ try:
    os.mkdir('Results/Kartläggning/Plottar')
 except FileExistsError:
    pass
+
+competencies = {'Hitta och tolka digital information':['SearchingForInfo', 'MapServices', 'EvaluateInformation', 'SpotDeepFake', 'OrganisingFiles', 'SharingFiles'],
+		'Kommunikation och samarbete':['EmailFunctions', 'SharingPictures', 'SharingEvents', 'CollaborationInDocuments',  'CreatingPresentations', 'SharingLargeFiles'],
+		#'Skapa och bearbeta digitalt innehåll':['ImageEditingSoftware', 'InfoGraphics', 'TextFormating', 'Templates', 'ChangingPDFs', 'FreeImages'],
+		'IT-säkerhet':['SafePasswords', 'Phishing', 'Malware', 'Backup', 'PortableDeviceSafety', 'GDPR'],
+		'Problemlösning i digitala miljöer':['SoftwareFreeze', 'FindingSolutions', 'LearningAboutFunctions', 'WifiProblems', 'OnlineMeetingProblems', 'SolvingCrash']}
+
+start_date = datetime.datetime(2022, 9, 1, tzinfo = pytz.UTC)
+end_date = datetime.datetime(2022, 9, 23, tzinfo = pytz.UTC)
+mod = pp.learning_module(competencies, n_sessions = 1, start_date = start_date, end_date = end_date, section_slug = 'kartlggning_av_digital_kompete_5arpp')
+
+# This is temporary. It should not actually target a specific date.
+if use_full_results:
+   mod.import_data('OLI_analytics/Kartläggning/2022_09_22/raw_analytics.tsv', 'OLI_analytics/Kartläggning/2022_09_22/Datashop_af_kartlggning_av_digital_komp.xml', verbose = True)#, previous_mapping_path = 'Results/Kartläggning/Mapping.csv')
+else:
+   mod.import_datashop('OLI_analytics/Kartläggning/2022_09_22/Datashop_af_kartlggning_av_digital_komp.xml')
+mod.export_datashop('Results/Kartläggning/XML_data.csv')
+
+mod.read_participant_IDs('Participant_data/Coaches.xlsx')
+if use_full_results:
+   mod.read_participants_results(database = 'combined', verbose = True)
+else:
+   mod.read_participants_results(database = 'datashop', verbose = True)
+
+mod.describe_module()
+
+
 mod.export_individual_results('Results/Kartläggning/Individer')
 mod.export_individual_feedback('Results/Kartläggning/Återkoppling')
 mod.export_IDs('Results/Kartläggning/IDs.json')

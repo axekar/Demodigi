@@ -453,9 +453,9 @@ class learning_module:
 
             if not (anon_id in answers.keys()):
                answers[anon_id] = {}
-            if not (problem_name in answers[anon_id].keys()):
-               answers[anon_id][problem_name] = {}
-            answers[anon_id][problem_name][time] = []
+            if not (time in answers[anon_id].keys()):
+               answers[anon_id][time] = {}
+            answers[anon_id][time][problem_name] = []
          elif child.tag == 'tool_message' and (not wait_for_next_context_message):
             pass
          elif child.tag == 'tutor_message' and (not wait_for_next_context_message):
@@ -467,39 +467,31 @@ class learning_module:
                is_correct = False
             else:
                print('Cannot figure out if action was completed correctly or not')
-            answers[anon_id][problem_name][time].append(is_correct)
+            answers[anon_id][time][problem_name].append(is_correct)
+      
       
       # We now put the information in a pandas dataframe
       IDs = []
       answer_dates = []
       correct = []
       activity_titles = []
-      for anon_id, problem in answers.items():
-         for problem_name, times in problem.items():
-            # Remove those problems that do not match any skill that we are
-            # trying to test, such as practise problems, feedback, etc
-            matched_skill = match_skill(problem_name)
-            if matched_skill == '':
-               continue
-               
-            for time, answers in sorted(times.items()):
+      for anon_id, times in answers.items():
+         for time, problem_names in sorted(times.items()):
+            for problem_name, answers in problem_names.items():
+               matched_skill = match_skill(problem_name)
+               if matched_skill == '':
+                  continue
                for is_correct in answers:
                   IDs.append(anon_id)
                   activity_titles.append(matched_skill)
                   correct.append(is_correct)
                   answer_dates.append(time)
-
-
-      # We need to figure out the earliest point where we know with certainty
-      # that the participant went on to the next question.
-     # next_question_time = []
-     # for ID, activity_title, date in tqdm.tqdm(zip(IDs, activity_titles, answer_dates)):
          
-
       self.xml_data_full = pd.DataFrame(data={'Student ID (lowercase)':IDs, 'Date Created':answer_dates, 'Activity Title': activity_titles, 'Correct?': correct})
       self.xml_data = self.xml_data_full[(self.start_date < self.xml_data_full['Date Created']) & (self.xml_data_full['Date Created'] < self.end_date)].reset_index()
       self.results_read = True
       return
+
       
    def _infer_mapping_pseudonym_ID(self, verbose = True, previous_mapping_path = None):
       """
