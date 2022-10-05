@@ -553,6 +553,7 @@ class learning_module:
       for lowercaseID, batches in tqdm.tqdm(self.xml_dict.items()):
       
          n_matches = []
+         total_occurrences = []
          match_percentages = []
          for pseudonym in pseudonyms:
             pseudonym_entries = self.raw_data[self.raw_data['Student ID'] == pseudonym]
@@ -576,6 +577,7 @@ class learning_module:
                   n_problems_matched += matched
                   n_problems += 1
             n_matches.append(n_problems_matched)
+            total_occurrences.append(n_problems)
             match_percentages.append(n_problems_matched / n_problems)
         
          match_percentages = np.asarray(match_percentages)
@@ -584,6 +586,7 @@ class learning_module:
          best_match_percentage = match_percentages[best_match_index]
          matched_pseudonym = pseudonyms[best_match_index]
          best_n_matches = n_matches[best_match_index]
+         best_total_occurrences = total_occurrences[best_match_index]
          
          match_percentages[best_match_index] = -np.inf
          second_best_match_index = np.argmax(match_percentages)
@@ -601,7 +604,7 @@ class learning_module:
             mapping['Match reliable'].append(reliable)      
             mapping['Match percentage'].append(best_match_percentage)
             mapping['n matches'].append(best_n_matches)
-            mapping['Total occurrences'].append(best_n_matches)
+            mapping['Total occurrences'].append(best_total_occurrences)
             mapping['Second best match percentage'].append(second_best_match_percentage)
             if reliable:
                mapping_pseudonym_lowercaseID[matched_pseudonym] = lowercaseID.replace('@arbetsformedlingen.se', '')
