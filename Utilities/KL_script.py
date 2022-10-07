@@ -62,19 +62,36 @@ mod.read_participants_results(database = 'datashop')
 # We get some terse text output describing the results on the module.
 mod.describe_module()
 
-# We export a large number of files that will be useful to different
-# people.
+### Export files
+
+# Save a list of all participants.
 mod.export_IDs('Resultat/Kartläggning/IDs.json')
+
+# Data to be delivered to SCB, and also used when sending out reminders
+# to participants who have not started yet.
 mod.export_SCB_data('Resultat/Kartläggning/Prelim_SCB_data.csv')
 hr.convert_SCB_data('Resultat/Kartläggning/Prelim_SCB_data.csv', 'Resultat/Kartläggning/SCB_data.xlsx')
+
+# Save results to be read by the factorial_experiment module
 mod.export_individual_results('Resultat/Kartläggning/Individer')
+
+# Save files of feedback for each individual, which can then be sent to
+# Canvas
 mod.export_individual_feedback('Resultat/Kartläggning/Återkoppling')
-mod.export_full_results('Resultat/Kartläggning/Full_results.csv')
+
+# This currently cannot be used, since we do not have an algorithm that
+# reliably tells us the performance of the individual participants
+#mod.export_full_results('Resultat/Kartläggning/Full_results.csv')
+
+# Make paedagogical plots to give us a hint of the results
 mod.plot_results_by_time('Resultat/Kartläggning/Plottar')
 mod.plot_initial_performance('Resultat/Kartläggning/Plottar')
 
-# To upload feedback to Canvas, it is necessary to have a token for an
-# admin account.
+
+### Upload Canvas feedback
+
+# A token is necessary to demonstrate that you are an admin, with the
+# right to send files to other users.
 token = input("Fyll i en token till ett admin-konto på Canvas:\n")
 message = 'Hej!\n\nDetta är din individuella återkoppling på kartläggningsmodulen.\n\nDetta är ett automatiserat meddelande och går inte att svara på.'
 
