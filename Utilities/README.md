@@ -12,6 +12,8 @@ The current contents of this directory are:
 
 `PP_IS_script`: Script that handles the results of the course module `IT-säkerhet`
 
+`sensitive_data_management`: Module for handling person numbers and similar information
+
 `Obsolete`: Directory containing code that we no longer expect to need
 
 `Feedback_paragraphs`: Directory containing text files with the individual paragraphs that are combined when generating feedback to the individual users
