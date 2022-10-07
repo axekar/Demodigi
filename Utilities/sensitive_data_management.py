@@ -195,7 +195,7 @@ class HR_data:
             elif len(person_number) == 12:
                person_number = person_number[:9] + '-' + person_number[9:]
             else:
-               print('Person number {} does not match format'.format(person_number))
+               print('Person number {} does not match expected format'.format(person_number))
             person_numbers.append(person_number)
             
             region = list(self.HR['Region'][correct_person])[0]
@@ -205,13 +205,13 @@ class HR_data:
             person_numbers.append('Ej känt')
             regions.append('Ej känd')
       person_numbers_pd = pd.DataFrame(data={'Personnummer':person_numbers})
-      regions_nd = np.asarray(regions)
+      regions_pd = pd.DataFrame(data={'Region':regions})
       SCB_prelim['Användarnamn'] = person_numbers_pd['Personnummer']
       SCB_prelim.rename(columns={'Användarnamn': 'Personnummer'}, inplace=True)
       
       with pd.ExcelWriter(target_file_path) as f:
          SCB_prelim.to_excel(f, index = False, sheet_name = 'Samtliga')
          for region in regions:
-            correct_region = regions_nd == region
+            correct_region = regions_pd == region
             SCB_prelim[correct_region].to_excel(f, index = False, sheet_name = region)
       return
