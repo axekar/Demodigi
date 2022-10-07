@@ -12,7 +12,9 @@ The current contents of this directory are:
 
 `sensitive_data_management`: Module for handling person numbers and similar information
 
-`KL_script`: Script that does the routine work related to the course module Kartläggning.
+`user_data_script`: Script that does the routine work related to creating users on Canvas
+
+`KL_script`: Script that does the routine work related to the course module Kartläggning
 
 `Obsolete`: Directory containing code that we no longer expect to need
 
