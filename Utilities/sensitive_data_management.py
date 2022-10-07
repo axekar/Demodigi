@@ -185,6 +185,7 @@ class HR_data:
       SCB_prelim = pd.read_csv(source_file_path, names = ['Användarnamn', 'Uppskattad tid', 'Startdatum', 'Avslutsdatum'], dtype = str, skiprows = [0])
       
       person_numbers = []
+      emails = []
       regions = []
       for ID in SCB_prelim['Användarnamn']:
          try:
@@ -197,25 +198,29 @@ class HR_data:
             else:
                print('Person number {} does not match expected format'.format(person_number))
             person_numbers.append(person_number)
+            emails.append(list(self.HR['e-post'][correct_person])[0])
             
             region = list(self.HR['Region'][correct_person])[0]
             regions.append(region)
          except KeyError:
             print('Could not find person number for user id {}'.format(ID))
             person_numbers.append('Ej känt')
-            regions.append('Ej känd')
-      person_numbers_pd = pd.DataFrame(data={'Personnummer':person_numbers})
-      regions_pd = pd.DataFrame(data={'Region':regions})
-      SCB_prelim['Användarnamn'] = person_numbers_pd['Personnummer']
-      SCB_prelim.rename(columns={'Användarnamn': 'Personnummer'}, inplace=True)
+            emails.append('Ej känd')
+            regions.append('Ej känd')      
+      SCB_first_page = SCB_prelim[['Uppskattad tid', 'Startdatum', 'Avslutsdatum']].copy()
+      SCB_first_page.insert(0, 'Personnummer', person_numbers)
+      
+      SCB_following_pages = SCB_prelim[['Startdatum', 'Avslutsdatum']].copy()
+      SCB_following_pages['e-post'] = emails
+      SCB_following_pages['Region'] = regions
+      
+      all_regions = set(regions)
+      all_regions.discard(np.nan)
       
       with pd.ExcelWriter(target_file_path) as f:
-         SCB_prelim.to_excel(f, index = False, sheet_name = 'Samtliga')
+         SCB_first_page.to_excel(f, index = False, sheet_name = 'Samtliga')
          
-         for region in list(set(regions)):
-            correct_region = regions_pd['Region'] == region
-            try:
-               SCB_prelim[correct_region].to_excel(f, index = False, sheet_name = region)
-            except TypeError:
-               print('Cannot create sheet for region {}'.format(region))
+         for region in sorted(list(all_regions)):
+            correct_region = SCB_following_pages['Region'] == region
+            SCB_following_pages[correct_region].to_excel(f, index = False, sheet_name = region)
       return
