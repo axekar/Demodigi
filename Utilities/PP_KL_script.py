@@ -19,7 +19,7 @@ import pytz
 import preprocessing as pp
 
 # Do we use both datashop and raw_analytics, or just datashop?
-use_full_results = False
+use_full_results = True
 
 try:
    os.mkdir('Results')
