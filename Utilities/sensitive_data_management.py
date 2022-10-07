@@ -191,9 +191,9 @@ class HR_data:
             correct_person = self.HR['5-ställig kod'] == self.mapping_username_code[ID.replace('@arbetsformedlingen.se', '')]
             person_number = list(self.HR['Personnr'][correct_person])[0]
             if len(person_number) == 10:
-               person_number = person_number[:7] + '-' + person_number[7:]
+               person_number = person_number[:6] + '-' + person_number[6:]
             elif len(person_number) == 12:
-               person_number = person_number[:9] + '-' + person_number[9:]
+               person_number = person_number[:8] + '-' + person_number[8:]
             else:
                print('Person number {} does not match expected format'.format(person_number))
             person_numbers.append(person_number)
