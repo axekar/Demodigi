@@ -5,31 +5,24 @@ Python modules created for the project. Hence, it has very verbose
 comments.
 """
 
-import os
 import datetime
 import pytz
 
 import sensitive_data_management as sdm
 import preprocessing as pp
 import canvas_contact as cc
+import extra_functions as ef
 
 # The script will attempt to drop a large number of files in various
 # folders. Hence, it starts by creating those folders, in the event
 # that they do not already exist.
 
-def makefolder(path):
-   try:
-      os.mkdir('Resultat')
-   except FileExistsError:
-      pass
-   return
-
-makefolder('Resultat')
-makefolder('Resultat/Kartläggning')
-makefolder('Resultat/Kartläggning/Individer')
-makefolder('Resultat/Kartläggning/Återkoppling')
-makefolder('Resultat/Kartläggning/Plottar')
-makefolder('Användardata')
+ef.make_folder('Resultat')
+ef.make_folder('Resultat/Kartläggning')
+ef.make_folder('Resultat/Kartläggning/Individer')
+ef.make_folder('Resultat/Kartläggning/Återkoppling')
+ef.make_folder('Resultat/Kartläggning/Plottar')
+ef.make_folder('Användardata')
 
 # This takes the salt which gets used by the hash function to generate
 # the usernames from the 5-character codes.

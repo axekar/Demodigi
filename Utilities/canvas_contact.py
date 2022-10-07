@@ -25,18 +25,12 @@ import requests as r
 import pandas as pd
 import tqdm
 
+import extra_functions as ef
+
 class UnexpectedResponseError(Exception):
     def __init__(self, msg):
         self.msg = msg
         return
-
-
-def make_folder(folder_path):
-   try:
-      os.mkdir(folder_path)
-   except FileExistsError:
-      pass
-   return
 
 def account_name_user_id_mapping(token, verbose = False):
    """
@@ -250,9 +244,9 @@ def send_feedback(account_name_path, feedback_folder_path, self_account, subject
    daily_tracker_folder_path = '{}Daily_deliveries/'.format(tracker_folder_path)
    total_tracker_folder_path = '{}Total_delivered/'.format(tracker_folder_path)
 
-   make_folder(tracker_folder_path)
-   make_folder(daily_tracker_folder_path)
-   make_folder(total_tracker_folder_path)
+   ef.make_folder(tracker_folder_path)
+   ef.make_folder(daily_tracker_folder_path)
+   ef.make_folder(total_tracker_folder_path)
    
    total_tracker_file_path = '{}Current.txt'.format(total_tracker_folder_path)
    if not os.path.isfile(total_tracker_file_path):

@@ -6,6 +6,8 @@ The current contents of this directory are:
 
 `canvas_contact.py`: Module for interacting with the Canvas API, typically to provide individual feedback to the course participants
 
+`extra_functions.py`: Module with useful little functions that do not fit anywhere else
+
 `preprocessing.py`: Module for handling the data that comes out of OLI-Torus, changing it into a format suitable for the `factorial_experiment` module one level further up
 
 `sensitive_data_management`: Module for handling person numbers and similar information
