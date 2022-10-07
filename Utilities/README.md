@@ -8,11 +8,9 @@ The current contents of this directory are:
 
 `preprocessing.py`: Module for handling the data that comes out of OLI-Torus, changing it into a format suitable for the `factorial_experiment` module one level further up
 
-`PP_KL_script`: Script that handles the results of the course module `kartläggning`
-
-`PP_IS_script`: Script that handles the results of the course module `IT-säkerhet`
-
 `sensitive_data_management`: Module for handling person numbers and similar information
+
+`KL_script`: Script that does the routine work related to the course module Kartläggning.
 
 `Obsolete`: Directory containing code that we no longer expect to need
 

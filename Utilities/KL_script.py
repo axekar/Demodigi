@@ -1,5 +1,7 @@
 """
-This script is intended to take results 
+This script is intended for routine tasks related to the OLI Torus
+module Kartläggning. It is also intended to clarify how to use the
+Python modules created for the project.
 """
 
 import os
