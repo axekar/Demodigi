@@ -13,16 +13,11 @@ import preprocessing as pp
 import canvas_contact as cc
 import extra_functions as ef
 
-# The script will attempt to drop a large number of files in various
-# folders. Hence, it starts by creating those folders, in the event
-# that they do not already exist.
-
 ef.make_folder('Resultat')
 ef.make_folder('Resultat/Kartläggning')
 ef.make_folder('Resultat/Kartläggning/Individer')
 ef.make_folder('Resultat/Kartläggning/Återkoppling')
 ef.make_folder('Resultat/Kartläggning/Plottar')
-ef.make_folder('Användardata')
 
 # This takes the salt which gets used by the hash function to generate
 # the usernames from the 5-character codes.
@@ -32,9 +27,6 @@ salt = input("Skriv in det salt som används vid hashningen som skapar användar
 # we assume that it has a specific file name, so this will need to be
 # updated if we get a more up-to-date list.
 hr = sdm.HR_data(salt, "HR-data/Projekt demokratisk digitalisering 220921.xlsx", "Användardata")
-
-# This generates a large number of useful files based on the user data.
-hr.generate_data()
 
 # This is a dictionary describing the four competencies tested in the
 # mapping module, and the individual skills that fall under each
