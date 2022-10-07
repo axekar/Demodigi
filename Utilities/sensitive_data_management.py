@@ -212,6 +212,6 @@ class HR_data:
       with pd.ExcelWriter(target_file_path) as f:
          SCB_prelim.to_excel(f, index = False, sheet_name = 'Samtliga')
          for region in regions:
-            correct_region = regions_pd == region
+            correct_region = regions_pd['Region'] == region
             SCB_prelim[correct_region].to_excel(f, index = False, sheet_name = region)
       return
