@@ -1,7 +1,8 @@
 """
 This script is intended for routine tasks related to the OLI Torus
 module Kartläggning. It is also intended to clarify how to use the
-Python modules created for the project.
+Python modules created for the project. Hence, it has very verbose
+comments.
 """
 
 import os
@@ -12,32 +13,26 @@ import sensitive_data_management as sdm
 import preprocessing as pp
 import canvas_contact as cc
 
-try:
-   os.mkdir('Resultat')
-except FileExistsError:
-   pass
-try:
-   os.mkdir('Resultat/Kartläggning')
-except FileExistsError:
-   pass
-try:
-   os.mkdir('Resultat/Kartläggning/Individer')
-except FileExistsError:
-   pass
-try:
-   os.mkdir('Resultat/Kartläggning/Återkoppling')
-except FileExistsError:
-   pass
-try:
-   os.mkdir('Resultat/Kartläggning/Plottar')
-except FileExistsError:
-   pass
+# The script will attempt to drop a large number of files in various
+# folders. Hence, it starts by creating those folders, in the event
+# that they do not already exist.
+
+def makefolder(path):
+   try:
+      os.mkdir('Resultat')
+   except FileExistsError:
+      pass
+   return
+
+makefolder('Resultat')
+makefolder('Resultat/Kartläggning')
+makefolder('Resultat/Kartläggning/Individer')
+makefolder('Resultat/Kartläggning/Återkoppling')
+makefolder('Resultat/Kartläggning/Plottar')
 
 salt = input("Skriv in det salt som används vid hashningen som skapar användarnamnen:\n")
-try:
-   os.mkdir('Användardata')
-except FileExistsError:
-   pass
+makefolder('Användardata')
+
 hr = sdm.HR_data(salt, "HR-data/Projekt demokratisk digitalisering 220921.xlsx", "Användardata")
 hr.generate_data()
 
