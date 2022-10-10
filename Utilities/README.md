@@ -14,11 +14,11 @@ The current contents of this directory are:
 
 `user_access_script`: Script for the routine task of renewing access for users who have lost it for some reason
 
-`KL_script`: Script that does the routine work related to the course module Kartläggning
+`KL_user_script`: Script that does the routine work related to creating users on Canvas, for the module `Kartläggning`
 
-`KL_data_script`: Script that does the routine work related to creating users on Canvas, for the module `Kartläggning`
+`KL_feedback_script`: Script that does the routine work related to giving feedback, for the module `Kartläggning`
 
-`IS_data_script`: Script that does the routine work related to creating users on Canvas, for the module `IT-säkerhet`
+`IS_user_script`: Script that does the routine work related to creating users on Canvas, for the module `IT-säkerhet`
 
 `Obsolete`: Directory containing code that we no longer expect to need
 
