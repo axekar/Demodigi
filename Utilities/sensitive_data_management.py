@@ -28,11 +28,11 @@ from hash_username import hash_username
 
 class HR_data:
    def __init__(self, salt, source_file_path, target_folder_path):
+      self.salt = salt
       self.source_file_path = source_file_path
       if target_folder_path[-1] != '/':
          target_folder_path += '/'
       self.target_folder_path = target_folder_path
-      self.salt = salt
       self.import_HR_data()
       return
       
@@ -124,23 +124,36 @@ class HR_data:
       self.HR['Efternamn'].to_excel('{}Efternamn.xlsx'.format(self.target_folder_path), index=False)
       return
    
-   def export_email_string(self):
+   def export_email_strings(self, module_versions = ['default']):
       """
       When adding users to courses, we need to cut&paste their pretend emails
       separated by commas
       """
-      mail_list = list(self.SIS_data['email'])
-      n_per_chunk = 1000
-      n_chunks = len(mail_list) // n_per_chunk + 1
+      mail_lists = {}
+      for version in module_versions:
+         mail_lists[version] = []
       
-      chunks = np.array_split(mail_list, n_chunks)
+      for mail, ID in zip(self.SIS_data['email'].values, self.SIS_data['user_id']):
+         version = module_versions[ord(ID[0]) % len(module_versions)]
+         mail_lists[version].append(ID)
+         
+      len_mail_list = 0
+      for version in module_versions:
+         len_mail_list = max(len_mail_list, len(mail_lists[version]))
       
-      for i in range(n_chunks):
-         chunk = chunks[i]
-         mail_string = ', '.join(chunk)
-         f = open('{}email_string_{}.txt'.format(self.target_folder_path, i), 'w')
-         f.write(mail_string)
-         f.close()
+      n_per_chunk = 500
+      n_chunks = len_mail_list // n_per_chunk + 1
+      
+      for version in module_versions:
+         mail_list = mail_lists[version]
+         chunks = np.array_split(mail_list, n_chunks)
+         
+         for i in range(n_chunks):
+            chunk = chunks[i]
+            mail_string = ', '.join(chunk)
+            f = open('{}email_string_{}_{}.txt'.format(self.target_folder_path, version, i), 'w')
+            f.write(mail_string)
+            f.close()
       return
    
    def transform_real_email_to_fake(self, mailstring):
@@ -162,7 +175,7 @@ class HR_data:
             print('No match for {}'.format(mail))
       return ', '.join(IDs)
    
-   def generate_data(self):
+   def generate_data(self, module_versions = ['default']):
       """
       Generate all of the data that different people in the project are likely
       to need.
@@ -171,7 +184,7 @@ class HR_data:
       self.SIS_data.to_csv('{}users.csv'.format(self.target_folder_path), index = False, encoding = 'utf-8')
       self.mail_by_region()
       self.export_bureaucracy()
-      self.export_email_string()
+      self.export_email_strings(module_versions = module_versions)
       return
       
    def emails_from_participant_list(self, source_file_path):
