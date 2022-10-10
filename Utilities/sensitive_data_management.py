@@ -155,10 +155,12 @@ class HR_data:
       IDs = []
       for mail in mails:
          mail = mail.strip()
-         code = self.HR['5-ställig kod'][self.HR['e-post'] == mail].values[0]
-         IDs.append(hash_username(code, self.salt).decode())
-      print(', '.join(IDs))
-      return
+         try:
+            code = self.HR['5-ställig kod'][self.HR['e-post'] == mail].values[0]
+            IDs.append(hash_username(code, self.salt).decode())
+         except IndexError:
+            print('No match for {}'.format(mail))
+      return ', '.join(IDs)
    
    def generate_data(self):
       """

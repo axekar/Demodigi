@@ -14,6 +14,8 @@ The current contents of this directory are:
 
 `user_data_script`: Script that does the routine work related to creating users on Canvas
 
+`user_access_script`: Script for the routine task of renewing access for users who have lost it for some reason
+
 `KL_script`: Script that does the routine work related to the course module Kartläggning
 
 `Obsolete`: Directory containing code that we no longer expect to need
