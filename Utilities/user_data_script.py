@@ -3,12 +3,7 @@ This script is intended for the routine task of creating users for use
 on Canvas.
 """
 
-import datetime
-import pytz
-
 import sensitive_data_management as sdm
-import preprocessing as pp
-import canvas_contact as cc
 import extra_functions as ef
 
 ef.make_folder('Användardata')
