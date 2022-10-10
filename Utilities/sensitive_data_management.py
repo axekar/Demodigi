@@ -143,6 +143,22 @@ class HR_data:
          f.close()
       return
    
+   def transform_real_email_to_fake(self, mailstring):
+      """
+      This is intended to deal with the specific situation where people contact us
+      with their work email and report that they cannot access a course on Canvas.
+      In that case, we want to get a string with the face email addresses used on
+      Canvas as their ideas, so that they can be cut&pasted into the Canvas
+      interface.
+      """
+      mails = mailstring.split(',')
+      IDs = []
+      for mail in mails:
+         mail = mail.strip()
+         code = self.HR['5-ställig kod'][self.HR['e-post'] == mail].values[0]
+         IDs.append(hash_username(code, self.salt).decode())
+      print(', '.join(IDs))
+      return
    
    def generate_data(self):
       """
