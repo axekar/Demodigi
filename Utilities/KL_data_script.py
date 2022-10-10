@@ -1,6 +1,6 @@
 """
-This script is intended for the routine task of creating users for use
-on Canvas.
+This script is intended for the routine task of creating users on Canvas
+and giving them access to courses.
 """
 
 import sensitive_data_management as sdm
