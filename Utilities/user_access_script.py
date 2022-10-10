@@ -19,6 +19,6 @@ hr = sdm.HR_data(salt, "HR-data/Projekt demokratisk digitalisering 220921.xlsx",
 
 emails = input("Skriv in jobbmailaddresserna, skilda med kommatecken och mellanslag, för personerna som behöver få access till lärmodulen på Canvas:\n")
 
-IDs = hr.transform_real_email_to_fake(emails)
-print('Klipp-och-klistra följande mailaddresser till Canvas:')
+IDs = hr.transform_workmail_to_ID(emails)
+print('Klipp-och-klistra följande ID:n till Canvas:')
 print(IDs)

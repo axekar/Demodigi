@@ -157,7 +157,7 @@ class HR_data:
          mail = mail.strip()
          try:
             code = self.HR['5-ställig kod'][self.HR['e-post'] == mail].values[0]
-            IDs.append(hash_username(code, self.salt).decode())
+            IDs.append(hash_username(code, self.salt).decode() + '@arbetsformedlingen.se')
          except IndexError:
             print('No match for {}'.format(mail))
       return ', '.join(IDs)
