@@ -18,7 +18,9 @@ salt = input("Skriv in det salt som används vid hashningen som skapar användar
 hr = sdm.HR_data(salt, "HR-data/Projekt demokratisk digitalisering 220921.xlsx", "Användardata")
 
 emails = input("Skriv in jobbmailaddresserna, skilda med kommatecken och mellanslag, för personerna som behöver få access till lärmodulen på Canvas:\n")
+print('')
 
-IDs = hr.transform_real_email_to_fake(emails)
-print('Klipp-och-klistra följande mailaddresser till Canvas:')
-print(IDs)
+IDs = hr.transform_real_email_to_fake(emails, ['Default'])
+print('\nKlipp-och-klistra följande mailaddresser till Canvas-sidan för kartläggningsmodulen:')
+print(IDs['Default'])
+print('')

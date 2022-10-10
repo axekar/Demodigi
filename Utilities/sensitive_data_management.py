@@ -156,7 +156,7 @@ class HR_data:
             f.close()
       return
    
-   def transform_real_email_to_fake(self, mailstring):
+   def transform_real_email_to_fake(self, mailstring, module_versions = ['default']):
       """
       This is intended to deal with the specific situation where people contact us
       with their work email and report that they cannot access a course on Canvas.
@@ -165,15 +165,24 @@ class HR_data:
       interface.
       """
       mails = mailstring.split(',')
-      IDs = []
+      fake_mails = {}
+      for version in module_versions:
+         fake_mails[version] = []
+      
       for mail in mails:
          mail = mail.strip()
          try:
             code = self.HR['5-ställig kod'][self.HR['e-post'] == mail].values[0]
-            IDs.append(hash_username(code, self.salt).decode() + '@arbetsformedlingen.se')
+            ID = hash_username(code, self.salt).decode()
+            version = module_versions[ord(ID[0]) % len(module_versions)]
+            fake_mails[version].append('{}@arbetsformedlingen.se'.format(ID))
          except IndexError:
             print('No match for {}'.format(mail))
-      return ', '.join(IDs)
+           
+      mail_strings = {} 
+      for version in module_versions:
+         mail_strings[version] = ', '.join(fake_mails[version])
+      return mail_strings
    
    def generate_data(self, module_versions = ['default']):
       """

@@ -12,13 +12,15 @@ The current contents of this directory are:
 
 `sensitive_data_management`: Module for handling person numbers and similar information
 
-`user_access_script`: Script for the routine task of renewing access for users who have lost it for some reason
-
 `KL_user_script`: Script that does the routine work related to creating users on Canvas, for the module `Kartläggning`
+
+`KL_access_script`: Script for the routine task of renewing access to the module `Kartläggning` for users who have lost it for some reason
 
 `KL_feedback_script`: Script that does the routine work related to giving feedback, for the module `Kartläggning`
 
 `IS_user_script`: Script that does the routine work related to creating users on Canvas, for the module `IT-säkerhet`
+
+`IS_access_script`: Script for the routine task of renewing access to the module `IT-säkerhet` for users who have lost it for some reason
 
 `Obsolete`: Directory containing code that we no longer expect to need
 
