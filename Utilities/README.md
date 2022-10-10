@@ -12,13 +12,15 @@ The current contents of this directory are:
 
 `sensitive_data_management`: Module for handling person numbers and similar information
 
-`KL_user_script`: Script that does the routine work related to creating users on Canvas, for the module `Kartläggning`
+`canvas_user_script`: Script that creates the SIS datafile necessary to create users on Canvas.
+
+`KL_user_script`: Script that does the routine work related to giving users access to the module `Kartläggning`
 
 `KL_access_script`: Script for the routine task of renewing access to the module `Kartläggning` for users who have lost it for some reason
 
 `KL_feedback_script`: Script that does the routine work related to giving feedback, for the module `Kartläggning`
 
-`IS_user_script`: Script that does the routine work related to creating users on Canvas, for the module `IT-säkerhet`
+`IS_user_script`: Script that does the routine work related to giving users access to the module `IT-säkerhet`
 
 `IS_access_script`: Script for the routine task of renewing access to the module `IT-säkerhet` for users who have lost it for some reason
 

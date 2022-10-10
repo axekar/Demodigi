@@ -99,9 +99,13 @@ class HR_data:
          last_name.append('Student')
          fake_emails.append('{}@arbetsformedlingen.se'.format(ID))
          status.append('active')
-      SIS_data = pd.DataFrame(data={'user_id':user_IDs, 'login_id':login_IDs, 'authentication_provider_id':authentication_provider, 'first_name':first_name, 'last_name':last_name, 'email':fake_emails, 'status':status})
-      return SIS_data
-    
+      self.SIS_data = pd.DataFrame(data={'user_id':user_IDs, 'login_id':login_IDs, 'authentication_provider_id':authentication_provider, 'first_name':first_name, 'last_name':last_name, 'email':fake_emails, 'status':status})
+      return
+   
+   def export_SIS_data(self):
+      self.SIS_data.to_csv('{}users.csv'.format(self.target_folder_path), index = False, encoding = 'utf-8')
+      return
+   
    def mail_by_region(self):
       """
       Make lists of email adresses per region.
@@ -189,8 +193,8 @@ class HR_data:
       Generate all of the data that different people in the project are likely
       to need.
       """
-      self.SIS_data = self.make_SIS_data()
-      self.SIS_data.to_csv('{}users.csv'.format(self.target_folder_path), index = False, encoding = 'utf-8')
+      self.make_SIS_data()
+      self.export_SIS_data()
       self.mail_by_region()
       self.export_bureaucracy()
       self.export_email_strings(module_versions = module_versions)
