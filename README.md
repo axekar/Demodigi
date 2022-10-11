@@ -12,9 +12,9 @@ The current contents of the repository are:
 
 `FE_minimal_size_script.py`: Script using the module `factorial_experiment` to try to find the minimal number of participants that we need in order to measure the effects that we are interested in.
 
-`FE_mapping_module_script.py`: Script for analysing data from the course module `Kartläggning`, which have already been rewritten into a format readable by the `Factorial_experiment` module by the module `Preprocessing`, which is found in the directory `Utilities`
+`KL_analysis_script.py`: Script for analysing data from the course module `Kartläggning`, which have already been rewritten into a format readable by the `Factorial_experiment` module by the module `preprocessing`, which is found in the directory `Utilities`
 
-`FE_digital_safety_script.py`: Script for analysing data from the course module `IT-säkerhet`, which have already been rewritten into a format readable by the `Factorial_experiment` module by the module `Preprocessing`, which is found in the directory `Utilities`
+`IS_analysis__script.py`: Script for analysing data from the course module `IT-säkerhet`, which have already been rewritten into a format readable by the `Factorial_experiment` module by the module `preprocessing`, which is found in the directory `Utilities`
 
 `behavioural_experiment.py`: Python module for simulating a behavioural experiment that we plan to do as part of the study. With time, I will also add code for analysing the results of the actual experiment.
 
