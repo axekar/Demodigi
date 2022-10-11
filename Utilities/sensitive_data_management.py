@@ -248,7 +248,7 @@ class HR_data:
          mail = mail.strip()
          try:
             index = (self.HR['e-post'] == mail)
-            ID = self.usernames[index]
+            ID = self.usernames[index][0]
             
             flags = []
             for manipulation in self.manipulations:
