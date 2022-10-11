@@ -1060,14 +1060,19 @@ class learning_module:
          for skill in self.competencies[competence]:
             n_correct += participant.correct_from_start[skill]
          already_known[n_correct] += 1
-      plt.clf()
-      plt.bar(x, already_known, color = colors, edgecolor='black')
-      plt.ylim(0, self.n_participants)
-      plt.xlabel('Antal rätt')
-      plt.ylabel('Antal deltagare')
-      plt.title(competence)
-      plt.tight_layout()
-      plt.savefig('{}{}_per_antal_rätt.png'.format(folder_path, competence.replace(' ', '_')))
+         
+      for extension in ['', '_normaliserad']:
+         plt.clf()
+         plt.bar(x, already_known, color = colors, edgecolor='black')
+         if extension == '_normaliserad':
+            plt.ylim(0, self.n_participants)
+         else:
+            plt.ylim(0, max(already_known))
+         plt.xlabel('Antal rätt')
+         plt.ylabel('Antal deltagare')
+         plt.title(competence)
+         plt.tight_layout()
+         plt.savefig('{}{}_per_antal_rätt{}.png'.format(folder_path, competence.replace(' ', '_'), extension))
       return
 
    def plot_performance_per_skill_for_competence(self, folder_path, competence):
@@ -1090,14 +1095,19 @@ class learning_module:
          for i in range(n_skill_for_this_competency):
             skill = self.competencies[competence][i]
             already_known[i] += np.all(participant.correct_first_try.loc[:, skill])
-      plt.clf()
-      plt.bar(x, already_known)
-      plt.xticks(ticks=x, labels=self.competencies[competence], rotation=90)
-      plt.ylim(0, self.n_participants)
-      plt.ylabel('Deltagare med rätt på första försöket')
-      plt.title(competence)
-      plt.tight_layout()
-      plt.savefig('{}{}_per_skill.png'.format(folder_path, competence.replace(' ', '_')))
+            
+      for extension in ['', '_normaliserad']:
+         plt.clf()
+         plt.bar(x, already_known)
+         plt.xticks(ticks=x, labels=self.competencies[competence], rotation=90)
+         if extension == '_normaliserad':
+            plt.ylim(0, self.n_participants)
+         else:
+            plt.ylim(0, max(already_known))
+         plt.ylabel('Deltagare med rätt på första försöket')
+         plt.title(competence)
+         plt.tight_layout()
+         plt.savefig('{}{}_per_skill{}.png'.format(folder_path, competence.replace(' ', '_'), extension))
       return
 
    def plot_initial_performance(self, folder_path):
