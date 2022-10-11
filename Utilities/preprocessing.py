@@ -399,7 +399,7 @@ class learning_module:
       self.results_read = True
       return
       
-   def import_datashop(self, filepath, verbose = False):
+   def import_datashop(self, filepaths, verbose = False):
       """
       This imports an XML file following the format specified at
       
@@ -409,6 +409,10 @@ class learning_module:
       followed by one or more pairs of first tool_message and tutor_message.
       Internally, these are ordered in time, but the whole batch of context,
       tool and tutor messages need not be ordered with respect to others.
+      
+      The import function can be given one or many filepaths. In the latter
+      case, they must come from courses that are considered separate in OLI
+      Torus, but which contain questions with the same names.
       """
       def match_skill(problem_name):
          """
@@ -423,51 +427,59 @@ class learning_module:
                   matched_skill = mixedcase_name
          return matched_skill
 
-      tree = et.parse(filepath)
-      root = tree.getroot()
+      if type(filepaths) == str:
+         filepaths = [filepaths]
+
+
       
       # We make a first run to pick out the relevant information and store it
       # in a way that will allow us to pick out the attempt number.
       answers = {}
       
-      # Some questions do not match the standard format for problems in the
-      # XML file. They should simply be ignored.
-      wait_for_next_context_message = False
       
-      for child in root:
-         if child.tag == 'context_message':
-            meta = child.findall('meta')[0]
-            anon_id = meta.findall('user_id')[0].text
-            time_str = meta.findall('time')[0].text
-            # The Datashop file says that the timezone is GMT, but that is the same thing as UTC
-            time = datetime.datetime.strptime(time_str, _xml_date_format).replace(tzinfo=datetime.timezone.utc)
+      for filepath in filepaths:
+         tree = et.parse(filepath)
+         root = tree.getroot()
+      
+         # Some questions do not match the standard format for problems in the
+         # XML file. They should simply be ignored.
+         wait_for_next_context_message = False
+      
+         for child in root:
+            if child.tag == 'context_message':
+               meta = child.findall('meta')[0]
+               anon_id = meta.findall('user_id')[0].text
+               time_str = meta.findall('time')[0].text
+               # The Datashop file says that the timezone is GMT, but that is the same thing as UTC
+               time = datetime.datetime.strptime(time_str, _xml_date_format).replace(tzinfo=datetime.timezone.utc)
             
-            try:
-               full_problem_name = child.findall('dataset')[0].findall('level')[0].findall('level')[0].findall('problem')[0].findall('name')[0].text
-            except IndexError:
-               wait_for_next_context_message = True
-               continue
-            wait_for_next_context_message = False
+               try:
+                  full_problem_name = child.findall('dataset')[0].findall('level')[0].findall('level')[0].findall('problem')[0].findall('name')[0].text
+               except IndexError:
+                  wait_for_next_context_message = True
+                  continue
+               wait_for_next_context_message = False
             
-            problem_name = full_problem_name.split(' ')[1][:-1]
+               problem_name = full_problem_name.split(' ')[1][:-1]
 
-            if not (anon_id in answers.keys()):
-               answers[anon_id] = {}
-            if not (time in answers[anon_id].keys()):
-               answers[anon_id][time] = {}
-            answers[anon_id][time][problem_name] = []
-         elif child.tag == 'tool_message' and (not wait_for_next_context_message):
-            pass
-         elif child.tag == 'tutor_message' and (not wait_for_next_context_message):
-            action_eval = child.findall('action_evaluation')[0].text
+               if not (anon_id in answers.keys()):
+                  answers[anon_id] = {}
+               if not (time in answers[anon_id].keys()):
+                  answers[anon_id][time] = {}
+               if not (problem_name in answers[anon_id][time].keys()):
+                  answers[anon_id][time][problem_name] = []
+            elif child.tag == 'tool_message' and (not wait_for_next_context_message):
+               pass
+            elif child.tag == 'tutor_message' and (not wait_for_next_context_message):
+               action_eval = child.findall('action_evaluation')[0].text
             
-            if action_eval == 'CORRECT':
-               is_correct = True
-            elif action_eval == 'INCORRECT':
-               is_correct = False
-            else:
-               print('Cannot figure out if action was completed correctly or not')
-            answers[anon_id][time][problem_name].append(is_correct)
+               if action_eval == 'CORRECT':
+                  is_correct = True
+               elif action_eval == 'INCORRECT':
+                  is_correct = False
+               else:
+                  print('Cannot figure out if action was completed correctly or not')
+               answers[anon_id][time][problem_name].append(is_correct)
 
       # Prepare to store the information in better structured ways
       IDs = []
