@@ -103,5 +103,5 @@ cc.send_feedback('Användardata/Användarnamn.xlsx', 'Resultat/Kartläggning/Åt
 
 # We create a list of mail adresses to the people who just received
 # feedback.
-today = datetime.today().strftime('%Y-%m-%d')
+today = datetime.datetime.today().strftime('%Y-%m-%d')
 hr.emails_from_participant_list('Resultat/Kartläggning/Återkoppling/Tracker/Daily_deliveries/{}.txt'.format(today))
