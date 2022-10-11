@@ -15,7 +15,7 @@ salt = input("Skriv in det salt som används vid hashningen som skapar användar
 # We will need to read a list of data from the HR department. Right now
 # we assume that it has a specific file name, so this will need to be
 # updated if we get a more up-to-date list.
-hr = sdm.HR_data(salt, "HR-data/Projekt demokratisk digitalisering 220921.xlsx", "Användardata")
+hr = sdm.HR_data(salt, "HR-data/Projekt demokratisk digitalisering 220921.xlsx", "Användardata", manipulations = ['Impure_QBL'])
 
 # This generates a large number of useful files based on the user data.
-hr.generate_data(['QBL', 'PQBL'])
+hr.generate_data()

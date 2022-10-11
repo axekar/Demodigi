@@ -21,19 +21,26 @@ https://github.com/Alvin-Gavel/Demodigi
 import os
 import numpy as np
 
+import json
 import pandas as pd
+import base64
+import hashlib as hl
    
 # This module is secret, meaning it cannot be included in the repository.
 from hash_username import hash_username
 
 class HR_data:
-   def __init__(self, salt, source_file_path, target_folder_path):
+   def __init__(self, salt, source_file_path, target_folder_path, manipulations = []):
       self.salt = salt
       self.source_file_path = source_file_path
       if target_folder_path[-1] != '/':
          target_folder_path += '/'
       self.target_folder_path = target_folder_path
       self.import_HR_data()
+      self.make_usernames()
+      self.manipulations = manipulations
+      self.flags = self.flag_manipulations()
+      self.versions = self.infer_version_names()
       return
       
    def make_usernames(self):
@@ -51,9 +58,50 @@ class HR_data:
          IDs.append(ID)
          self.mapping_code_username[code] = ID
          self.mapping_username_code[ID] = code
+      self.usernames = np.asarray(IDs)
+      self.n_users = len(self.usernames)
       self.mapping = pd.DataFrame(data={'user_id': IDs, '5-ställig kod':codes})
       self.mapping.to_csv('{}mapping.csv'.format(self.target_folder_path), index = False)
       return
+   
+   def infer_version_names(self):
+      """
+      Based on the n manipulations, come up with names for the 2^n versions
+      of the learning modules that will need to exist on Canvas.
+      """
+      versions = set([])
+      for i in range(self.n_users):
+         flags = []
+         for manipulation in self.manipulations:
+            if self.flags[manipulation][i]:
+               flags.append(manipulation)
+         version = ", ".join(flags)
+         if version == "":
+            version = "default"
+         if not (version in versions):
+            versions.add(version)
+      return versions
+   
+   def flag_manipulations(self):
+      """
+      Flag all participants according to a list of manipulations. This is
+      done in a way that is in principle deterministic, but where there is
+      no correlation between who the user is any what manipulations they get
+      assigned to.
+      """
+      flags = {}
+      for manipulation in self.manipulations:
+         flags[manipulation] = []
+      
+      for code in self.HR['5-ställig kod'].values:
+         for manipulation in self.manipulations:
+            hashed = hl.sha1('{}{}'.format(code,manipulation).encode(encoding='UTF-8'))
+            digested = hashed.digest()
+            b64encoded = base64.b64encode(digested)
+            flags[manipulation].append(b64encoded[0] % 2 == 0)
+      for manipulation in self.manipulations:
+         flags[manipulation] = np.asarray(flags[manipulation])
+      return flags
          
    def import_HR_data(self, verbose = True):
       """
@@ -76,7 +124,6 @@ class HR_data:
       for key in HR.keys():
          HR[key] = HR[key].str.strip()
       self.HR = HR
-      self.make_usernames()
       return
 
    def make_SIS_data(self):
@@ -128,39 +175,63 @@ class HR_data:
       self.HR['Efternamn'].to_excel('{}Efternamn.xlsx'.format(self.target_folder_path), index=False)
       return
    
-   def export_email_strings(self, module_versions = ['default']):
+   def export_manipulations(self):
+      """
+      Export a file of manipulation flags, which can be read by the
+      module factorial_experiment
+      """
+      jsonable_manipulations = []
+      jsonable_flags = {}
+      for manipulation in self.manipulations:
+         jsonable_manipulations.append(manipulation)
+         jsonable_flags[manipulation] = self.flags[manipulation].tolist()
+      f = open('{}Manipulations.json'.format(self.target_folder_path), 'w')
+      packed = json.dumps({'IDs':self.SIS_data['user_id'].values.tolist(), 'Manipulations': jsonable_manipulations, 'Manipulation flags':jsonable_flags})
+      f.write(packed)
+      f.close()
+      return
+
+   def export_email_strings(self):
       """
       When adding users to courses, we need to cut&paste their pretend emails
       separated by commas
       """
       mail_lists = {}
-      for version in module_versions:
+      for version in self.versions:
          mail_lists[version] = []
       
-      for mail, ID in zip(self.SIS_data['email'].values, self.SIS_data['user_id']):
-         version = module_versions[ord(ID[0]) % len(module_versions)]
+      for i in range(self.n_users):
+         mail = self.SIS_data['email'].values[i]
+         ID = self.SIS_data['user_id'].values[i]
+         flags = []
+         for manipulation in self.manipulations:
+            if self.flags[manipulation][i]:
+               flags.append(manipulation)
+         version = ", ".join(flags)
+         if version == '':
+            version = 'default'
          mail_lists[version].append(ID)
          
       len_mail_list = 0
-      for version in module_versions:
+      for version in self.versions:
          len_mail_list = max(len_mail_list, len(mail_lists[version]))
       
       n_per_chunk = 500
       n_chunks = len_mail_list // n_per_chunk + 1
       
-      for version in module_versions:
+      for version in self.versions:
          mail_list = mail_lists[version]
          chunks = np.array_split(mail_list, n_chunks)
          
          for i in range(n_chunks):
             chunk = chunks[i]
-            mail_string = ', '.join(chunk)
+            mail_string = ', '.join(chunk)            
             f = open('{}email_string_{}_{}.txt'.format(self.target_folder_path, version, i), 'w')
             f.write(mail_string)
             f.close()
       return
    
-   def transform_real_email_to_fake(self, mailstring, module_versions = ['default']):
+   def transform_real_email_to_fake(self, mailstring):
       """
       This is intended to deal with the specific situation where people contact us
       with their work email and report that they cannot access a course on Canvas.
@@ -170,25 +241,33 @@ class HR_data:
       """
       mails = mailstring.split(',')
       fake_mails = {}
-      for version in module_versions:
+      for version in self.versions:
          fake_mails[version] = []
       
       for mail in mails:
          mail = mail.strip()
          try:
-            code = self.HR['5-ställig kod'][self.HR['e-post'] == mail].values[0]
-            ID = hash_username(code, self.salt).decode()
-            version = module_versions[ord(ID[0]) % len(module_versions)]
+            index = (self.HR['e-post'] == mail)
+            ID = self.usernames[index]
+            
+            flags = []
+            for manipulation in self.manipulations:
+               if self.flags[manipulation][index]:
+                  flags.append(manipulation)
+            version = ", ".join(flags)
+            if version == '':
+               version = 'default'
+            
             fake_mails[version].append('{}@arbetsformedlingen.se'.format(ID))
          except IndexError:
             print('No match for {}'.format(mail))
            
       mail_strings = {} 
-      for version in module_versions:
+      for version in self.versions:
          mail_strings[version] = ', '.join(fake_mails[version])
       return mail_strings
    
-   def generate_data(self, module_versions = ['default']):
+   def generate_data(self, manipulations = ['']):
       """
       Generate all of the data that different people in the project are likely
       to need.
@@ -196,8 +275,9 @@ class HR_data:
       self.make_SIS_data()
       self.export_SIS_data()
       self.mail_by_region()
+      self.export_manipulations()
       self.export_bureaucracy()
-      self.export_email_strings(module_versions = module_versions)
+      self.export_email_strings()
       return
       
    def emails_from_participant_list(self, source_file_path):
