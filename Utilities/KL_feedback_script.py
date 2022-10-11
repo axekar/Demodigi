@@ -90,13 +90,16 @@ mod.plot_initial_performance('Resultat/Kartläggning/Plottar')
 
 ### Upload Canvas feedback
 
-# A token is necessary to demonstrate that you are an admin, with the
-# right to send files to other users.
-token = input("Fyll i en token till ett lärar-konto på Canvas:\n")
+# First, you need to specify what account to send feedback from. This
+# will need to be a teacher account.
+account_name = input("Skriv in ditt inloggnings-ID på Canvas:\n")
+
+# Next, you need to give a token for that account
+token = input("Fyll i en token till ditt konto på Canvas:\n")
 message = 'Hej!\n\nDetta är din individuella återkoppling på kartläggningsmodulen.\n\nDetta är ett automatiserat meddelande och går inte att svara på.'
 
 # We upload the feedback.
-cc.send_feedback('Användardata/Användarnamn.xlsx', 'Resultat/Kartläggning/Återkoppling', 'alvin.gavel@arbetsformedlingen.se', 'Återkoppling på kartläggningsmodul', message, token, test = False, verbose = True)
+cc.send_feedback('Användardata/Användarnamn.xlsx', 'Resultat/Kartläggning/Återkoppling', account_name, 'Återkoppling på kartläggningsmodul', message, token, test = False, verbose = True)
 
 # We create a list of mail adresses to the people who just received
 # feedback.
