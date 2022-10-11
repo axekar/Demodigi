@@ -92,7 +92,7 @@ mod.plot_initial_performance('Resultat/Kartläggning/Plottar')
 
 # A token is necessary to demonstrate that you are an admin, with the
 # right to send files to other users.
-token = input("Fyll i en token till ett admin-konto på Canvas:\n")
+token = input("Fyll i en token till ett lärar-konto på Canvas:\n")
 message = 'Hej!\n\nDetta är din individuella återkoppling på kartläggningsmodulen.\n\nDetta är ett automatiserat meddelande och går inte att svara på.'
 
 # We upload the feedback.
