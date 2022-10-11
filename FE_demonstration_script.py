@@ -26,8 +26,11 @@ which has to be in the same directory as the script is run in.
 that were saved by save_results.
 """
 
+import os
+
 import factorial_experiment as fe
 import numpy.random as rd
+
 
 # Prints verbose output describing the simulated study
 print_results = True
@@ -44,6 +47,21 @@ save_results = True
 # Test that loading the results works
 load_results = True
 
+
+# Create directories for saving data in
+
+try:
+   os.mkdir('Simulated_results')
+except FileExistsError:
+   pass
+try:
+   os.mkdir('Simulated_results/Plots')
+except FileExistsError:
+   pass
+try:
+   os.mkdir('Simulated_results/Individuals')
+except FileExistsError:
+   pass
 
 # We introduce two known BBVs, one which affects both initial skill and
 # the effectiveness of the intervention, and one which affects only the
@@ -120,10 +138,10 @@ if print_results:
    demo_group.describe()
 demo_group.run_simulation()
 if save_results:
-   demo_group.save_ids('simulated_participants.json')
-   demo_group.save_BBVs('simulated_BBVs.json')
-   demo_group.save_manipulations('simulated_manipulations.json')
-   demo_group.save_results('Simulated_results')
+   demo_group.save_ids('Simulated_results/Participants.json')
+   demo_group.save_BBVs('Simulated_results/BBVs.json')
+   demo_group.save_manipulations('Simulated_results/Manipulations.json')
+   demo_group.save_results('Simulated_results/Individuals')
 
 
 # Everything is put together into a study, which is then run and the
@@ -136,7 +154,7 @@ trial_study.do_tests()
 if print_results:
    trial_study.summarise_results()
 if plot_results:
-   trial_study.plot_folder = 'DD_plots'
+   trial_study.plot_folder = 'Simulated_results/Plots'
    trial_study.plot_results()
    trial_study.plot_participants()
 
@@ -145,8 +163,7 @@ if plot_results:
 
 if load_results:
    print('Loading saved data...')
-   loaded_learning_module = fe.real_learning_module(n_skills, n_sessions, 'simulated_participants.json', 'simulated_BBVs.json', 'Simulated_results', boundaries = bounds)
-   loaded_learning_module.load_manipulations('simulated_manipulations.json')
+   loaded_learning_module = fe.real_learning_module(n_skills, n_sessions, 'Simulated_results/Participants.json', 'Simulated_results/Individuals', 'Simulated_results/Manipulations.json', BBV_path = 'Simulated_results/BBVs.json', boundaries = bounds)
    loaded_study = fe.study('Demonstration of loading', loaded_learning_module)
    loaded_study.do_tests()
    if print_results:
