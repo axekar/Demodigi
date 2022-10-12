@@ -172,7 +172,7 @@ class HR_data:
          roles.append('student')
          status.append('inactive')
       SIS_kickout = pd.DataFrame(data={'course_id': course_IDs, 'user_id':user_IDs, 'role':roles, 'status':status})
-      SIS_kickout.to_csv('{}kickout.csv'.format(self.target_folder_path), index = False, encoding = 'utf-8')
+      SIS_kickout.to_csv('{}enrollments.csv'.format(self.target_folder_path), index = False, encoding = 'utf-8')
       return
    
    def mail_by_region(self):
