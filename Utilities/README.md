@@ -24,6 +24,8 @@ The current contents of this directory are:
 
 `IS_access_script`: Script for the routine task of renewing access to the module `IT-säkerhet` for users who have lost it for some reason
 
+`IS_kickout_script`: Script for inactivating every user on the module `IT-säkerhet`. Obviously, this is not a routine task and should only be used if you are really, really sure that you know what you are doing.
+
 `Obsolete`: Directory containing code that we no longer expect to need
 
 `Feedback_paragraphs`: Directory containing text files with the individual paragraphs that are combined when generating feedback to the individual users

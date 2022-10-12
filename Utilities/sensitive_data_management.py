@@ -138,7 +138,7 @@ class HR_data:
       last_name = []
       fake_emails = []
       status = []
-      for ID in self.mapping['user_id']:
+      for ID in self.usernames:
          user_IDs.append(ID)
          login_IDs.append(ID)
          authentication_provider.append('openid_connect')
@@ -151,6 +151,28 @@ class HR_data:
    
    def export_SIS_data(self):
       self.SIS_data.to_csv('{}users.csv'.format(self.target_folder_path), index = False, encoding = 'utf-8')
+      return
+   
+   def make_SIS_kickout_file(self, course_ID):
+      """
+      Given a list of five-character codes and a salt, this creates the basis
+      for a SIS file which will kick them out from a course. This can come in
+      handy, since the graphical user interface for Canvas does not have a
+      bulk remove function, meaning that people have to be removed manually.
+      Since we have in the order of thousands of users, this can be very
+      tedious.
+      """
+      course_IDs = []
+      user_IDs = []
+      roles = []
+      status = []
+      for ID in self.usernames:
+         course_IDs.append(course_ID)
+         user_IDs.append(ID)
+         roles.append('student')
+         status.append('inactive')
+      SIS_kickout = pd.DataFrame(data={'course_id': course_IDs, 'user_id':user_IDs, 'role':roles, 'status':status})
+      SIS_kickout.to_csv('{}kickout.csv'.format(self.target_folder_path), index = False, encoding = 'utf-8')
       return
    
    def mail_by_region(self):
