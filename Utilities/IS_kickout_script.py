@@ -23,4 +23,4 @@ salt = input("Skriv in det salt som används vid hashningen som skapar användar
 hr = sdm.HR_data(salt, "HR-data/Projekt demokratisk digitalisering 220921.xlsx", "Användardata/IT-säkerhet")
 
 # This generates a large number of useful files based on the user data.
-hr.make_SIS_kickout_file('111')
+hr.make_SIS_kickout_file('IT_security_module')
