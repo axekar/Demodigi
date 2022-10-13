@@ -14,6 +14,8 @@ The current contents of this directory are:
 
 `canvas_user_script`: Script that creates the SIS datafile necessary to create users on Canvas.
 
+`module_kickout_script`: Script for inactivating users on a module. Obviously, this is not a routine task and should only be used if you are sure that you know what you are doing.
+
 `KL_user_script`: Script that does the routine work related to giving users access to the module `Kartläggning`
 
 `KL_access_script`: Script for the routine task of renewing access to the module `Kartläggning` for users who have lost it for some reason
@@ -24,7 +26,6 @@ The current contents of this directory are:
 
 `IS_access_script`: Script for the routine task of renewing access to the module `IT-säkerhet` for users who have lost it for some reason
 
-`IS_kickout_script`: Script for inactivating every user on the module `IT-säkerhet`. Obviously, this is not a routine task and should only be used if you are really, really sure that you know what you are doing.
 
 `Obsolete`: Directory containing code that we no longer expect to need
 
