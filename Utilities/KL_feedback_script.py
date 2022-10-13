@@ -55,7 +55,7 @@ mod = pp.learning_module(competencies, n_sessions = 1, start_date = start_date, 
 mod.import_datashop('OLI_analytics/Kartläggning/datashop/Datashop_af_kartlggning_av_digital_komp.xml')
 
 # We read the list of user names, which must previously have been
-# created by the user_data_script
+# created by the canvas_user_script
 mod.read_participant_IDs('Användardata/Användarnamn.xlsx')
 mod.read_participants_results(database = 'datashop')
 
