@@ -430,13 +430,9 @@ class learning_module:
       if type(filepaths) == str:
          filepaths = [filepaths]
 
-
-      
       # We make a first run to pick out the relevant information and store it
       # in a way that will allow us to pick out the attempt number.
       answers = {}
-      
-      
       for filepath in filepaths:
          tree = et.parse(filepath)
          root = tree.getroot()
@@ -540,9 +536,9 @@ class learning_module:
    def _infer_mapping_pseudonym_ID(self, verbose = True):
       """
       See the internal DD document 'Datashop och raw analytics' for an
-      explanation of what this method does and why.
+      explanation of what this method does and why. Note that at the moment
+      *IT DOES NOT WORK*, so it will need fixing if you want to use it.
       """
-      
       n_lowercaseID = len(self.xml_dict)
       
       pseudonyms = list(set(self.raw_data['Student ID']))
