@@ -326,7 +326,10 @@ class HR_data:
    def convert_SCB_data(self, source_file_path, target_file_path):
       """
       Take a preliminary SCB file and transform it into a final file. This
-      file contains one sheet of 
+      file contains one sheet of data to be delivered directly to SCB. It
+      also has one sheet per department which contains email addresses, and
+      can be used to send reminders for people who are late with doing the
+      course.
       """
       SCB_prelim = pd.read_csv(source_file_path, names = ['Användarnamn', 'Uppskattad tid', 'Startdatum', 'Avslutsdatum'], dtype = str, skiprows = [0])
       
