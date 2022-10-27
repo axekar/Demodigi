@@ -15,7 +15,7 @@ salt = input("Skriv in det salt som används vid hashningen som skapar användar
 # We will need to read a list of data from the HR department. Right now
 # we assume that it has a specific file name, so this will need to be
 # updated if we get a more up-to-date list.
-hr = sdm.HR_data(salt, "HR-data/Projekt demokratisk digitalisering 220921.xlsx", "Användardata/")
+hr = sdm.HR_data(salt, "HR-data/Projekt demokratisk digitalisering 220921.xlsx", "Användardata/Kartläggning")
 
 emails = input("Skriv in jobbmailaddresserna, skilda med kommatecken och mellanslag, för personerna som behöver få access till lärmodulen på Canvas:\n")
 print('')

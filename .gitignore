@@ -4,3 +4,5 @@ Utilities/HR-data/
 Utilities/OLI_analytics/
 Utilities/Resultat/
 Utilities/Resultat_backup/
+Utilities/hash_username.py
+Utilities/__pycache__/
