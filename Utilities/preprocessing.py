@@ -741,7 +741,7 @@ class learning_module:
       
       Since the Datashop file does not contain timestamps for individual
       answer attempts, this function will assume that a participant got it
-      right on the first try iff they gave one answer, which was correct. In
+      right on the first try if they gave one answer, which was correct. In
       those cases where a participant answered correctly on the first try and
       then checked the other alternatives out of curiosity, they will be
       flagged as having answered incorrectly. This is *very bad* but we may
