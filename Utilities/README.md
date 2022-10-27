@@ -26,6 +26,9 @@ The current contents of this directory are:
 
 `IS_access_script`: Script for the routine task of renewing access to the module `IT-säkerhet` for users who have lost it for some reason
 
+`KS_user_script`: Script that does the routine work related to giving users access to the module `Kommunikation och Samarbete`
+
+`KS_access_script`: Script for the routine task of renewing access to the module `Kommunikation och Samarbete` for users who have lost it for some reason
 
 `Obsolete`: Directory containing code that we no longer expect to need
 
