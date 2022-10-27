@@ -15,10 +15,9 @@ anywhere else
 
 import os
 
-
 def make_folder(folder_path):
-    try:
-        os.mkdir(folder_path)
-    except FileExistsError:
-        pass
-    return
+   try:
+      os.mkdir(folder_path)
+   except FileExistsError:
+      pass
+   return

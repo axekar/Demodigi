@@ -232,7 +232,7 @@ class HR_data:
          version = ", ".join(flags)
          if version == '':
             version = 'default'
-         mail_lists[version].append(ID)
+         mail_lists[version].append(mail)          # Changed to mail (from ID), since this is to be to add user emails /axekar
          
       len_mail_list = 0
       for version in self.versions:
